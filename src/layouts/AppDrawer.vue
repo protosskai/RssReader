@@ -8,52 +8,18 @@
         </template>
       </q-input>
     </q-toolbar>
-    <div class="q-pa-sm">
-      <q-list>
-        <q-item
-          v-for="rssInfo in rssListInfo"
-          :key="rssInfo.id"
-          clickable
-          v-ripple
-        >
-          <q-item-section avatar>
-            <q-avatar>
-              <img :src="rssInfo.avatar">
-            </q-avatar>
-          </q-item-section>
-
-          <q-item-section>
-            <q-item-label lines="1">
-              {{ rssInfo.title }}
-            </q-item-label>
-            <q-item-label class="conversation__summary" caption v-if="rssInfo.unread !== 0">
-              <q-icon name="mark_chat_unread" color="red-6"/>
-              {{ rssInfo.unread }}未读
-            </q-item-label>
-            <q-item-label class="conversation__summary" caption v-else>
-              <q-icon name="check"/>
-              已读
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-item-label caption>
-              {{ rssInfo.lastUpdateTime }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <subscription-list :rss-info-list="rssListInfo"/>
   </q-drawer>
 </template>
 
 <script setup lang="ts">
-import {inject, ref} from "vue";
-import {TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
+import {inject, provide, ref} from "vue";
+import {TOGGLE_LAYOUT_LEFT_DRAWER_REF, RSS_INFO_LIST_REF} from "src/const/InjectionKey";
+import SubscriptionList from "components/SubscriptionList.vue";
 
 const search = ref('')
 const leftDrawerOpen = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
-const rssListInfo = [
+const rssListInfo = ref([
   {
     id: 1,
     avatar: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg',
@@ -61,5 +27,6 @@ const rssListInfo = [
     unread: 0,
     lastUpdateTime: '2022-01-03'
   }
-]
+])
+provide(RSS_INFO_LIST_REF, rssListInfo)
 </script>
