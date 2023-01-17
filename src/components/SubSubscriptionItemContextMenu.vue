@@ -13,53 +13,38 @@
           <q-icon :name="item.icon"/>
         </q-item-section>
       </q-item>
-      <!--      <q-item clickable v-close-popup>-->
-      <!--        <q-item-section>Open...</q-item-section>-->
-      <!--      </q-item>-->
-      <!--      <q-item clickable v-close-popup>-->
-      <!--        <q-item-section>New</q-item-section>-->
-      <!--      </q-item>-->
-      <!--      <q-separator/>-->
-      <!--      <q-item clickable v-close-popup>-->
-      <!--        <q-item-section>Preferences</q-item-section>-->
-      <!--        <q-item-section side>-->
-      <!--          <q-icon name="keyboard_arrow_right"/>-->
-      <!--        </q-item-section>-->
-
-      <!--      </q-item>-->
-      <!--      <q-separator/>-->
-      <!--      <q-item clickable v-close-popup>-->
-      <!--        <q-item-section>Quit</q-item-section>-->
-      <!--      </q-item>-->
     </q-list>
 
   </q-menu>
 </template>
 <script setup lang="ts">
+const props = defineProps<{
+  id: number
+}>()
 
 export interface ContextMenuItem {
   title: string,
   icon?: string,
-  clickHandler?: (id: number) => void,
+  clickHandler?: () => void,
   separator?: boolean
 }
 
-const onOpenHomePage = (id: number) => {
+const onOpenHomePage = () => {
+  console.log(`打开了${props.id}的主页`)
+}
+const onMarkRead = () => {
 
 }
-const onMarkRead = (id: number) => {
+const onOpenEditDialog = () => {
 
 }
-const onOpenEditDialog = (id: number) => {
+const onCopyFeedUrl = () => {
 
 }
-const onCopyFeedUrl = (id: number) => {
+const onRename = () => {
 
 }
-const onRename = (id: number) => {
-
-}
-const onDeleted = (id: number) => {
+const onDeleted = () => {
 
 }
 const contextMenuInfo: ContextMenuItem[] = [
