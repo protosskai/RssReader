@@ -8,7 +8,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'Home',
-        component: () => import('pages/Content.vue')
+        component: () => import('pages/HomePage.vue')
       },
       {
         path: '/postList/:RssId',

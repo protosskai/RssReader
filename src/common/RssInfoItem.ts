@@ -5,3 +5,4 @@ export interface RssInfoItem {
   avatar?: string,
   lastUpdateTime?: string
 }
+
