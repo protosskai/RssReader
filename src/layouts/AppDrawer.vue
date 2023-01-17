@@ -26,7 +26,21 @@ const rssListInfo = ref([
     title: '稀土掘金',
     unread: 0,
     lastUpdateTime: '2022-01-03'
-  }
+  },
+  {
+    id: 2,
+    avatar: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg',
+    title: '稀土掘金',
+    unread: 9,
+    lastUpdateTime: '2022-01-03'
+  },
+  {
+    id: 3,
+    avatar: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg',
+    title: '稀土掘金',
+    unread: 12,
+    lastUpdateTime: '2022-01-03'
+  },
 ])
 provide(RSS_INFO_LIST_REF, rssListInfo)
 </script>

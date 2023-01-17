@@ -32,6 +32,7 @@
             {{ rssInfo.lastUpdateTime }}
           </q-item-label>
         </q-item-section>
+        <sub-subscription-item-context-menu/>
       </q-item>
     </q-list>
   </div>
@@ -41,7 +42,8 @@
 
 import {inject} from "vue";
 import {RSS_INFO_LIST_REF} from "src/const/InjectionKey";
+import {QItem} from "quasar";
+import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
 
 const RssInfoList = inject(RSS_INFO_LIST_REF)
-
 </script>
