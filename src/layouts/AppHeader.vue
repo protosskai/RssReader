@@ -19,9 +19,14 @@
           刷新订阅
         </q-tooltip>
       </q-btn>
-      <q-btn flat round color="white" icon="settings">
+      <q-btn flat round color="white" icon="settings" @click="openSettingPage" v-if="settingOrHome=== 'home'">
         <q-tooltip>
           设置
+        </q-tooltip>
+      </q-btn>
+      <q-btn flat round color="white" icon="home" @click="openHomePage" v-if="settingOrHome=== 'setting'">
+        <q-tooltip>
+          主页
         </q-tooltip>
       </q-btn>
     </q-toolbar>
@@ -33,11 +38,21 @@
 import {inject, provide, ref} from "vue";
 import {TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, SUBSCRIBE_DIALOG_REF} from "src/const/InjectionKey";
 import SubscribeDialog from "components/SubscribeDialog.vue";
+import {switchPage} from "src/common/util";
 
 const toggleLeftDrawer = inject(TOGGLE_LAYOUT_LEFT_DRAWER_FUNC)
 const showSubscribeDialog = ref(false);
 provide(SUBSCRIBE_DIALOG_REF, showSubscribeDialog);
+const settingOrHome = ref('setting') // 控制显示设置按钮还是主页按钮
 const addSubscription = () => {
   showSubscribeDialog.value = true
+}
+const openSettingPage = () => {
+  switchPage('Setting')
+  settingOrHome.value = 'setting'
+}
+const openHomePage = () => {
+  switchPage('Home')
+  settingOrHome.value = 'home'
 }
 </script>

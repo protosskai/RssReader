@@ -6,6 +6,7 @@
         :key="rssInfo.id"
         clickable
         v-ripple
+        @click="openPostList(rssInfo.id)"
       >
         <q-item-section avatar>
           <q-avatar>
@@ -44,6 +45,13 @@ import {inject} from "vue";
 import {RSS_INFO_LIST_REF} from "src/const/InjectionKey";
 import {QItem} from "quasar";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
+import {switchPage} from "src/common/util";
 
 const RssInfoList = inject(RSS_INFO_LIST_REF)
+const openPostList = (RssId: number) => {
+  switchPage('PostList', {
+    RssId
+  })
+}
+
 </script>
