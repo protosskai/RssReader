@@ -4,7 +4,7 @@
 
     <app-drawer :left-drawer-open="leftDrawerOpen"/>
 
-    <q-page-container>
+    <q-page-container class="row items-center justify-evenly">
       <router-view :key="route.fullPath"/>
     </q-page-container>
 

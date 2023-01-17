@@ -1,5 +1,5 @@
 <template>
-  <q-drawer v-model="leftDrawerOpen" side="left" elevated>
+  <q-drawer v-model="leftDrawerOpen" side="left" elevated overlay>
     <q-toolbar class="bg-grey-2">
       <q-input rounded outlined dense class="WAL__field full-width" bg-color="white" v-model="search"
                placeholder="搜索订阅源">

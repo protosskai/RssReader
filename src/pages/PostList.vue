@@ -1,7 +1,7 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <q-list class="row items-center justify-evenly">
-      <post-list-item v-for="(item,index) in PostInfoList" :post-info="item" :key="index"/>
+      <post-list-item v-for="(item,index) in PostInfoList" :post-info="item" :key="index" :rss-id="rssId"/>
     </q-list>
   </q-page>
 </template>
@@ -13,6 +13,7 @@ import PostListItem from "src/components/PostListItem.vue";
 
 const route = useRoute();
 const {RssId} = route.params
+const rssId = Number((RssId as string))
 const PostInfoList: Ref<PostInfoItem[]> = ref([
   {
     postId: 1,
