@@ -5,7 +5,7 @@
     <app-drawer :left-drawer-open="leftDrawerOpen"/>
 
     <q-page-container>
-      <router-view/>
+      <router-view :key="route.fullPath"/>
     </q-page-container>
 
   </q-layout>
@@ -16,7 +16,9 @@ import {provide, ref} from 'vue'
 import AppHeader from "layouts/AppHeader.vue";
 import AppDrawer from "layouts/AppDrawer.vue";
 import {TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
+import {useRoute} from "vue-router";
 
+const route = useRoute();
 const leftDrawerOpen = ref(false)
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value
