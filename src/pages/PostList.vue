@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
 import {PostInfoItem} from "src/common/PostInfoItem";
-import {Ref, ref} from "vue";
+import {onMounted, Ref, ref} from "vue";
 import PostListItem from "src/components/PostListItem.vue";
 
 const route = useRoute();
@@ -48,5 +48,10 @@ const PostInfoList: Ref<PostInfoItem[]> = ref([
     read: true
   },
 ]);
-
+const getPostListById = async (rssItemId: number): Promise<PostInfoItem[]> => {
+  return await window.electronAPI.getPostListInfo(rssItemId)
+}
+onMounted(async () => {
+  PostInfoList.value = await getPostListById(1)
+})
 </script>

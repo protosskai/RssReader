@@ -2,12 +2,12 @@
  * 管理订阅源相关
  * 新增或删除订阅源。并且负责持久化到存储中
  */
-import { OpmlOutline, OpmlObject } from "./opmlUtil";
-import { readOpmlFromFile, dumpOpmlToFile } from "./opmlUtil";
+import {OpmlOutline, OpmlObject} from "./opmlUtil";
+import {readOpmlFromFile, dumpOpmlToFile} from "./opmlUtil";
 
 const DEFAULT_FOLDER = "__rss_client_default__";
 
-class Source {
+export class Source {
   url: string;
   name: string = "";
   folder: string = "";
@@ -23,7 +23,7 @@ class Source {
   }
 }
 
-class Folder {
+export class Folder {
   name: string;
   sourceArray: Source[] = [];
 
@@ -69,7 +69,7 @@ class Folder {
   }
 }
 
-class SourceManage {
+export class SourceManage {
   folderMap: Record<string, Folder | null> = {};
 
   constructor() {

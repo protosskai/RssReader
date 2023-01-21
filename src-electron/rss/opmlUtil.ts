@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import {promises as fs} from "fs";
 import xml2js from "xml2js";
 
 export class OpmlOutline {
@@ -56,8 +56,7 @@ export class OpmlOutline {
     let url: string | null = null;
     if (this.xmlUrl) {
       url = this.xmlUrl;
-    }
-    if (this.htmlUrl) {
+    } else if (this.htmlUrl) {
       url = this.htmlUrl;
     }
     if (url === null) {
@@ -168,7 +167,7 @@ export async function readOpmlFromFile(filename: string): Promise<OpmlObject> {
 }
 
 function dumpOpmlOutline(outline: OpmlOutline) {
-  const result: any = { $: {} };
+  const result: any = {$: {}};
   if (outline.title) {
     result.$.title = outline.title;
   }
@@ -208,7 +207,7 @@ export async function dumpOpmlToFile(opmlObject: OpmlObject, filename: string): 
     });
   }
   if (opmlObject.outline.length > 0) {
-    result.opml["body"] = [{ outline: [] }];
+    result.opml["body"] = [{outline: []}];
     opmlObject.outline.forEach((item) => {
       result.opml["body"][0]["outline"].push(dumpOpmlOutline(item));
     });
@@ -222,13 +221,10 @@ export async function dumpOpmlToFile(opmlObject: OpmlObject, filename: string): 
   });
 }
 
-async function test() {
-  const opmlObj = await readOpmlFromFile("a.txt");
+export async function test() {
+  const opmlObj = await readOpmlFromFile("a.opml");
   const dumpObj = await dumpOpmlToFile(opmlObj, "b.opml");
 }
-
-
-test();
 
 
 

@@ -1,7 +1,9 @@
-import {app, BrowserWindow, nativeTheme} from 'electron';
+import {app, BrowserWindow, ipcMain, nativeTheme} from 'electron';
 import path from 'path';
 import os from 'os';
-import {getUrl} from "app/src-electron/net/NetUtil";
+import {getPostListInfo, getRssContent, getRssInfoList} from "src-electron/rss/api";
+import {testPostList} from "app/src-electron/rss/postListManeger";
+
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -50,7 +52,19 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  ipcMain.handle('rss:infoList', getRssInfoList)
+  ipcMain.handle('rss:rssContent', async (event, ...args) => {
+    const [rssItemId] = args
+    return await getRssContent(rssItemId)
+  })
+  ipcMain.handle('rss:testPostList', testPostList)
+  ipcMain.handle('rss:getPostList', async (event, ...args) => {
+    const [rssItemId] = args
+    return await getPostListInfo(rssItemId)
+  })
+  createWindow()
+});
 
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

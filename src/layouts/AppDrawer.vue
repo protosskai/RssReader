@@ -13,34 +13,16 @@
 </template>
 
 <script setup lang="ts">
-import {inject, provide, ref} from "vue";
-import {TOGGLE_LAYOUT_LEFT_DRAWER_REF, RSS_INFO_LIST_REF} from "src/const/InjectionKey";
+import {inject, onMounted, provide, Ref, ref} from "vue";
+import {RSS_INFO_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
 import SubscriptionList from "components/SubscriptionList.vue";
+import {RssInfoItem} from "src/common/RssInfoItem";
 
 const search = ref('')
 const leftDrawerOpen = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
-const rssListInfo = ref([
-  {
-    id: 1,
-    avatar: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg',
-    title: '稀土掘金',
-    unread: 0,
-    lastUpdateTime: '2022-01-03'
-  },
-  {
-    id: 2,
-    avatar: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg',
-    title: '稀土掘金',
-    unread: 9,
-    lastUpdateTime: '2022-01-03'
-  },
-  {
-    id: 3,
-    avatar: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg',
-    title: '稀土掘金',
-    unread: 12,
-    lastUpdateTime: '2022-01-03'
-  },
-])
+const rssListInfo: Ref<RssInfoItem[]> = ref([])
 provide(RSS_INFO_LIST_REF, rssListInfo)
+onMounted(async () => {
+  rssListInfo.value = await window.electronAPI.getRssInfoList();
+})
 </script>

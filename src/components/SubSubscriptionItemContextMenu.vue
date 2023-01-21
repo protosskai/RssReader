@@ -31,6 +31,7 @@ export interface ContextMenuItem {
 
 const onOpenHomePage = () => {
   console.log(`打开了${props.id}的主页`)
+  window.electronAPI.testRss()
 }
 const onMarkRead = () => {
 

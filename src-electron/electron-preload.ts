@@ -27,9 +27,21 @@
  *   }
  * }
  */
-import {contextBridge} from 'electron'
+import {contextBridge, ipcRenderer} from 'electron'
+import {RssInfoItem} from "src/common/RssInfoItem";
+import {PostInfoItem} from "src/common/PostInfoItem";
 
-contextBridge.exposeInMainWorld('api', {
-  doAThing: () => {
+contextBridge.exposeInMainWorld('electronAPI', {
+  getRssInfoList: async (): Promise<RssInfoItem[]> => {
+    return await ipcRenderer.invoke('rss:infoList')
+  },
+  getRssContent: async (rssItemId: number): Promise<string> => {
+    return await ipcRenderer.invoke('rss:rssContent', rssItemId)
+  },
+  testRssPostList: () => {
+    ipcRenderer.invoke('rss:testPostList')
+  },
+  getPostListInfo: async (rssItemId: number): Promise<PostInfoItem[]> => {
+    return await ipcRenderer.invoke('rss:getPostList', rssItemId)
   }
 })

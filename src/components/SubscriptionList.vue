@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 
-import {inject} from "vue";
+import {inject, onMounted} from "vue";
 import {RSS_INFO_LIST_REF} from "src/const/InjectionKey";
 import {QItem} from "quasar";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
@@ -53,5 +53,8 @@ const openPostList = (RssId: number) => {
     RssId
   })
 }
+onMounted(() => {
+  window.electronAPI.getRssInfoList()
+})
 
 </script>
