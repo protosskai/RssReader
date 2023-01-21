@@ -12,6 +12,48 @@ export interface PostInfoObject {
   link?: string
 }
 
+export const convertPostObjToItem = (postInfoObj: PostInfoObject): any => {
+  const result: any = {}
+  const description: any = postInfoObj["description"]
+  const author: any = postInfoObj["author"]
+  const pubDate: any = postInfoObj["pubDate"]
+  const guid: any = postInfoObj["guid"]
+  const link: any = postInfoObj["link"]
+  const title: any = postInfoObj["title"]
+  if (title instanceof Array) {
+    result["title"] = title[0]
+  } else {
+    result["title"] = title
+  }
+  if (description instanceof Array) {
+    result["description"] = description[0]
+  } else {
+    result["description"] = description
+  }
+  if (author instanceof Array) {
+    result["author"] = author[0]
+  } else {
+    result["author"] = author
+  }
+  if (pubDate instanceof Array) {
+    result["pubDate"] = pubDate[0]
+  } else {
+    result["pubDate"] = pubDate
+  }
+  if (guid instanceof Array) {
+    result["guid"] = guid[0]
+  } else {
+    result["guid"] = guid
+  }
+  if (link instanceof Array) {
+    result["link"] = link[0]
+  } else {
+    result["link"] = link
+  }
+  return result
+}
+
+
 export const parsePostList = (data: string): PostInfoObject[] => {
   const res: PostInfoObject[] = []
   xml2js.parseString(data, (err, result) => {
@@ -20,13 +62,14 @@ export const parsePostList = (data: string): PostInfoObject[] => {
     }
     const items = result["rss"]["channel"][0]["item"]
     for (const item of items) {
+      const tmpObj = convertPostObjToItem(item)
       const obj: PostInfoObject = {
-        title: item["title"],
-        description: item["description"],
-        author: item["author"],
-        pubDate: item["pubDate"],
-        guid: item["guid"],
-        link: item["link"]
+        title: tmpObj["title"],
+        description: tmpObj["description"],
+        author: tmpObj["author"],
+        pubDate: tmpObj["pubDate"],
+        guid: tmpObj["guid"],
+        link: tmpObj["link"]
       }
       res.push(obj)
     }

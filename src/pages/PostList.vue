@@ -1,7 +1,8 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <q-list class="row items-center justify-evenly">
-      <post-list-item v-for="(item,index) in PostInfoList" :post-info="item" :key="index" :rss-id="rssId"/>
+  <q-page class="row items-center justify-evenly" style="width: 100%">
+    <q-list class="row items-center justify-evenly post-list">
+      <post-list-item class="post-list-item" v-for="(item,index) in PostInfoList" :post-info="item" :key="index"
+                      :rss-id="rssId"/>
     </q-list>
   </q-page>
 </template>
@@ -55,3 +56,9 @@ onMounted(async () => {
   PostInfoList.value = await getPostListById(1)
 })
 </script>
+
+<style scoped lang="scss">
+.post-list-item {
+  width: 100%;
+}
+</style>
