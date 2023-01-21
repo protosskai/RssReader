@@ -1,6 +1,7 @@
-import { app, BrowserWindow, nativeTheme } from 'electron';
+import {app, BrowserWindow, nativeTheme} from 'electron';
 import path from 'path';
 import os from 'os';
+import {getUrl} from "app/src-electron/net/NetUtil";
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -11,7 +12,8 @@ try {
       path.join(app.getPath('userData'), 'DevTools Extensions')
     );
   }
-} catch (_) {}
+} catch (_) {
+}
 
 let mainWindow: BrowserWindow | undefined;
 
