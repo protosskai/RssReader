@@ -30,6 +30,7 @@
 import {contextBridge, ipcRenderer} from 'electron'
 import {RssInfoItem} from "src/common/RssInfoItem";
 import {PostInfoItem} from "src/common/PostInfoItem";
+import {ContentInfo} from "src/common/ContentInfo";
 
 contextBridge.exposeInMainWorld('electronAPI', {
   getRssInfoList: async (): Promise<RssInfoItem[]> => {
@@ -43,5 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   getPostListInfo: async (rssItemId: number): Promise<PostInfoItem[]> => {
     return await ipcRenderer.invoke('rss:getPostList', rssItemId)
+  },
+  getPostContent: async (rssItemId: number, postId: number): Promise<ContentInfo> => {
+    return await ipcRenderer.invoke('rss:getPostContent', rssItemId, postId)
   }
 })

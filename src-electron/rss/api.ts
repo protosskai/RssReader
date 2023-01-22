@@ -4,9 +4,11 @@ import {getUrl} from "src-electron/net/NetUtil";
 import {PostInfoObject} from "app/src-electron/rss/postListManeger";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {PostManager} from "app/src-electron/rss/postListManeger";
+import {ContentInfo} from "src/common/ContentInfo";
 
 export const rssItemMap: Record<number, Source> = {}
-export const postItemMap: Record<number, PostInfoObject> = {}
+type RssPostListMap = Record<number, Record<number, PostInfoObject>>
+const postItemMap: RssPostListMap = {}
 export const getRssInfoList = async (): Promise<RssInfoItem[]> => {
   const result: RssInfoItem[] = []
   let id = 0;
@@ -47,7 +49,21 @@ export const getPostListInfo = async (rssItemId: number): Promise<PostInfoItem[]
   const postList: PostInfoItem[] = await postManager.getPostList(url)
   const _postItemMap = postManager.getPostItmMap()
   for (const key in _postItemMap) {
-    postItemMap[key] = _postItemMap[key]
+    if (!postItemMap[rssItemId]) {
+      postItemMap[rssItemId] = {}
+    }
+    postItemMap[rssItemId][key] = _postItemMap[key]
   }
   return postList
+}
+
+export const getPostContent = (rssItemId: number, postId: number): ContentInfo => {
+  const postObj = postItemMap[rssItemId][postId]
+  const contentInfo: ContentInfo = {
+    title: postObj.title,
+    content: postObj.description,
+    author: postObj.author,
+    updateTime: postObj.pubDate
+  }
+  return contentInfo
 }

@@ -27,7 +27,7 @@
         <q-item>
           <q-item-section>
             <q-item-label lines="3" class="text-body1">
-              {{ postInfo.desc }}
+              {{ extractTextFromHtml(postInfo.desc) }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -55,6 +55,9 @@ const openContentPage = () => {
     RssId: props.rssId,
     PostId: props.postInfo.postId
   })
+}
+const extractTextFromHtml = (html: string): string => {
+  return html.replace(/<[^>]*(>|$)| |‌|»|«|>/g, '')
 }
 </script>
 

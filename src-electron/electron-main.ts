@@ -1,7 +1,7 @@
 import {app, BrowserWindow, ipcMain, nativeTheme} from 'electron';
 import path from 'path';
 import os from 'os';
-import {getPostListInfo, getRssContent, getRssInfoList} from "src-electron/rss/api";
+import {getPostListInfo, getRssContent, getRssInfoList, getPostContent} from "src-electron/rss/api";
 import {testPostList} from "app/src-electron/rss/postListManeger";
 
 
@@ -62,6 +62,10 @@ app.whenReady().then(() => {
   ipcMain.handle('rss:getPostList', async (event, ...args) => {
     const [rssItemId] = args
     return await getPostListInfo(rssItemId)
+  })
+  ipcMain.handle('rss:getPostContent', async (event, ...args) => {
+    const [rssItemId, postId] = args
+    return getPostContent(rssItemId, postId)
   })
   createWindow()
 });
