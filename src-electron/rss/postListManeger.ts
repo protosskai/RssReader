@@ -1,7 +1,6 @@
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {getUrl} from "app/src-electron/net/NetUtil";
 import xml2js from "xml2js";
-import {postItemMap} from "app/src-electron/rss/api";
 
 
 export interface PostInfoObject {
@@ -77,16 +76,9 @@ export const parsePostList = (data: string): PostInfoObject[] => {
   })
   return res
 }
-export const testPostList = () => {
-  getUrl("http://43.128.7.84:1200/juejin/category/frontend").then((data) => {
-    if (!data) {
-      return
-    }
-  })
-}
 
 export class PostManager {
-  private postItemMap: Record<number, PostInfoObject>;
+  private readonly postItemMap: Record<number, PostInfoObject>;
 
   constructor() {
     this.postItemMap = {}

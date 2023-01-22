@@ -11,14 +11,18 @@ export class Source {
   url: string;
   name: string = "";
   folder: string = "";
+  avatar?: string = "";
 
-  constructor(url: string, name?: string, folder?: string) {
+  constructor(url: string, name?: string, folder?: string, avatar?: string) {
     this.url = url;
     if (name) {
       this.name = name;
     }
     if (folder) {
       this.folder = folder;
+    }
+    if (avatar) {
+      this.avatar = avatar
     }
   }
 }
@@ -137,10 +141,21 @@ export class SourceManage {
     return opmlObject;
   }
 
+  buildAvatarUrl(htmlUrl: string): string {
+    const urlObj = new URL(htmlUrl)
+    const avatarUrl = `${urlObj.protocol}//${urlObj.host}/favicon.ico`
+    return avatarUrl
+  }
+
   convertOutlineToSource(outline: OpmlOutline, folder?: Folder): Source {
     const url = outline.getUrl();
     const name = outline.getName();
-    const source = new Source(url, name);
+    const htmlUrl = outline.htmlUrl
+    let avatarUrl: string = "";
+    if (htmlUrl) {
+      avatarUrl = this.buildAvatarUrl(htmlUrl)
+    }
+    const source = new Source(url, name, undefined, avatarUrl);
     if (folder) {
       source.folder = folder.name;
     }

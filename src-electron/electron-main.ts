@@ -2,7 +2,6 @@ import {app, BrowserWindow, ipcMain, nativeTheme} from 'electron';
 import path from 'path';
 import os from 'os';
 import {getPostListInfo, getRssContent, getRssInfoList, getPostContent} from "src-electron/rss/api";
-import {testPostList} from "app/src-electron/rss/postListManeger";
 
 
 // needed in case process is undefined under Linux
@@ -58,7 +57,6 @@ app.whenReady().then(() => {
     const [rssItemId] = args
     return await getRssContent(rssItemId)
   })
-  ipcMain.handle('rss:testPostList', testPostList)
   ipcMain.handle('rss:getPostList', async (event, ...args) => {
     const [rssItemId] = args
     return await getPostListInfo(rssItemId)
