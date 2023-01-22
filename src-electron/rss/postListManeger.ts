@@ -1,6 +1,7 @@
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {getUrl} from "app/src-electron/net/NetUtil";
 import xml2js from "xml2js";
+import {postItemMap} from "app/src-electron/rss/api";
 
 
 export interface PostInfoObject {
@@ -81,12 +82,14 @@ export const testPostList = () => {
     if (!data) {
       return
     }
-    console.log(parsePostList(data))
   })
 }
 
 export class PostManager {
+  private postItemMap: Record<number, PostInfoObject>;
+
   constructor() {
+    this.postItemMap = {}
   }
 
   async getPostList(url: string): Promise<PostInfoItem[]> {
@@ -104,11 +107,16 @@ export class PostManager {
         desc: postObject.description,
         read: false,
         author: postObject.author,
-        updateTime: postObject.pubDate
+        updateTime: postObject.pubDate,
       }
-      postId++
       result.push(postInfoItem)
+      this.postItemMap[postId] = postObject
+      postId++
     })
     return result;
+  }
+
+  getPostItmMap(): Record<number, PostInfoObject> {
+    return this.postItemMap
   }
 }

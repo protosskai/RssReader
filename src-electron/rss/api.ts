@@ -44,5 +44,10 @@ export const getPostListInfo = async (rssItemId: number): Promise<PostInfoItem[]
   const rssItem = rssItemMap[rssItemId]
   const url = rssItem.url
   const postManager = new PostManager()
-  return postManager.getPostList(url)
+  const postList: PostInfoItem[] = await postManager.getPostList(url)
+  const _postItemMap = postManager.getPostItmMap()
+  for (const key in _postItemMap) {
+    postItemMap[key] = _postItemMap[key]
+  }
+  return postList
 }

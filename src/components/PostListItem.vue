@@ -1,6 +1,6 @@
 <template>
   <q-item class="post-item">
-    <q-card>
+    <q-card style="width: 100%">
       <q-card-section>
         <q-item>
           <q-item-section>
@@ -60,7 +60,7 @@ const openContentPage = () => {
 
 <style scoped lang="scss">
 .post-item {
-  width: 75%;
+  width: 100%;
 }
 
 .unread-icon {
