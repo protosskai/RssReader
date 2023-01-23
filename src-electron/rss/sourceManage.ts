@@ -11,8 +11,8 @@ export class Source {
   url: string;
   name: string = "";
   folder: string = "";
-  avatar?: string = "";
-  htmlUrl?: string = "";
+  avatar: string = "";
+  htmlUrl: string = "";
 
   constructor(url: string, name?: string, folder?: string, avatar?: string, htmlUrl?: string) {
     this.url = url;

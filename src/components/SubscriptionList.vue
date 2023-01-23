@@ -33,7 +33,7 @@
             {{ rssInfo.lastUpdateTime }}
           </q-item-label>
         </q-item-section>
-        <sub-subscription-item-context-menu :id="rssInfo.id"/>
+        <sub-subscription-item-context-menu :rss-info="rssInfo"/>
       </q-item>
     </q-list>
   </div>

@@ -24,7 +24,9 @@ export const getRssInfoList = async (): Promise<RssInfoItem[]> => {
       id,
       title: source.name,
       unread: 0,
-      avatar: source.avatar
+      avatar: source.avatar,
+      htmlUrl: source.htmlUrl,
+      feedUrl: source.url
     }
     result.push(rssMapItem)
     rssItemMap[id] = source

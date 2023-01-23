@@ -18,9 +18,18 @@
   </q-menu>
 </template>
 <script setup lang="ts">
+import {RssInfoItem} from "src/common/RssInfoItem";
+import {useClipboard} from '@vueuse/core'
+import {ref} from "vue";
+import {useQuasar} from 'quasar'
+
+const feedUrl = ref('')
+const {copy, isSupported} = useClipboard({source: feedUrl})
+
 const props = defineProps<{
-  id: number
+  rssInfo: RssInfoItem
 }>()
+const $q = useQuasar()
 
 export interface ContextMenuItem {
   title: string,
@@ -30,8 +39,8 @@ export interface ContextMenuItem {
 }
 
 const onOpenHomePage = () => {
-  console.log(`打开了${props.id}的主页`)
-  window.electronAPI.testRss()
+  const htmlUrl = props.rssInfo.htmlUrl
+  window.electronAPI.openLink(htmlUrl)
 }
 const onMarkRead = () => {
 
@@ -40,7 +49,18 @@ const onOpenEditDialog = () => {
 
 }
 const onCopyFeedUrl = () => {
-
+  feedUrl.value = props.rssInfo.feedUrl
+  if (isSupported) {
+    copy(feedUrl.value)
+    $q.notify({
+      message: '复制成功!'
+    })
+  } else {
+    $q.notify({
+      message: '当前浏览器不支持复制!',
+      icon: 'announcement'
+    })
+  }
 }
 const onRename = () => {
 
