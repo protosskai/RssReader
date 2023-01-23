@@ -6,10 +6,10 @@ import xml2js from "xml2js";
 export interface PostInfoObject {
   title: string,
   description: string,
+  link: string,
   pubDate: string,
   author: string,
   guid?: string,
-  link?: string
 }
 
 export const convertPostObjToItem = (postInfoObj: PostInfoObject): any => {

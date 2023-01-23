@@ -1,6 +1,10 @@
+import {Source} from "app/src-electron/rss/sourceManage";
+
 export interface ContentInfo {
   title: string,
-  content: string
+  content: string,
+  link: string,
   author?: string,
-  updateTime?: string
+  updateTime?: string,
+  rssSource?: Source
 }

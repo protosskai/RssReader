@@ -61,11 +61,14 @@ export const getPostListInfo = async (rssItemId: number): Promise<PostInfoItem[]
 
 export const getPostContent = (rssItemId: number, postId: number): ContentInfo => {
   const postObj = postItemMap[rssItemId][postId]
+  const source = rssItemMap[rssItemId]
   const contentInfo: ContentInfo = {
     title: postObj.title,
     content: postObj.description,
     author: postObj.author,
-    updateTime: postObj.pubDate
+    updateTime: postObj.pubDate,
+    rssSource: source,
+    link: postObj.link
   }
   return contentInfo
 }

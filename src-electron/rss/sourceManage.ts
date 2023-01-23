@@ -12,8 +12,9 @@ export class Source {
   name: string = "";
   folder: string = "";
   avatar?: string = "";
+  htmlUrl?: string = "";
 
-  constructor(url: string, name?: string, folder?: string, avatar?: string) {
+  constructor(url: string, name?: string, folder?: string, avatar?: string, htmlUrl?: string) {
     this.url = url;
     if (name) {
       this.name = name;
@@ -23,6 +24,9 @@ export class Source {
     }
     if (avatar) {
       this.avatar = avatar
+    }
+    if (htmlUrl) {
+      this.htmlUrl = htmlUrl
     }
   }
 }
@@ -150,12 +154,13 @@ export class SourceManage {
   convertOutlineToSource(outline: OpmlOutline, folder?: Folder): Source {
     const url = outline.getUrl();
     const name = outline.getName();
-    const htmlUrl = outline.htmlUrl
+    let htmlUrl: string = "";
     let avatarUrl: string = "";
-    if (htmlUrl) {
+    if (outline.htmlUrl) {
+      htmlUrl = outline.htmlUrl
       avatarUrl = this.buildAvatarUrl(htmlUrl)
     }
-    const source = new Source(url, name, undefined, avatarUrl);
+    const source = new Source(url, name, undefined, avatarUrl, htmlUrl);
     if (folder) {
       source.folder = folder.name;
     }
