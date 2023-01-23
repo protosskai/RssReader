@@ -91,7 +91,12 @@ export class PostManager {
     if (!content) {
       throw new Error("get content null!")
     }
-    const postListInfo: PostInfoObject[] = parsePostList(content)
+    let postListInfo: PostInfoObject[] = []
+    try {
+      postListInfo = parsePostList(content)
+    } catch (e) {
+      return []
+    }
     postListInfo.forEach((postObject) => {
       const postInfoItem: PostInfoItem = {
         postId,

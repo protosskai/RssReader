@@ -1,7 +1,7 @@
-import {app, BrowserWindow, ipcMain, nativeTheme} from 'electron';
+import {app, BrowserWindow, ipcMain, nativeTheme, shell} from 'electron';
 import path from 'path';
 import os from 'os';
-import {getPostListInfo, getRssContent, getRssInfoList, getPostContent} from "src-electron/rss/api";
+import {getPostListInfo, getRssContent, getRssInfoList, getPostContent, openLink} from "src-electron/rss/api";
 
 
 // needed in case process is undefined under Linux
@@ -49,6 +49,16 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
+  mainWindow.webContents.on('will-navigate', (e, url) => {
+    e.preventDefault()
+    shell.openExternal(url)
+  })
+  mainWindow.webContents.setWindowOpenHandler((data) => {
+    shell.openExternal(data.url)
+    return {
+      action: 'deny'
+    }
+  })
 }
 
 app.whenReady().then(() => {
@@ -64,6 +74,10 @@ app.whenReady().then(() => {
   ipcMain.handle('rss:getPostContent', async (event, ...args) => {
     const [rssItemId, postId] = args
     return getPostContent(rssItemId, postId)
+  })
+  ipcMain.handle('openLink', async (event, ...args) => {
+    const [url] = args
+    return openLink(url)
   })
   createWindow()
 });

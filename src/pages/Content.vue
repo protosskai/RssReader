@@ -8,12 +8,19 @@
 import {useRoute} from "vue-router";
 import {ContentInfo} from "src/common/ContentInfo";
 import {onMounted, ref, Ref} from "vue";
+import {useQuasar} from "quasar";
 
 const route = useRoute();
+const $q = useQuasar()
 const {RssId, PostId} = route.params
 const curContentInfo: Ref<ContentInfo | null> = ref(null);
 const getContentById = async (rssId: number, postId: number): Promise<ContentInfo> => {
-  return window.electronAPI.getPostContent(rssId, postId)
+  $q.loading.show({
+    message: '加载中...'
+  })
+  const result = await window.electronAPI.getPostContent(rssId, postId)
+  $q.loading.hide()
+  return result
 }
 const fixContentImgSize = (htmlStr: string): string => {
   return htmlStr.replace(/<img/g, '<img style="max-width:80%" ')
@@ -23,6 +30,7 @@ onMounted(async () => {
   result.content = fixContentImgSize(result.content)
   curContentInfo.value = result
 })
+
 
 </script>
 

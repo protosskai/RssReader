@@ -5,6 +5,7 @@ import {PostInfoObject} from "app/src-electron/rss/postListManeger";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {PostManager} from "app/src-electron/rss/postListManeger";
 import {ContentInfo} from "src/common/ContentInfo";
+import {shell} from "electron";
 
 export const rssItemMap: Record<number, Source> = {}
 type RssPostListMap = Record<number, Record<number, PostInfoObject>>
@@ -67,4 +68,8 @@ export const getPostContent = (rssItemId: number, postId: number): ContentInfo =
     updateTime: postObj.pubDate
   }
   return contentInfo
+}
+
+export const openLink = async (url: string): Promise<void> => {
+  return await shell.openExternal(url)
 }

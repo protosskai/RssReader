@@ -44,5 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   getPostContent: async (rssItemId: number, postId: number): Promise<ContentInfo> => {
     return await ipcRenderer.invoke('rss:getPostContent', rssItemId, postId)
+  },
+  openLink: async (url: string): Promise<void> => {
+    return await ipcRenderer.invoke('openLink', url)
   }
 })

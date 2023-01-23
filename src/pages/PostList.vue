@@ -11,13 +11,20 @@ import {useRoute} from "vue-router";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {onMounted, Ref, ref} from "vue";
 import PostListItem from "src/components/PostListItem.vue";
+import {useQuasar} from "quasar";
 
 const route = useRoute();
+const $q = useQuasar()
 const {RssId} = route.params
 const rssId = Number((RssId as string))
 const PostInfoList: Ref<PostInfoItem[]> = ref([]);
 const getPostListById = async (rssItemId: number): Promise<PostInfoItem[]> => {
-  return await window.electronAPI.getPostListInfo(rssItemId)
+  $q.loading.show({
+    message: '加载中...'
+  })
+  const result = await window.electronAPI.getPostListInfo(rssItemId)
+  $q.loading.hide()
+  return result
 }
 onMounted(async () => {
   PostInfoList.value = await getPostListById(rssId)
@@ -28,6 +35,7 @@ onMounted(async () => {
 .post-list-item {
   width: 100%;
 }
+
 .post-list {
   width: 100%;
 }
