@@ -27,6 +27,7 @@ function createWindow() {
     width: 1280,
     height: 960,
     useContentSize: true,
+    frame: false,
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
@@ -78,6 +79,13 @@ app.whenReady().then(() => {
   ipcMain.handle('openLink', async (event, ...args) => {
     const [url] = args
     return openLink(url)
+  })
+  ipcMain.handle('close', () => {
+    // app.exit(0)
+    BrowserWindow.getFocusedWindow()?.close()
+  })
+  ipcMain.handle('minimize', () => {
+    BrowserWindow.getFocusedWindow()?.minimize()
   })
   createWindow()
 });

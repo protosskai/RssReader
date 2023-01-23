@@ -8,7 +8,9 @@ export interface electronAPI {
   testRssPostList: () => void,
   getPostListInfo: (rssItemId: number) => Promise<PostInfoItem[]>,
   getPostContent: (rssItemId: number, postId: number) => Promise<ContentInfo>,
-  openLink: (url: string) => Promise<void>
+  openLink: (url: string) => Promise<void>,
+  close: () => void,
+  minimize: () => void
 }
 
 declare  global {
