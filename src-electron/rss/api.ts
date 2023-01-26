@@ -1,4 +1,4 @@
-import {RssInfoItem} from "src/common/RssInfoItem";
+import {RssFolderItem, RssInfoItem} from "src/common/RssInfoItem";
 import {Folder, Source, SourceManage} from "src-electron/rss/sourceManage";
 import {getUrl} from "src-electron/net/NetUtil";
 import {PostInfoObject} from "app/src-electron/rss/postListManeger";
@@ -32,6 +32,40 @@ export const getRssInfoList = async (): Promise<RssInfoItem[]> => {
     result.push(rssMapItem)
     rssItemMap[id] = source
     id++
+  }
+  return result
+}
+
+export const getRssFolderList = async (): Promise<RssFolderItem[]> => {
+  const result = []
+  let id = 0; // 给每个订阅源分配一个id
+  const sourceManager = new SourceManage()
+  await sourceManager.loadDefaultConfigFile()
+  // await sourceManager.loadFromFile('a.opml')
+  for (const folderName in sourceManager.folderMap) {
+    const folderItem: RssFolderItem = {
+      folderName,
+      data: [],
+      children: [] // 暂时不支持嵌套目录
+    }
+    const folder = sourceManager.folderMap[folderName]
+    if (!folder) {
+      continue
+    }
+    for (const source of folder.sourceArray) {
+      const rssMapItem = {
+        id,
+        title: source.name,
+        unread: 0,
+        avatar: source.avatar,
+        htmlUrl: source.htmlUrl,
+        feedUrl: source.url
+      }
+      folderItem.data.push(rssMapItem)
+      rssItemMap[id] = source
+      id++
+    }
+    result.push(folderItem)
   }
   return result
 }

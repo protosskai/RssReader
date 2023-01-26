@@ -22,6 +22,13 @@
           hint="别名, 置空则用默认名称"
           lazy-rules
         />
+        <q-input
+          filled
+          v-model="subscribeRef.nameInputRef"
+          label="文件夹"
+          hint="称"
+          lazy-rules
+        />
         <div>
           <q-btn label="确认" type="submit" color="primary"/>
           <q-btn label="重置" type="reset" color="primary" flat class="q-ml-sm"/>

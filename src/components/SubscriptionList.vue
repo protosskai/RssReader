@@ -42,19 +42,24 @@
 <script setup lang="ts">
 
 import {inject, onMounted} from "vue";
-import {RSS_INFO_LIST_REF} from "src/const/InjectionKey";
+import {RSS_FOLDER_LIST_REF} from "src/const/InjectionKey";
 import {QItem} from "quasar";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
 import {switchPage} from "src/common/util";
 
-const RssInfoList = inject(RSS_INFO_LIST_REF)
+// const RssInfoList = inject(RSS_INFO_LIST_REF)
+
+const RssInfoList = []
+const RssFolderList = inject(RSS_FOLDER_LIST_REF)
 const openPostList = (RssId: number) => {
   switchPage('PostList', {
     RssId
   })
 }
 onMounted(() => {
-  window.electronAPI.getRssInfoList()
+  setTimeout(() => {
+    console.log(RssFolderList?.value)
+  }, 2000)
 })
 
 </script>

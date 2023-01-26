@@ -3,8 +3,14 @@ export interface RssInfoItem {
   title: string,
   unread: number,
   htmlUrl: string,
-  feedUrl:string,
+  feedUrl: string,
   avatar?: string,
   lastUpdateTime?: string
+}
+
+export interface RssFolderItem {
+  folderName: string,
+  data: RssInfoItem[],
+  children: RssInfoItem[]
 }
 

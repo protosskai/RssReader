@@ -13,16 +13,13 @@
 </template>
 
 <script setup lang="ts">
-import {inject, onMounted, provide, Ref, ref} from "vue";
-import {RSS_INFO_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
+import {computed, inject, onMounted, provide, Ref, ref} from "vue";
+import {RSS_FOLDER_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
 import SubscriptionList from "components/SubscriptionList.vue";
-import {RssInfoItem} from "src/common/RssInfoItem";
+import {userRssInfoStore} from "stores/rssInfoStore";
 
+const store = userRssInfoStore()
 const search = ref('')
 const leftDrawerOpen = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
-const rssListInfo: Ref<RssInfoItem[]> = ref([])
-provide(RSS_INFO_LIST_REF, rssListInfo)
-onMounted(async () => {
-  rssListInfo.value = await window.electronAPI.getRssInfoList();
-})
+provide(RSS_FOLDER_LIST_REF, computed(() => store.rssFolderList))
 </script>
