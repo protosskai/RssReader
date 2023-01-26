@@ -157,7 +157,7 @@ export async function readOpmlFromFile(filename: string): Promise<OpmlObject> {
         }
       });
       if (outline === null) {
-        reject("invalid opml format file, [outline] is null");
+        outline = []
       }
       const opmlObject = buildOpmlObject(title!, outline!);
       // console.log(JSON.stringify(opmlObject, null, 4));

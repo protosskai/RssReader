@@ -4,6 +4,7 @@
  */
 import {OpmlOutline, OpmlObject} from "./opmlUtil";
 import {readOpmlFromFile, dumpOpmlToFile} from "./opmlUtil";
+import {promises as fs} from "fs";
 
 const DEFAULT_FOLDER = "__rss_client_default__";
 
@@ -145,13 +146,13 @@ export class SourceManage {
     return opmlObject;
   }
 
-  buildAvatarUrl(htmlUrl: string): string {
+  private buildAvatarUrl(htmlUrl: string): string {
     const urlObj = new URL(htmlUrl)
     const avatarUrl = `${urlObj.protocol}//${urlObj.host}/favicon.ico`
     return avatarUrl
   }
 
-  convertOutlineToSource(outline: OpmlOutline, folder?: Folder): Source {
+  private convertOutlineToSource(outline: OpmlOutline, folder?: Folder): Source {
     const url = outline.getUrl();
     const name = outline.getName();
     let htmlUrl: string = "";
@@ -193,5 +194,48 @@ export class SourceManage {
   async saveToFile(filename: string) {
     const opmlObject = this.dump();
     await dumpOpmlToFile(opmlObject, filename);
+  }
+
+  private async isDirectory(filePath: string) {
+    return await fs.stat(filePath).then(stat => stat.isDirectory()).catch(_ => false)
+  }
+
+  private async isFile(filePath: string) {
+    return await fs.stat(filePath).then(stat => stat.isFile()).catch(_ => false)
+  }
+
+
+  private async writeFile(path: string, data: string) {
+    return await fs.writeFile(path, data, {flag: 'a'})
+  }
+
+  private async createDefaultOpmlFile(path: string) {
+    const template = `<?xml version="1.0" encoding="UTF-8"?>
+                      <opml version="1.1">
+                        <head>
+                          <title>Subscriptions-OnMyMac.opml</title>
+                        </head>
+                        <body>
+                        </body>
+                      </opml>`
+    await this.writeFile(path, template)
+  }
+
+  private async getDefaultConfigFilePath(): Promise<string> {
+    const user_home = process.env.HOME || process.env.USERPROFILE
+    const defaultConfigDir = `${user_home}/RssClient`
+    if (!await this.isDirectory(defaultConfigDir)) {
+      await fs.mkdir(defaultConfigDir)
+    }
+    const defaultConfigFilePath = `${user_home}/RssClient/_default.opml`
+    if (!await this.isFile(defaultConfigFilePath)) {
+      await this.createDefaultOpmlFile(defaultConfigFilePath)
+    }
+    return defaultConfigFilePath
+  }
+
+  async loadDefaultConfigFile() {
+    const defaultPath = await this.getDefaultConfigFilePath()
+    await this.loadFromFile(defaultPath)
   }
 }

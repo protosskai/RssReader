@@ -14,8 +14,9 @@ export const getRssInfoList = async (): Promise<RssInfoItem[]> => {
   const result: RssInfoItem[] = []
   let id = 0;
   const sourceManager = new SourceManage()
-  await sourceManager.loadFromFile('a.opml')
-  const folder: Folder | null = sourceManager.folderMap["新闻"];
+  // await sourceManager.loadFromFile('a.opml')
+  await sourceManager.loadDefaultConfigFile()
+  const folder: Folder | null = sourceManager.folderMap["编程"];
   if (!folder) {
     return [];
   }
