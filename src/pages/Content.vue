@@ -20,8 +20,8 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-    <q-item v-if="curContentInfo" v-html="curContentInfo.content" class="content-area">
-    </q-item>
+    <div v-if="curContentInfo" v-html="curContentInfo.content" class="content-area">
+    </div>
   </q-page>
 </template>
 <script setup lang="ts">
@@ -48,12 +48,19 @@ const getContentById = async (rssId: number, postId: number): Promise<ContentInf
   $q.loading.hide()
   return result
 }
-const fixContentImgSize = (htmlStr: string): string => {
-  return htmlStr.replace(/<img/g, '<img style="max-width:80%" ')
+const fixContentStyle = (htmlStr: string): string => {
+  let result = htmlStr.replace(/<img/g, '<img style="max-width:80%" ')
+  result = result.replace(/<h1/g, '<h1 style="font-size:32px" ')
+  result = result.replace(/<h2/g, '<h2 style="font-size:24px" ')
+  result = result.replace(/<h3/g, '<h3 style="font-size:18px" ')
+  result = result.replace(/<h4/g, '<h4 style="font-size:16px" ')
+  result = result.replace(/<h5/g, '<h5 style="font-size:13px" ')
+  result = result.replace(/<h6/g, '<h6 style="font-size:10px" ')
+  return result
 }
 onMounted(async () => {
   const result = await getContentById(Number(RssId), Number(PostId))
-  result.content = fixContentImgSize(result.content)
+  result.content = fixContentStyle(result.content)
   curContentInfo.value = result
 })
 
@@ -74,7 +81,6 @@ const openUrl = (url: string) => {
 }
 
 .content-area {
-  @import "src/css/typo.scss";
   width: 100%;
   font-size: 16px;
   display: flex;

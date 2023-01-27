@@ -8,7 +8,7 @@
         </template>
       </q-input>
     </q-toolbar>
-    <subscription-list :rss-info-list="rssListInfo"/>
+    <subscription-list/>
   </q-drawer>
 </template>
 
