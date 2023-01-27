@@ -104,6 +104,16 @@ const openUrl = (url: string) => {
   :deep(h6) {
     font-size: 10px;
   }
+
+  :deep(h1, h2, h3, h4, h5, h6) {
+    color: #444;
+    margin-top: 3px;
+    margin-bottom: 3px;
+  }
+
+  :deep(a) {
+    color: $primary;
+  }
 }
 
 .url {
