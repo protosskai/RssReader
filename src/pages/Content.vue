@@ -48,19 +48,8 @@ const getContentById = async (rssId: number, postId: number): Promise<ContentInf
   $q.loading.hide()
   return result
 }
-const fixContentStyle = (htmlStr: string): string => {
-  let result = htmlStr.replace(/<img/g, '<img style="max-width:80%" ')
-  result = result.replace(/<h1/g, '<h1 style="font-size:32px" ')
-  result = result.replace(/<h2/g, '<h2 style="font-size:24px" ')
-  result = result.replace(/<h3/g, '<h3 style="font-size:18px" ')
-  result = result.replace(/<h4/g, '<h4 style="font-size:16px" ')
-  result = result.replace(/<h5/g, '<h5 style="font-size:13px" ')
-  result = result.replace(/<h6/g, '<h6 style="font-size:10px" ')
-  return result
-}
 onMounted(async () => {
   const result = await getContentById(Number(RssId), Number(PostId))
-  result.content = fixContentStyle(result.content)
   curContentInfo.value = result
 })
 
@@ -88,9 +77,32 @@ const openUrl = (url: string) => {
   justify-content: flex-start;
   align-items: flex-start;
 
-  figure, img {
-    max-width: 50%;
-    max-height: 50%;
+  :deep(img) {
+    max-width: 80%;
+  }
+
+  :deep(h1) {
+    font-size: 32px;
+  }
+
+  :deep(h2) {
+    font-size: 24px;
+  }
+
+  :deep(h3) {
+    font-size: 18px;
+  }
+
+  :deep(h4) {
+    font-size: 16px;
+  }
+
+  :deep(h5) {
+    font-size: 13px;
+  }
+
+  :deep(h6) {
+    font-size: 10px;
   }
 }
 
