@@ -1,65 +1,91 @@
 <template>
   <div class="q-pa-sm">
-    <q-list>
-      <q-item
-        v-for="rssInfo in RssInfoList"
-        :key="rssInfo.id"
-        clickable
-        v-ripple
-        @click="openPostList(rssInfo.id)"
-      >
-        <q-item-section avatar>
-          <q-avatar>
-            <img :src="rssInfo.avatar">
-          </q-avatar>
-        </q-item-section>
+    <q-tree
+      :nodes="nodes"
+      node-key="label"
+      no-connectors
+      dense
+    >
+      <template #default-header="props">
+        <div v-if="!props.node.data">
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="folder"/>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>
+                {{ props.node.label }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </div>
+        <div v-else></div>
+      </template>
+      <template #default-body="props">
+        <q-item
+          v-if="props.node.data"
+          clickable
+          v-ripple
+          @click="openPostList(props.node.data.id)"
+        >
+          <q-item-section avatar>
+            <q-avatar>
+              <img :src="props.node.data.avatar">
+            </q-avatar>
+          </q-item-section>
 
-        <q-item-section>
-          <q-item-label lines="1">
-            {{ rssInfo.title }}
-          </q-item-label>
-          <q-item-label class="conversation__summary" caption v-if="rssInfo.unread !== 0">
-            <q-icon name="mark_chat_unread" color="red-6"/>
-            {{ rssInfo.unread }}未读
-          </q-item-label>
-          <q-item-label class="conversation__summary" caption v-else>
-            <q-icon name="check"/>
-            已读
-          </q-item-label>
-        </q-item-section>
+          <q-item-section>
+            <q-item-label lines="1">
+              {{ props.node.data.title }}
+            </q-item-label>
+            <q-item-label class="conversation__summary" caption v-if="props.node.data.unread !== 0">
+              <q-icon name="mark_chat_unread" color="red-6"/>
+              {{ props.node.data.unread }}未读
+            </q-item-label>
+            <q-item-label class="conversation__summary" caption v-else>
+              <q-icon name="check"/>
+              已读
+            </q-item-label>
+          </q-item-section>
 
-        <q-item-section side>
-          <q-item-label caption>
-            {{ rssInfo.lastUpdateTime }}
-          </q-item-label>
-        </q-item-section>
-        <sub-subscription-item-context-menu :rss-info="rssInfo"/>
-      </q-item>
-    </q-list>
+          <q-item-section side>
+            <q-item-label caption>
+              {{ props.node.data.lastUpdateTime }}
+            </q-item-label>
+          </q-item-section>
+          <sub-subscription-item-context-menu :rss-info="props.node.data"/>
+        </q-item>
+      </template>
+    </q-tree>
   </div>
 </template>
 
 <script setup lang="ts">
 
-import {inject, onMounted} from "vue";
+import {computed, inject, onMounted} from "vue";
 import {RSS_FOLDER_LIST_REF} from "src/const/InjectionKey";
 import {QItem} from "quasar";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
 import {switchPage} from "src/common/util";
 
-// const RssInfoList = inject(RSS_INFO_LIST_REF)
 
 const RssInfoList = []
 const RssFolderList = inject(RSS_FOLDER_LIST_REF)
+const nodes = computed(() => (
+  RssFolderList?.value.map(item => ({
+    label: item.folderName === '__rss_client_default__' ? '默认' : item.folderName,
+    icon: 'folder',
+    children: item.data.map(item1 => ({
+      label: item1.title,
+      avatar: item1.avatar,
+      data: item1
+    }))
+  })) ?? []
+))
 const openPostList = (RssId: number) => {
   switchPage('PostList', {
     RssId
   })
 }
-onMounted(() => {
-  setTimeout(() => {
-    console.log(RssFolderList?.value)
-  }, 2000)
-})
 
 </script>

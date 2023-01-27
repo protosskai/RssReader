@@ -40,8 +40,8 @@ export const getRssFolderList = async (): Promise<RssFolderItem[]> => {
   const result = []
   let id = 0; // 给每个订阅源分配一个id
   const sourceManager = new SourceManage()
-  await sourceManager.loadDefaultConfigFile()
-  // await sourceManager.loadFromFile('a.opml')
+  // await sourceManager.loadDefaultConfigFile()
+  await sourceManager.loadFromFile('a.opml')
   for (const folderName in sourceManager.folderMap) {
     const folderItem: RssFolderItem = {
       folderName,
