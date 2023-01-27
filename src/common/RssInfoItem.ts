@@ -8,6 +8,12 @@ export interface RssInfoItem {
   lastUpdateTime?: string
 }
 
+export interface RssInfoNew {
+  feedUrl: string,
+  title?: string,
+  folderName?: string
+}
+
 export interface RssFolderItem {
   folderName: string,
   data: RssInfoItem[],

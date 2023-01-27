@@ -5,8 +5,9 @@
 import {OpmlOutline, OpmlObject} from "./opmlUtil";
 import {readOpmlFromFile, dumpOpmlToFile} from "./opmlUtil";
 import {promises as fs} from "fs";
+import {buildAvatarUrl} from "app/src-electron/rss/utils";
 
-const DEFAULT_FOLDER = "__rss_client_default__";
+export const DEFAULT_FOLDER = "__rss_client_default__";
 
 export class Source {
   url: string;
@@ -80,9 +81,17 @@ export class Folder {
 
 export class SourceManage {
   folderMap: Record<string, Folder | null> = {};
+  static instance: SourceManage | null = null
 
   constructor() {
     this.init();
+  }
+
+  static getInstance(): SourceManage {
+    if (SourceManage.instance === null) {
+      SourceManage.instance = new SourceManage()
+    }
+    return SourceManage.instance
   }
 
   init() {
@@ -137,19 +146,17 @@ export class SourceManage {
         });
         opmlObject.addOutline(outline);
       } else {
+        const outline = new OpmlOutline();
+        outline.text = DEFAULT_FOLDER
+        outline.title = DEFAULT_FOLDER
         sourceArray.forEach(item => {
           const subOutline = new OpmlOutline(item.name, item.name, [], "rss", item.url, item.url);
-          opmlObject.addOutline(subOutline);
+          outline.addOutline(subOutline);
         });
+        opmlObject.addOutline(outline)
       }
     });
     return opmlObject;
-  }
-
-  private buildAvatarUrl(htmlUrl: string): string {
-    const urlObj = new URL(htmlUrl)
-    const avatarUrl = `${urlObj.protocol}//${urlObj.host}/favicon.ico`
-    return avatarUrl
   }
 
   private convertOutlineToSource(outline: OpmlOutline, folder?: Folder): Source {
@@ -159,7 +166,7 @@ export class SourceManage {
     let avatarUrl: string = "";
     if (outline.htmlUrl) {
       htmlUrl = outline.htmlUrl
-      avatarUrl = this.buildAvatarUrl(htmlUrl)
+      avatarUrl = buildAvatarUrl(htmlUrl)
     }
     const source = new Source(url, name, undefined, avatarUrl, htmlUrl);
     if (folder) {
@@ -237,5 +244,10 @@ export class SourceManage {
   async loadDefaultConfigFile() {
     const defaultPath = await this.getDefaultConfigFilePath()
     await this.loadFromFile(defaultPath)
+  }
+
+  async dumpToDefaultConfigFile() {
+    const defaultPath = await this.getDefaultConfigFilePath()
+    await this.saveToFile(defaultPath)
   }
 }

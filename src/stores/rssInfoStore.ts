@@ -1,18 +1,21 @@
 import {defineStore} from 'pinia';
-import {ref, Ref} from "vue";
-import {RssFolderItem, RssInfoItem} from "src/common/RssInfoItem";
+import {computed, ref, Ref} from "vue";
+import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
 
 export const userRssInfoStore = defineStore('rssInfo', () => {
   const rssFolderList: Ref<RssFolderItem[]> = ref([])
-  const addRssSubscription = (folderItem: RssFolderItem, rssInfoItem: RssInfoItem) => {
-    const targetFolder = rssFolderList.value.find((item) => item.folderName === folderItem.folderName)
-    if (!targetFolder) {
-      return
+  const folderNameList = computed(() => (rssFolderList.value.map(item => item.folderName)))
+  const addRssSubscription = async (feedUrl: string, title: string, folderName: string) => {
+    const obj: RssInfoNew = {
+      feedUrl,
+      title,
+      folderName
     }
-    targetFolder.data.push(rssInfoItem)
+    await window.electronAPI.addRssSubscription(obj)
+    rssFolderList.value = await window.electronAPI.getRssFolderList()
   }
-  const removeRssSubscription = (folderItem: RssFolderItem, rssInfoItem: RssInfoItem) => {
-    const targetFolder = rssFolderList.value.find((item) => item.folderName === folderItem.folderName)
+  const removeRssSubscription = (folderName: string, rssInfoItem: RssInfoItem) => {
+    const targetFolder = rssFolderList.value.find((item) => item.folderName === folderName)
     if (!targetFolder) {
       return
     }
@@ -26,5 +29,5 @@ export const userRssInfoStore = defineStore('rssInfo', () => {
   window.electronAPI.getRssFolderList().then(data => {
     rssFolderList.value = data
   })
-  return {rssFolderList, addRssSubscription, removeRssSubscription}
+  return {rssFolderList, addRssSubscription, removeRssSubscription, folderNameList}
 })

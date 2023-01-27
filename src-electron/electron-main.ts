@@ -7,7 +7,7 @@ import {
   getRssInfoList,
   getPostContent,
   openLink,
-  getRssFolderList
+  getRssFolderList, addRssSubscription
 } from "src-electron/rss/api";
 
 
@@ -84,6 +84,10 @@ app.whenReady().then(() => {
     return getPostContent(rssItemId, postId)
   })
   ipcMain.handle('rss:folderList', getRssFolderList)
+  ipcMain.handle('rss:addRssSubscription', async (event, ...args) => {
+    const [obj] = args
+    return await addRssSubscription(obj)
+  })
   ipcMain.handle('openLink', async (event, ...args) => {
     const [url] = args
     return openLink(url)

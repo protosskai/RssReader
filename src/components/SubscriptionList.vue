@@ -69,11 +69,10 @@ import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContex
 import {switchPage} from "src/common/util";
 
 
-const RssInfoList = []
 const RssFolderList = inject(RSS_FOLDER_LIST_REF)
 const nodes = computed(() => (
   RssFolderList?.value.map(item => ({
-    label: item.folderName === '__rss_client_default__' ? '默认' : item.folderName,
+    label: item.folderName,
     icon: 'folder',
     children: item.data.map(item1 => ({
       label: item1.title,

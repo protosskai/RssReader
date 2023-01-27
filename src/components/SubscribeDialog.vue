@@ -22,11 +22,11 @@
           hint="别名, 置空则用默认名称"
           lazy-rules
         />
-        <q-input
+        <q-select
           filled
-          v-model="subscribeRef.nameInputRef"
+          v-model="subscribeRef.folderInputRef"
+          :options="folderNameList"
           label="文件夹"
-          hint="称"
           lazy-rules
         />
         <div>
@@ -42,22 +42,28 @@
 <script setup lang="ts">
 import {inject, reactive} from "vue";
 import {SUBSCRIBE_DIALOG_REF} from "src/const/InjectionKey";
+import {userRssInfoStore} from "stores/rssInfoStore";
+import {storeToRefs} from "pinia";
+import {RssInfoNew} from "src/common/RssInfoItem";
 
+const rssInfoStore = userRssInfoStore()
+const {folderNameList} = storeToRefs(rssInfoStore)
+const {addRssSubscription} = rssInfoStore
 const showDialog = inject(SUBSCRIBE_DIALOG_REF)
 const subscribeRef = reactive({
   urlInputRef: '',
-  nameInputRef: ''
+  nameInputRef: '',
+  folderInputRef: ''
 })
 const clear = () => {
   subscribeRef.urlInputRef = '';
   subscribeRef.nameInputRef = '';
+  subscribeRef.folderInputRef = '';
 }
 const onSubmit = () => {
-  console.log(subscribeRef.urlInputRef)
-  console.log(subscribeRef.nameInputRef)
+  addRssSubscription(subscribeRef.urlInputRef, subscribeRef.nameInputRef, subscribeRef.folderInputRef)
   showDialog!.value = false
   clear()
-
 }
 const onReset = () => {
   clear()
