@@ -8,7 +8,7 @@
           <q-avatar>
             <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
           </q-avatar>
-          Rss Reader
+          {{ SOFT_NAME}}
         </q-toolbar-title>
         <q-btn flat round color="white" icon="add" @click="addSubscription">
           <q-tooltip>
@@ -44,6 +44,7 @@ import {inject, provide, ref} from "vue";
 import {TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, SUBSCRIBE_DIALOG_REF} from "src/const/InjectionKey";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import {switchPage} from "src/common/util";
+import {SOFT_NAME} from "src/const/string";
 
 const toggleLeftDrawer = inject(TOGGLE_LAYOUT_LEFT_DRAWER_FUNC)
 const showSubscribeDialog = ref(false);

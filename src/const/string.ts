@@ -1,0 +1,5 @@
+export const SOFT_NAME = "Rss Reader"
+export const ADD_FEED = "添加订阅"
+export const ADD_FOLDER = "添加文件夹"
+export const IMPORT_OPML = "导入opml文件"
+export const SETTING = "设置"
