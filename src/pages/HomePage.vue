@@ -14,7 +14,7 @@
             <q-icon name="folder" size="24px"/>
             <span>{{ ADD_FOLDER }}</span></div>
         </q-btn>
-        <q-btn>
+        <q-btn @click="importOpmlFile">
           <div class="btn-item">
             <q-icon name="attachment" size="24px"/>
             <span>{{ IMPORT_OPML }}</span></div>
@@ -31,9 +31,12 @@
 <script setup lang="ts">
 import {SOFT_NAME, ADD_FOLDER, ADD_FEED, IMPORT_OPML, SETTING} from "src/const/string";
 import {useSystemDialogStore} from "stores/systemDialogStore";
+import {useRssInfoStore} from "stores/rssInfoStore";
 
 const systemDialogStore = useSystemDialogStore()
+const rssInfoStore = useRssInfoStore()
 const {toggleSubscriptionDialog, toggleAddFolderDialog} = systemDialogStore
+const {importOpmlFile} = rssInfoStore
 
 </script>
 

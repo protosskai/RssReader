@@ -47,7 +47,7 @@ import {PostInfoItem} from "src/common/PostInfoItem";
 import {switchPage} from "src/common/util";
 
 const props = defineProps<{
-  rssId: number,
+  rssId: string,
   postInfo: PostInfoItem
 }>()
 const openContentPage = () => {

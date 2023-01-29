@@ -42,14 +42,14 @@
 
 <script setup lang="ts">
 import {reactive} from "vue";
-import {userRssInfoStore} from "stores/rssInfoStore";
+import {useRssInfoStore} from "stores/rssInfoStore";
 import {storeToRefs} from "pinia";
 import {useSystemDialogStore} from "stores/systemDialogStore";
 
 const systemDialogStore = useSystemDialogStore()
 const {showAddSubscriptionDialog} = storeToRefs(systemDialogStore)
 const {toggleSubscriptionDialog} = systemDialogStore
-const rssInfoStore = userRssInfoStore()
+const rssInfoStore = useRssInfoStore()
 const {folderNameList} = storeToRefs(rssInfoStore)
 const {addRssSubscription} = rssInfoStore
 const subscribeRef = reactive({

@@ -5,12 +5,11 @@ import {addRssSubscription} from "app/src-electron/rss/api";
 import {ErrorMsg} from "src/common/ErrorMsg";
 
 export interface electronAPI {
-  getRssInfoList: () => Promise<RssInfoItem[]>,
   getRssFolderList: () => Promise<RssFolderItem[]>,
-  getRssContent: (rssItemId: number) => Promise<string>,
+  getRssContent: (rssItemId: string) => Promise<string>,
   testRssPostList: () => void,
-  getPostListInfo: (rssItemId: number) => Promise<PostInfoItem[]>,
-  getPostContent: (rssItemId: number, postId: number) => Promise<ContentInfo>,
+  getPostListInfo: (rssItemId: string) => Promise<PostInfoItem[]>,
+  getPostContent: (rssItemId: string, postId: number) => Promise<ContentInfo>,
   addRssSubscription: (obj: RssInfoNew) => Promise<void>,
   removeRssSubscription: (folderName: string, rssUrl: string) => Promise<ErrorMsg>
   openLink: (url: string) => Promise<void>,
@@ -18,6 +17,7 @@ export interface electronAPI {
   minimize: () => void,
   addFolder: (folderName: string) => Promise<ErrorMsg>,
   removeFolder: (folderName: string) => Promise<ErrorMsg>
+  importOpmlFile: () => Promise<ErrorMsg>
 }
 
 declare  global {

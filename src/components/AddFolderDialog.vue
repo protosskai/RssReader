@@ -26,14 +26,14 @@
 <script setup lang="ts">
 import {reactive} from "vue";
 import {useSystemDialogStore} from "stores/systemDialogStore";
-import {userRssInfoStore} from "stores/rssInfoStore";
+import {useRssInfoStore} from "stores/rssInfoStore";
 import {storeToRefs} from "pinia";
 import {useQuasar} from "quasar";
 
 const $q = useQuasar()
 
 const systemDialogStore = useSystemDialogStore()
-const rssInfoStore = userRssInfoStore()
+const rssInfoStore = useRssInfoStore()
 const {addFolder} = rssInfoStore
 const {showAddFolderDialog} = storeToRefs(systemDialogStore)
 const {toggleAddFolderDialog} = systemDialogStore

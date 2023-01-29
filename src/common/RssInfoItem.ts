@@ -1,5 +1,5 @@
 export interface RssInfoItem {
-  id: number,
+  id: string,
   title: string,
   unread: number,
   htmlUrl: string,

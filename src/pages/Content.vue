@@ -33,6 +33,7 @@ import {useQuasar} from "quasar";
 const route = useRoute();
 const $q = useQuasar()
 const {RssId, PostId} = route.params
+const rssId: any = RssId
 const curContentInfo: Ref<ContentInfo> = ref({
   title: '',
   content: '',
@@ -40,7 +41,7 @@ const curContentInfo: Ref<ContentInfo> = ref({
   updateTime: '',
   link: ''
 });
-const getContentById = async (rssId: number, postId: number): Promise<ContentInfo> => {
+const getContentById = async (rssId: string, postId: number): Promise<ContentInfo> => {
   $q.loading.show({
     message: '加载中...'
   })
@@ -49,16 +50,13 @@ const getContentById = async (rssId: number, postId: number): Promise<ContentInf
   return result
 }
 onMounted(async () => {
-  const result = await getContentById(Number(RssId), Number(PostId))
+  const result = await getContentById(rssId, Number(PostId))
   curContentInfo.value = result
 })
 
 const openUrl = (url: string) => {
   window.electronAPI.openLink(url)
 }
-watch(curContentInfo, () => {
-  console.log(curContentInfo.value.content)
-})
 </script>
 
 <style scoped lang="scss">

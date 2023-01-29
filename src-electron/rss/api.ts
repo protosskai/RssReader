@@ -1,49 +1,22 @@
-import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
+import {RssFolderItem, RssInfoNew} from "src/common/RssInfoItem";
 import {DEFAULT_FOLDER, Folder, Source, SourceManage} from "src-electron/rss/sourceManage";
 import {getUrl} from "src-electron/net/NetUtil";
 import {PostInfoObject} from "app/src-electron/rss/postListManeger";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {PostManager} from "app/src-electron/rss/postListManeger";
 import {ContentInfo} from "src/common/ContentInfo";
-import {shell} from "electron";
+import {shell, dialog} from "electron";
 import {getRssId, parseRssFromUrl} from "app/src-electron/rss/utils";
 import {ErrorMsg} from "src/common/ErrorMsg";
 
-export const rssItemMap: Record<number, Source> = {}
-type RssPostListMap = Record<number, Record<number, PostInfoObject>>
+export const rssItemMap: Record<string, Source> = {}
+type RssPostListMap = Record<string, Record<number, PostInfoObject>>
 const postItemMap: RssPostListMap = {}
-export const getRssInfoList = async (): Promise<RssInfoItem[]> => {
-  const result: RssInfoItem[] = []
-  let id = 0;
-  const sourceManager = SourceManage.getInstance()
-  // await sourceManager.loadFromFile('a.opml')
-  await sourceManager.loadDefaultConfigFile()
-  const folder: Folder | null = sourceManager.folderMap["编程"];
-  if (!folder) {
-    return [];
-  }
-  for (const source of folder.sourceArray) {
-    const rssMapItem = {
-      id,
-      title: source.name,
-      unread: 0,
-      avatar: source.avatar,
-      htmlUrl: source.htmlUrl,
-      feedUrl: source.url
-    }
-    result.push(rssMapItem)
-    rssItemMap[id] = source
-    id++
-  }
-  return result
-}
 
 export const getRssFolderList = async (): Promise<RssFolderItem[]> => {
   const result = []
-  const id = getRssId() // 给每个订阅源分配一个id
   const sourceManager = SourceManage.getInstance()
   await sourceManager.loadDefaultConfigFile()
-  // await sourceManager.loadFromFile('a.opml')
   for (const folderName in sourceManager.folderMap) {
     const folderItem: RssFolderItem = {
       folderName: folderName === DEFAULT_FOLDER ? '默认' : folderName,
@@ -55,6 +28,7 @@ export const getRssFolderList = async (): Promise<RssFolderItem[]> => {
       continue
     }
     for (const source of folder.sourceArray) {
+      const id = String(getRssId())
       const rssMapItem = {
         id,
         title: source.name,
@@ -123,7 +97,7 @@ export const removeRssSubscription = async (folderName: string, rssUrl: string):
   }
 }
 
-export const getRssContent = async (rssItemId: number): Promise<string> => {
+export const getRssContent = async (rssItemId: string): Promise<string> => {
   const rssItem = rssItemMap[rssItemId]
   const url = rssItem.url
   const content = await getUrl(url)
@@ -134,7 +108,7 @@ export const getRssContent = async (rssItemId: number): Promise<string> => {
 }
 
 
-export const getPostListInfo = async (rssItemId: number): Promise<PostInfoItem[]> => {
+export const getPostListInfo = async (rssItemId: string): Promise<PostInfoItem[]> => {
   const rssItem = rssItemMap[rssItemId]
   const url = rssItem.url
   const postManager = new PostManager()
@@ -149,7 +123,7 @@ export const getPostListInfo = async (rssItemId: number): Promise<PostInfoItem[]
   return postList
 }
 
-export const getPostContent = (rssItemId: number, postId: number): ContentInfo => {
+export const getPostContent = (rssItemId: string, postId: number): ContentInfo => {
   const postObj = postItemMap[rssItemId][postId]
   const source = rssItemMap[rssItemId]
   const contentInfo: ContentInfo = {
@@ -196,5 +170,30 @@ export const removeFolder = async (folderName: string): Promise<ErrorMsg> => {
   return {
     success: true,
     msg: ''
+  }
+}
+
+export const importOpmlFile = async (): Promise<ErrorMsg> => {
+  try {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile']
+    })
+    if (!result.canceled) {
+      if (result.filePaths.length > 0) {
+        const sourceManager = SourceManage.getInstance()
+        const path = result.filePaths[0]
+        await sourceManager.loadFromFile(path)
+        await sourceManager.dumpToDefaultConfigFile()
+      }
+    }
+    return {
+      success: true,
+      msg: ''
+    }
+  } catch (e: any) {
+    return {
+      success: false,
+      msg: e
+    }
   }
 }

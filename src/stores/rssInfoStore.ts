@@ -2,9 +2,8 @@ import {defineStore} from 'pinia';
 import {computed, ref, Ref} from "vue";
 import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
 import {ErrorMsg} from "src/common/ErrorMsg";
-import {DEFAULT_FOLDER} from "app/src-electron/rss/sourceManage";
 
-export const userRssInfoStore = defineStore('rssInfo', () => {
+export const useRssInfoStore = defineStore('rssInfo', () => {
   const rssFolderList: Ref<RssFolderItem[]> = ref([])
   const folderNameList = computed(() => (rssFolderList.value.map(item => item.folderName)))
   const refresh = async () => {
@@ -35,9 +34,22 @@ export const userRssInfoStore = defineStore('rssInfo', () => {
     await refresh()
     return errMsg
   }
+  const importOpmlFile = async (): Promise<ErrorMsg> => {
+    const errMsg = await window.electronAPI.importOpmlFile()
+    await refresh()
+    return errMsg
+  }
   // 初始化RSS菜单数据
   window.electronAPI.getRssFolderList().then(data => {
     rssFolderList.value = data
   })
-  return {rssFolderList, addRssSubscription, removeRssSubscription, folderNameList, addFolder, removeFolder}
+  return {
+    rssFolderList,
+    addRssSubscription,
+    removeRssSubscription,
+    folderNameList,
+    addFolder,
+    removeFolder,
+    importOpmlFile
+  }
 })

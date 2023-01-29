@@ -184,10 +184,15 @@ export class SourceManage {
         const source = this.convertOutlineToSource(item, this.folderMap[DEFAULT_FOLDER]!);
         this.folderMap[DEFAULT_FOLDER]!.sourceArray.push(source);
       } else {
-        this.folderMap[item.getName()] = new Folder(item.getName());
+        if (!this.getFolder(item.getName())) {
+          this.folderMap[item.getName()] = new Folder(item.getName());
+        }
         item.subOutlines.forEach(subItem => {
           const source = this.convertOutlineToSource(subItem, this.folderMap[item.getName()]!);
-          this.folderMap[item.getName()]!.sourceArray.push(source);
+          const sourceIndex = this.getFolder(item.getName())!.sourceArray.findIndex(item => item.url === source.url)
+          if (sourceIndex === -1) {
+            this.getFolder(item.getName())!.addSource(source)
+          }
         });
       }
     });

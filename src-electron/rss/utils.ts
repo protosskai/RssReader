@@ -1,12 +1,12 @@
 import {RssInfoItem} from "src/common/RssInfoItem";
 import {getUrl} from "app/src-electron/net/NetUtil";
 import xml2js from "xml2js";
+// @ts-ignore
+import {v4 as uuidv4} from 'uuid';
 
-
-let rssId = 0;
 export const getRssId = () => {
-  rssId++;
-  return rssId
+  const rssId = uuidv4()
+  return String(rssId)
 }
 
 interface CheckResult {

@@ -21,26 +21,26 @@
         </div>
         <div v-else></div>
       </template>
-      <template #default-body="props">
+      <template #default-body="prop">
         <q-item
-          v-if="props.node.data"
+          v-if="prop.node.data"
           clickable
           v-ripple
-          @click="openPostList(props.node.data.id)"
+          @click="openPostList(prop.node.data.id)"
         >
           <q-item-section avatar>
             <q-avatar>
-              <img :src="props.node.data.avatar">
+              <img :src="prop.node.data.avatar">
             </q-avatar>
           </q-item-section>
 
           <q-item-section>
             <q-item-label lines="1">
-              {{ props.node.data.title }}
+              {{ prop.node.data.title }}
             </q-item-label>
-            <q-item-label class="conversation__summary" caption v-if="props.node.data.unread !== 0">
+            <q-item-label class="conversation__summary" caption v-if="prop.node.data.unread !== 0">
               <q-icon name="mark_chat_unread" color="red-6"/>
-              {{ props.node.data.unread }}未读
+              {{ prop.node.data.unread }}未读
             </q-item-label>
             <q-item-label class="conversation__summary" caption v-else>
               <q-icon name="check"/>
@@ -50,10 +50,10 @@
 
           <q-item-section side>
             <q-item-label caption>
-              {{ props.node.data.lastUpdateTime }}
+              {{ prop.node.data.lastUpdateTime }}
             </q-item-label>
           </q-item-section>
-          <sub-subscription-item-context-menu :rss-info="props.node.data" :folder-name="props.node.folderName" />
+          <sub-subscription-item-context-menu :rss-info="prop.node.data" :folder-name="prop.node.folderName"/>
         </q-item>
       </template>
     </q-tree>
@@ -83,6 +83,7 @@ const nodes = computed(() => (
   })) ?? []
 ))
 const openPostList = (RssId: number) => {
+  console.log(RssId)
   switchPage('PostList', {
     RssId
   })

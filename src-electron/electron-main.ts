@@ -4,10 +4,9 @@ import os from 'os';
 import {
   getPostListInfo,
   getRssContent,
-  getRssInfoList,
   getPostContent,
   openLink,
-  getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription
+  getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription, importOpmlFile
 } from "src-electron/rss/api";
 
 
@@ -70,7 +69,6 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('rss:infoList', getRssInfoList)
   ipcMain.handle('rss:rssContent', async (event, ...args) => {
     const [rssItemId] = args
     return await getRssContent(rssItemId)
@@ -92,6 +90,7 @@ app.whenReady().then(() => {
     const [folderName, rssUrl] = args
     return await removeRssSubscription(folderName, rssUrl)
   })
+  ipcMain.handle('rss:importOpmlFile', importOpmlFile)
   ipcMain.handle('openLink', async (event, ...args) => {
     const [url] = args
     return openLink(url)

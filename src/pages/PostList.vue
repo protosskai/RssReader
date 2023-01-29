@@ -13,12 +13,11 @@ import {onMounted, Ref, ref} from "vue";
 import PostListItem from "src/components/PostListItem.vue";
 import {useQuasar} from "quasar";
 
-const route = useRoute();
 const $q = useQuasar()
-const {RssId} = route.params
-const rssId = Number((RssId as string))
+const route = useRoute();
+const rssId: any = route.params.RssId
 const PostInfoList: Ref<PostInfoItem[]> = ref([]);
-const getPostListById = async (rssItemId: number): Promise<PostInfoItem[]> => {
+const getPostListById = async (rssItemId: string): Promise<PostInfoItem[]> => {
   $q.loading.show({
     message: '加载中...'
   })

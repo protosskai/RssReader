@@ -22,7 +22,7 @@ import {RssInfoItem} from "src/common/RssInfoItem";
 import {useClipboard} from '@vueuse/core'
 import {ref} from "vue";
 import {useQuasar} from 'quasar'
-import {userRssInfoStore} from "stores/rssInfoStore";
+import {useRssInfoStore} from "stores/rssInfoStore";
 
 const feedUrl = ref('')
 const {copy, isSupported} = useClipboard({source: feedUrl})
@@ -32,7 +32,7 @@ const props = defineProps<{
   folderName: string
 }>()
 const $q = useQuasar()
-const rssInfoStore = userRssInfoStore()
+const rssInfoStore = useRssInfoStore()
 const {removeRssSubscription} = rssInfoStore
 
 export interface ContextMenuItem {

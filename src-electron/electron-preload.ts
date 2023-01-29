@@ -42,19 +42,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getRssFolderList: async (): Promise<RssFolderItem[]> => {
     return await ipcRenderer.invoke('rss:folderList')
   },
-  getRssContent: async (rssItemId: number): Promise<string> => {
+  getRssContent: async (rssItemId: string): Promise<string> => {
     return await ipcRenderer.invoke('rss:rssContent', rssItemId)
   },
-  getPostListInfo: async (rssItemId: number): Promise<PostInfoItem[]> => {
+  getPostListInfo: async (rssItemId: string): Promise<PostInfoItem[]> => {
     return await ipcRenderer.invoke('rss:getPostList', rssItemId)
   },
-  getPostContent: async (rssItemId: number, postId: number): Promise<ContentInfo> => {
+  getPostContent: async (rssItemId: string, postId: number): Promise<ContentInfo> => {
     return await ipcRenderer.invoke('rss:getPostContent', rssItemId, postId)
   },
   addRssSubscription: async (obj: RssInfoNew): Promise<void> => {
     return await ipcRenderer.invoke('rss:addRssSubscription', obj)
   },
-  removeRssSubscription: async (folderName: string, rssUrl:string): Promise<ErrorMsg> => {
+  removeRssSubscription: async (folderName: string, rssUrl: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('rss:removeRssSubscription', folderName, rssUrl)
   },
   openLink: async (url: string): Promise<void> => {
@@ -71,5 +71,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   removeFolder: async (folderName: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('removeFolder', folderName)
+  },
+  importOpmlFile: async (): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('rss:importOpmlFile')
   }
 })

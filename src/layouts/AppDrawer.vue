@@ -16,9 +16,9 @@
 import {computed, inject, onMounted, provide, Ref, ref} from "vue";
 import {RSS_FOLDER_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
 import SubscriptionList from "components/SubscriptionList.vue";
-import {userRssInfoStore} from "stores/rssInfoStore";
+import {useRssInfoStore} from "stores/rssInfoStore";
 
-const store = userRssInfoStore()
+const store = useRssInfoStore()
 const search = ref('')
 const leftDrawerOpen = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
 provide(RSS_FOLDER_LIST_REF, computed(() => store.rssFolderList))
