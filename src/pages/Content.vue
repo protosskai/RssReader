@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
 import {ContentInfo} from "src/common/ContentInfo";
-import {onMounted, ref, Ref} from "vue";
+import {onMounted, ref, Ref, watch} from "vue";
 import {useQuasar} from "quasar";
 
 const route = useRoute();
@@ -56,6 +56,9 @@ onMounted(async () => {
 const openUrl = (url: string) => {
   window.electronAPI.openLink(url)
 }
+watch(curContentInfo, () => {
+  console.log(curContentInfo.value.content)
+})
 </script>
 
 <style scoped lang="scss">

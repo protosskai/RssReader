@@ -79,7 +79,11 @@ export const addRssSubscription = async (obj: RssInfoNew): Promise<void> => {
   const sourceManager = SourceManage.getInstance()
   let folder: Folder | null
   if (obj.folderName && obj.folderName !== '') {
-    folder = sourceManager.folderMap[obj.folderName]
+    if (obj.folderName === '默认') {
+      folder = sourceManager.folderMap[DEFAULT_FOLDER]
+    } else {
+      folder = sourceManager.folderMap[obj.folderName]
+    }
   } else {
     folder = sourceManager.folderMap[DEFAULT_FOLDER]
   }
@@ -136,11 +140,11 @@ export const getPostListInfo = async (rssItemId: number): Promise<PostInfoItem[]
   const postManager = new PostManager()
   const postList: PostInfoItem[] = await postManager.getPostList(url)
   const _postItemMap = postManager.getPostItmMap()
-  for (const key in _postItemMap) {
+  for (const postId in _postItemMap) {
     if (!postItemMap[rssItemId]) {
       postItemMap[rssItemId] = {}
     }
-    postItemMap[rssItemId][key] = _postItemMap[key]
+    postItemMap[rssItemId][postId] = _postItemMap[postId]
   }
   return postList
 }
@@ -150,7 +154,7 @@ export const getPostContent = (rssItemId: number, postId: number): ContentInfo =
   const source = rssItemMap[rssItemId]
   const contentInfo: ContentInfo = {
     title: postObj.title,
-    content: postObj.description,
+    content: postObj.contentEncoded && postObj.contentEncoded.trim() !== '' ? postObj.contentEncoded : postObj.description,
     author: postObj.author,
     updateTime: postObj.pubDate,
     rssSource: source,

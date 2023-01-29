@@ -10,9 +10,10 @@ export interface PostInfoObject {
   pubDate: string,
   author: string,
   guid?: string,
+  contentEncoded?: string
 }
 
-export const convertPostObjToItem = (postInfoObj: PostInfoObject): any => {
+export const convertPostObjToItem = (postInfoObj: any): any => {
   const result: any = {}
   const description: any = postInfoObj["description"]
   const author: any = postInfoObj["author"]
@@ -20,6 +21,7 @@ export const convertPostObjToItem = (postInfoObj: PostInfoObject): any => {
   const guid: any = postInfoObj["guid"]
   const link: any = postInfoObj["link"]
   const title: any = postInfoObj["title"]
+  const contentEncoded: any = postInfoObj["content:encoded"]
   if (title instanceof Array) {
     result["title"] = title[0]
   } else {
@@ -50,6 +52,13 @@ export const convertPostObjToItem = (postInfoObj: PostInfoObject): any => {
   } else {
     result["link"] = link
   }
+  if (contentEncoded) {
+    if (contentEncoded instanceof Array) {
+      result["contentEncoded"] = contentEncoded[0]
+    } else {
+      result["contentEncoded"] = contentEncoded
+    }
+  }
   return result
 }
 
@@ -70,6 +79,9 @@ export const parsePostList = (data: string): PostInfoObject[] => {
         pubDate: tmpObj["pubDate"],
         guid: tmpObj["guid"],
         link: tmpObj["link"]
+      }
+      if (tmpObj.contentEncoded) {
+        obj.contentEncoded = tmpObj["contentEncoded"]
       }
       res.push(obj)
     }
@@ -101,7 +113,7 @@ export class PostManager {
       const postInfoItem: PostInfoItem = {
         postId,
         title: postObject.title,
-        desc: postObject.description,
+        desc: postObject.contentEncoded && postObject.contentEncoded.trim() !== '' ? postObject.contentEncoded : postObject.description,
         read: false,
         author: postObject.author,
         updateTime: postObject.pubDate,
