@@ -1,6 +1,6 @@
 <template>
-  <q-dialog v-model="showDialog">
-    <q-card class="subscribe-card">
+  <q-dialog v-model="showAddSubscriptionDialog">
+    <q-card class="add-folder-card">
       <q-form
         @submit="onSubmit"
         @reset="onReset"
@@ -26,7 +26,8 @@
           filled
           v-model="subscribeRef.folderInputRef"
           :options="folderNameList"
-          label="文件夹"
+          label="文件夹(可空)"
+          hint="订阅源存放的文件夹，置空则使用默认文件夹"
           lazy-rules
         />
         <div>
@@ -40,16 +41,17 @@
 </template>
 
 <script setup lang="ts">
-import {inject, reactive} from "vue";
-import {SUBSCRIBE_DIALOG_REF} from "src/const/InjectionKey";
+import {reactive} from "vue";
 import {userRssInfoStore} from "stores/rssInfoStore";
 import {storeToRefs} from "pinia";
-import {RssInfoNew} from "src/common/RssInfoItem";
+import {useSystemDialogStore} from "stores/systemDialogStore";
 
+const systemDialogStore = useSystemDialogStore()
+const {showAddSubscriptionDialog} = storeToRefs(systemDialogStore)
+const {toggleSubscriptionDialog} = systemDialogStore
 const rssInfoStore = userRssInfoStore()
 const {folderNameList} = storeToRefs(rssInfoStore)
 const {addRssSubscription} = rssInfoStore
-const showDialog = inject(SUBSCRIBE_DIALOG_REF)
 const subscribeRef = reactive({
   urlInputRef: '',
   nameInputRef: '',
@@ -62,7 +64,7 @@ const clear = () => {
 }
 const onSubmit = () => {
   addRssSubscription(subscribeRef.urlInputRef, subscribeRef.nameInputRef, subscribeRef.folderInputRef)
-  showDialog!.value = false
+  toggleSubscriptionDialog()
   clear()
 }
 const onReset = () => {
@@ -71,7 +73,7 @@ const onReset = () => {
 </script>
 
 <style scoped lang="scss">
-.subscribe-card {
+.add-folder-card {
   width: 100%;
   max-width: 500px;
 }
