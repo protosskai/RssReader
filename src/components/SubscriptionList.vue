@@ -53,7 +53,7 @@
               {{ props.node.data.lastUpdateTime }}
             </q-item-label>
           </q-item-section>
-          <sub-subscription-item-context-menu :rss-info="props.node.data"/>
+          <sub-subscription-item-context-menu :rss-info="props.node.data" :folder-name="props.node.folderName" />
         </q-item>
       </template>
     </q-tree>
@@ -77,7 +77,8 @@ const nodes = computed(() => (
     children: item.data.map(item1 => ({
       label: item1.title,
       avatar: item1.avatar,
-      data: item1
+      data: item1,
+      folderName: item.folderName
     }))
   })) ?? []
 ))

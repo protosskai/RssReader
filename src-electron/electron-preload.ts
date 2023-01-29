@@ -54,6 +54,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addRssSubscription: async (obj: RssInfoNew): Promise<void> => {
     return await ipcRenderer.invoke('rss:addRssSubscription', obj)
   },
+  removeRssSubscription: async (folderName: string, rssUrl:string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('rss:removeRssSubscription', folderName, rssUrl)
+  },
   openLink: async (url: string): Promise<void> => {
     return await ipcRenderer.invoke('openLink', url)
   },
@@ -65,5 +68,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   addFolder: async (folderName: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('addFolder', folderName)
+  },
+  removeFolder: async (folderName: string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('removeFolder', folderName)
   }
 })

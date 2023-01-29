@@ -22,14 +22,18 @@ import {RssInfoItem} from "src/common/RssInfoItem";
 import {useClipboard} from '@vueuse/core'
 import {ref} from "vue";
 import {useQuasar} from 'quasar'
+import {userRssInfoStore} from "stores/rssInfoStore";
 
 const feedUrl = ref('')
 const {copy, isSupported} = useClipboard({source: feedUrl})
 
 const props = defineProps<{
-  rssInfo: RssInfoItem
+  rssInfo: RssInfoItem,
+  folderName: string
 }>()
 const $q = useQuasar()
+const rssInfoStore = userRssInfoStore()
+const {removeRssSubscription} = rssInfoStore
 
 export interface ContextMenuItem {
   title: string,
@@ -65,8 +69,14 @@ const onCopyFeedUrl = () => {
 const onRename = () => {
 
 }
-const onDeleted = () => {
-
+const onDeleted = async () => {
+  const errMsg = await removeRssSubscription(props.folderName, props.rssInfo)
+  if (!errMsg.success) {
+    $q.notify({
+      message: errMsg.msg,
+      icon: 'announcement'
+    })
+  }
 }
 const contextMenuInfo: ContextMenuItem[] = [
   {

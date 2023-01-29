@@ -12,10 +12,12 @@ export interface electronAPI {
   getPostListInfo: (rssItemId: number) => Promise<PostInfoItem[]>,
   getPostContent: (rssItemId: number, postId: number) => Promise<ContentInfo>,
   addRssSubscription: (obj: RssInfoNew) => Promise<void>,
+  removeRssSubscription: (folderName: string, rssUrl: string) => Promise<ErrorMsg>
   openLink: (url: string) => Promise<void>,
   close: () => void,
   minimize: () => void,
-  addFolder: (folderName: string) => Promise<ErrorMsg>
+  addFolder: (folderName: string) => Promise<ErrorMsg>,
+  removeFolder: (folderName: string) => Promise<ErrorMsg>
 }
 
 declare  global {

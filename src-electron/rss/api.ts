@@ -90,6 +90,34 @@ export const addRssSubscription = async (obj: RssInfoNew): Promise<void> => {
   folder.addSource(source)
   await sourceManager.dumpToDefaultConfigFile()
 }
+export const removeRssSubscription = async (folderName: string, rssUrl: string): Promise<ErrorMsg> => {
+  const sourceManager = SourceManage.getInstance()
+  let folder
+  if (folderName === '默认') {
+    folder = sourceManager.getFolder(DEFAULT_FOLDER)
+  } else {
+    folder = sourceManager.getFolder(folderName)
+  }
+  if (!folder) {
+    return {
+      success: false,
+      msg: `文件夹[${folderName}]不存在!`
+    }
+  }
+  const sourceIndex = folder.sourceArray.findIndex(item => item.url === rssUrl)
+  if (sourceIndex === -1) {
+    return {
+      success: false,
+      msg: `订阅不存在!`
+    }
+  }
+  folder.sourceArray.splice(sourceIndex, 1)
+  await sourceManager.dumpToDefaultConfigFile()
+  return {
+    success: true,
+    msg: ''
+  }
+}
 
 export const getRssContent = async (rssItemId: number): Promise<string> => {
   const rssItem = rssItemMap[rssItemId]
@@ -138,13 +166,28 @@ export const openLink = async (url: string): Promise<void> => {
 export const addFolder = async (folderName: string): Promise<ErrorMsg> => {
   const sourceManager = SourceManage.getInstance()
   if (sourceManager.getFolder(folderName)) {
-    console.log(sourceManager.getFolder(folderName))
     return {
       success: false,
       msg: `文件夹[${folderName}]已存在!`
     }
   }
   sourceManager.addFolder(new Folder(folderName))
+  await sourceManager.dumpToDefaultConfigFile()
+  return {
+    success: true,
+    msg: ''
+  }
+}
+
+export const removeFolder = async (folderName: string): Promise<ErrorMsg> => {
+  const sourceManager = SourceManage.getInstance()
+  if (!sourceManager.getFolder(folderName)) {
+    return {
+      success: false,
+      msg: `文件夹[${folderName}]不存在!`
+    }
+  }
+  sourceManager.deleteFolder(folderName)
   await sourceManager.dumpToDefaultConfigFile()
   return {
     success: true,
