@@ -32,6 +32,7 @@ import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {ContentInfo} from "src/common/ContentInfo";
 import {addRssSubscription} from "app/src-electron/rss/api";
+import {ErrorMsg} from "src/common/ErrorMsg";
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -62,4 +63,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimize() {
     return ipcRenderer.invoke('minimize')
   },
+  addFolder: async (folderName: string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('addFolder', folderName)
+  }
 })

@@ -7,7 +7,7 @@ import {
   getRssInfoList,
   getPostContent,
   openLink,
-  getRssFolderList, addRssSubscription
+  getRssFolderList, addRssSubscription, addFolder
 } from "src-electron/rss/api";
 
 
@@ -98,6 +98,10 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('minimize', () => {
     BrowserWindow.getFocusedWindow()?.minimize()
+  })
+  ipcMain.handle('addFolder', async (event, ...args) => {
+    const [folderName] = args
+    return await addFolder(folderName)
   })
   createWindow()
 });

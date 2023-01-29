@@ -26,9 +26,15 @@
 <script setup lang="ts">
 import {reactive} from "vue";
 import {useSystemDialogStore} from "stores/systemDialogStore";
+import {userRssInfoStore} from "stores/rssInfoStore";
 import {storeToRefs} from "pinia";
+import {useQuasar} from "quasar";
+
+const $q = useQuasar()
 
 const systemDialogStore = useSystemDialogStore()
+const rssInfoStore = userRssInfoStore()
+const {addFolder} = rssInfoStore
 const {showAddFolderDialog} = storeToRefs(systemDialogStore)
 const {toggleAddFolderDialog} = systemDialogStore
 
@@ -39,8 +45,15 @@ const clear = () => {
   addFolderRef.folderNameRef = '';
 
 }
-const onSubmit = () => {
+const onSubmit = async () => {
   toggleAddFolderDialog()
+  const res = await addFolder(addFolderRef.folderNameRef)
+  if (!res.success) {
+    $q.notify({
+      message: res.msg,
+      icon: 'announcement'
+    })
+  }
   clear()
 }
 const onReset = () => {

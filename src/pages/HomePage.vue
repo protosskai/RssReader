@@ -3,13 +3,13 @@
     <div>
       <div class="title text-h3 text-weight-light">{{ SOFT_NAME }}</div>
       <div class="btn-bar">
-        <q-btn>
+        <q-btn @click="toggleSubscriptionDialog">
           <div class="btn-item">
             <q-icon name="rss_feed" size="24px"/>
             <span>{{ ADD_FEED }}</span>
           </div>
         </q-btn>
-        <q-btn>
+        <q-btn @click="toggleAddFolderDialog">
           <div class="btn-item">
             <q-icon name="folder" size="24px"/>
             <span>{{ ADD_FOLDER }}</span></div>
@@ -30,6 +30,11 @@
 </template>
 <script setup lang="ts">
 import {SOFT_NAME, ADD_FOLDER, ADD_FEED, IMPORT_OPML, SETTING} from "src/const/string";
+import {useSystemDialogStore} from "stores/systemDialogStore";
+
+const systemDialogStore = useSystemDialogStore()
+const {toggleSubscriptionDialog, toggleAddFolderDialog} = systemDialogStore
+
 </script>
 
 <style scoped lang="scss">

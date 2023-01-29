@@ -7,6 +7,7 @@ import {PostManager} from "app/src-electron/rss/postListManeger";
 import {ContentInfo} from "src/common/ContentInfo";
 import {shell} from "electron";
 import {getRssId, parseRssFromUrl} from "app/src-electron/rss/utils";
+import {ErrorMsg} from "src/common/ErrorMsg";
 
 export const rssItemMap: Record<number, Source> = {}
 type RssPostListMap = Record<number, Record<number, PostInfoObject>>
@@ -132,4 +133,21 @@ export const getPostContent = (rssItemId: number, postId: number): ContentInfo =
 
 export const openLink = async (url: string): Promise<void> => {
   return await shell.openExternal(url)
+}
+
+export const addFolder = async (folderName: string): Promise<ErrorMsg> => {
+  const sourceManager = SourceManage.getInstance()
+  if (sourceManager.getFolder(folderName)) {
+    console.log(sourceManager.getFolder(folderName))
+    return {
+      success: false,
+      msg: `文件夹[${folderName}]已存在!`
+    }
+  }
+  sourceManager.addFolder(new Folder(folderName))
+  await sourceManager.dumpToDefaultConfigFile()
+  return {
+    success: true,
+    msg: ''
+  }
 }
