@@ -8,6 +8,7 @@ import {
   openLink,
   getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription, importOpmlFile
 } from "src-electron/rss/api";
+import {SqliteUtil} from "app/src-electron/storage/sqlite";
 
 
 // needed in case process is undefined under Linux
@@ -111,6 +112,8 @@ app.whenReady().then(() => {
     return await removeFolder(folderName)
   })
   createWindow()
+  const sqliteClient = SqliteUtil.getInstance()
+  sqliteClient.init()
 });
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {
