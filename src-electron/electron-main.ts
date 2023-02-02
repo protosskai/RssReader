@@ -113,7 +113,13 @@ app.whenReady().then(() => {
   })
   createWindow()
   const sqliteClient = SqliteUtil.getInstance()
-  sqliteClient.init()
+  sqliteClient.init().then(() => {
+    sqliteClient.updateRssInfo("asda", 124, "test2", "http://www.baidu.com",
+      "http://www.baidu.com", "asda", "2022-2-2").then((res) => {
+      console.log(res.success)
+      console.log(res.msg)
+    })
+  })
 });
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

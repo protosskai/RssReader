@@ -72,10 +72,27 @@ export class SqliteUtil implements StorageUtil {
    * @param parentId
    */
   async insertFolderInfo(folderName: string, parentId?: string): Promise<ErrorMsg> {
-    return {
-      success: true,
-      msg: ''
+    let sql: string | null = null
+    if (parentId) {
+      sql = `insert into folder_info (name, parentId) values ("${folderName}, ${parentId}")`
+    } else {
+      sql = `insert into folder_info (name) values ("${folderName}")`
     }
+    return new Promise((resolve) => {
+      this.db?.run(sql!, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        } else {
+          resolve({
+            success: true,
+            msg: ''
+          })
+        }
+      })
+    })
   }
 
   /**
@@ -88,14 +105,28 @@ export class SqliteUtil implements StorageUtil {
    * @param avatar
    * @param updateTime
    */
-  async insertRssInfo(rssId: number, folderId: number,
+  async insertRssInfo(rssId: string, folderId: number,
                       title: string, htmlUrl: string,
                       feedUrl: string, avatar: string,
                       updateTime: string): Promise<ErrorMsg> {
-    return {
-      success: true,
-      msg: ''
-    }
+    const sql = `insert into rss_info (rss_id,folder_id,title,html_url,feed_url,avatar,update_time)
+                              values("${rssId}", ${folderId}, "${title}", "${htmlUrl}", "${feedUrl}",
+                              "${avatar}", "${updateTime}")`
+    return new Promise((resolve) => {
+      this.db?.run(sql!, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        } else {
+          resolve({
+            success: true,
+            msg: ''
+          })
+        }
+      })
+    })
   }
 
   /**
@@ -108,14 +139,28 @@ export class SqliteUtil implements StorageUtil {
    * @param avatar
    * @param updateTime
    */
-  async updateRssInfo(rssId: number, folderId: number,
+  async updateRssInfo(rssId: string, folderId: number,
                       title: string, htmlUrl: string,
                       feedUrl: string, avatar: string,
                       updateTime: string): Promise<ErrorMsg> {
-    return {
-      success: true,
-      msg: ''
-    }
+    const sql = `update rss_info set folder_id=${folderId}, title="${title}", html_url="${htmlUrl}",
+                feed_url="${feedUrl}", avatar="${avatar}", update_time="${updateTime}"
+                where rss_id="${rssId}"`
+    return new Promise((resolve) => {
+      this.db?.run(sql!, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        } else {
+          resolve({
+            success: true,
+            msg: ''
+          })
+        }
+      })
+    })
   }
 
   /**
