@@ -167,19 +167,58 @@ export class SqliteUtil implements StorageUtil {
    * 通过目录名称查询folder_info表,不传入参数则返回所有folder_info
    * @param folderName
    */
-  async queryFolderByFolderId(folderId?: string): Promise<ErrorData<any>> {
-    return {
-      success: true,
-      msg: '',
-      data: []
+  async queryFolderByFolderId(folderId?: number): Promise<ErrorData<any>> {
+    let sql: string | null
+    if (folderId) {
+      sql = `select * from folder_info where id=${folderId}`
+    } else {
+      sql = `select * from folder_info`
     }
+    return new Promise<ErrorData<any>>((resolve) => {
+      this.db?.all(sql!, (err, rows) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message,
+            data: []
+          })
+        }
+        resolve({
+          success: true,
+          msg: '',
+          data: rows
+        })
+      })
+    })
   }
 
   /**
    * 通过订阅链接查询rss_info表,不传入参数则返回所有rss_info
    * @param feedUrl
    */
-  async queryRssByRssId(rssId?: number): Promise<ErrorData<any>> {
+  async queryRssByRssId(rssId?: string): Promise<ErrorData<any>> {
+    let sql: string | null
+    if (rssId) {
+      sql = `select * from rss_info where rss_id="${rssId}"`
+    } else {
+      sql = `select * from rss_info`
+    }
+    return new Promise<ErrorData<any>>((resolve) => {
+      this.db?.all(sql!, (err, rows) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message,
+            data: []
+          })
+        }
+        resolve({
+          success: true,
+          msg: '',
+          data: rows
+        })
+      })
+    })
     return {
       success: true,
       msg: '',
