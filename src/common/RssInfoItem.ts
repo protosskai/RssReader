@@ -17,6 +17,6 @@ export interface RssInfoNew {
 export interface RssFolderItem {
   folderName: string,
   data: RssInfoItem[],
-  children: RssInfoItem[]
+  children: RssFolderItem[] // 子目录，暂不使用
 }
 

@@ -192,6 +192,31 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
+  async queryFolderByFolderName(folderName?: string): Promise<ErrorData<any>> {
+    let sql: string | null
+    if (folderName) {
+      sql = `select * from folder_info where name="${folderName}"`
+    } else {
+      sql = `select * from folder_info`
+    }
+    return new Promise<ErrorData<any>>((resolve) => {
+      this.db?.all(sql!, (err, rows) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message,
+            data: []
+          })
+        }
+        resolve({
+          success: true,
+          msg: '',
+          data: rows
+        })
+      })
+    })
+  }
+
   /**
    * 通过订阅链接查询rss_info表,不传入参数则返回所有rss_info
    * @param feedUrl
@@ -226,12 +251,52 @@ export class SqliteUtil implements StorageUtil {
     }
   }
 
+  async checkFolderExist(folderName: string): Promise<boolean> {
+    const folderData = await this.queryFolderByFolderName(folderName)
+    if (!folderData.success) {
+      throw new Error(folderData.msg)
+    }
+    return folderData.data.length > 0;
+  }
+
+  async checkRssExist(rssId: string): Promise<boolean> {
+    const rssData = await this.queryRssByRssId(rssId)
+    if (!rssData.success) {
+      throw new Error(rssData.msg)
+    }
+    return rssData.data.length > 0;
+  }
+
   /**
    * 将folder信息同步到数据库表中,同时同步folder关联的rss信息
    * @param folderInfo
    */
   async syncFolderInfo(folderInfo: RssFolderItem) {
-
+    if (!await this.checkFolderExist(folderInfo.folderName)) {
+      const result = await this.insertFolderInfo(folderInfo.folderName)
+      if (!result.success) {
+        throw new Error(result.msg)
+      }
+    }
+    const [folderData] = (await this.queryFolderByFolderName(folderInfo.folderName)).data
+    const folderId = folderData["id"] as number
+    for (const rssInfo of folderInfo.data) {
+      if (!await this.checkRssExist(rssInfo.id)) {
+        const result = await this.insertRssInfo(rssInfo.id, folderId, rssInfo.title, rssInfo.htmlUrl,
+          rssInfo.feedUrl, rssInfo.avatar ? rssInfo.avatar : "",
+          rssInfo.lastUpdateTime ? rssInfo.lastUpdateTime : "")
+        if (!result.success) {
+          throw new Error(result.msg)
+        }
+      }
+      const [rssData] = (await this.queryRssByRssId(rssInfo.id)).data
+      const result = await this.updateRssInfo(rssInfo.id, folderId, rssInfo.title, rssInfo.htmlUrl,
+        rssInfo.feedUrl, rssInfo.avatar ? rssInfo.avatar : "",
+        rssInfo.lastUpdateTime ? rssInfo.lastUpdateTime : "")
+      if (!result.success) {
+        throw new Error(result.msg)
+      }
+    }
   }
 
 

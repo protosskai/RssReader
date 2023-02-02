@@ -9,6 +9,7 @@ import {
   getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription, importOpmlFile
 } from "src-electron/rss/api";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
+import {RssFolderItem} from "src/common/RssInfoItem";
 
 
 // needed in case process is undefined under Linux
@@ -113,12 +114,30 @@ app.whenReady().then(() => {
   })
   createWindow()
   const sqliteClient = SqliteUtil.getInstance()
+  const folder: RssFolderItem = {
+    folderName: "kkk",
+    data: [{
+      id: 'qqq',
+      title: 'aaa',
+      unread: 0,
+      htmlUrl: 'aa',
+      feedUrl: 'bb',
+      avatar: 'cc',
+      lastUpdateTime: 'dd'
+    },
+      {
+        id: 'www',
+        title: 'aaa',
+        unread: 0,
+        htmlUrl: 'aa',
+        feedUrl: 'bb',
+        avatar: 'cc',
+        lastUpdateTime: 'dd'
+      }],
+    children: []
+  }
   sqliteClient.init().then(() => {
-    sqliteClient.queryRssByRssId().then(res => {
-      console.log(res.msg)
-      console.log(res.success)
-      console.log(res.data)
-    })
+    sqliteClient.syncFolderInfo(folder)
   })
 });
 app.on('window-all-closed', () => {
