@@ -75,7 +75,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   importOpmlFile: async (): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('rss:importOpmlFile')
   },
-  dumpFolderToDb: async (folderInfoList: RssFolderItem[]): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('rss:dumpFolderToDb', folderInfoList)
+  dumpFolderToDb: async (folderInfoListJson: string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('rss:dumpFolderToDb', folderInfoListJson)
   }
 })

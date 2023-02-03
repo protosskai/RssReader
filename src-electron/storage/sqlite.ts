@@ -290,7 +290,7 @@ export class SqliteUtil implements StorageUtil {
         }
       }
       const [rssData] = (await this.queryRssByRssId(rssInfo.id)).data
-      const result = await this.updateRssInfo(rssInfo.id, folderId, rssInfo.title, rssInfo.htmlUrl,
+      const result = await this.updateRssInfo(rssData.id, folderId, rssInfo.title, rssInfo.htmlUrl,
         rssInfo.feedUrl, rssInfo.avatar ? rssInfo.avatar : "",
         rssInfo.lastUpdateTime ? rssInfo.lastUpdateTime : "")
       if (!result.success) {

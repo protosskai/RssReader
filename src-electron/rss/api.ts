@@ -200,7 +200,8 @@ export const importOpmlFile = async (): Promise<ErrorMsg> => {
   }
 }
 
-export const dumpFolderToDb = async (folderInfoList: RssFolderItem[]): Promise<ErrorMsg> => {
+export const dumpFolderToDb = async (folderInfoListJson: string): Promise<ErrorMsg> => {
+  const folderInfoList = JSON.parse(folderInfoListJson)
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
   await storageUtil.init()
   return await storageUtil.dumpFolderItemList(folderInfoList)

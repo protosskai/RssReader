@@ -37,6 +37,7 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
   const importOpmlFile = async (): Promise<ErrorMsg> => {
     const errMsg = await window.electronAPI.importOpmlFile()
     await refresh()
+    await window.electronAPI.dumpFolderToDb(JSON.stringify(rssFolderList.value))
     return errMsg
   }
   // 初始化RSS菜单数据

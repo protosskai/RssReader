@@ -113,8 +113,8 @@ app.whenReady().then(() => {
     return await removeFolder(folderName)
   })
   ipcMain.handle('rss:dumpFolderToDb', async (event, ...args) => {
-    const [folderInfoList] = args
-    return await dumpFolderToDb(folderInfoList)
+    const [folderInfoListJson] = args
+    return await dumpFolderToDb(folderInfoListJson)
   })
   createWindow()
 });
