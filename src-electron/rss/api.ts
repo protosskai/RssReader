@@ -206,3 +206,9 @@ export const dumpFolderToDb = async (folderInfoListJson: string): Promise<ErrorM
   await storageUtil.init()
   return await storageUtil.dumpFolderItemList(folderInfoList)
 }
+export const loadFolderFromDb = async (): Promise<string> => {
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
+  const folderInfoList = (await storageUtil.loadFolderItemList()).data
+  return JSON.stringify(folderInfoList)
+}

@@ -31,7 +31,7 @@ import {contextBridge, ipcRenderer} from 'electron'
 import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {ContentInfo} from "src/common/ContentInfo";
-import {addRssSubscription, dumpFolderToDb} from "app/src-electron/rss/api";
+import {addRssSubscription, dumpFolderToDb, loadFolderFromDb} from "app/src-electron/rss/api";
 import {ErrorMsg} from "src/common/ErrorMsg";
 
 
@@ -77,5 +77,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   dumpFolderToDb: async (folderInfoListJson: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('rss:dumpFolderToDb', folderInfoListJson)
+  },
+  loadFolderFromDb: async (): Promise<string> => {
+    return await ipcRenderer.invoke('rss:loadFolderFromDb')
   }
 })

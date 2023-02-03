@@ -251,6 +251,42 @@ export class SqliteUtil implements StorageUtil {
     }
   }
 
+  async cleanFolderInfoTable(): Promise<ErrorMsg> {
+    const sql = `delete from folder_info;`
+    return new Promise((resolve) => {
+      this.db?.run(sql, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        }
+        resolve({
+          success: true,
+          msg: ''
+        })
+      })
+    })
+  }
+
+  async cleanRssInfoTable(): Promise<ErrorMsg> {
+    const sql = `delete from rss_info;`
+    return new Promise((resolve) => {
+      this.db?.run(sql, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        }
+        resolve({
+          success: true,
+          msg: ''
+        })
+      })
+    })
+  }
+
   async checkFolderExist(folderName: string): Promise<boolean> {
     const folderData = await this.queryFolderByFolderName(folderName)
     if (!folderData.success) {
@@ -301,6 +337,8 @@ export class SqliteUtil implements StorageUtil {
 
 
   async dumpFolderItemList(folderInfoList: RssFolderItem[]): Promise<ErrorMsg> {
+    await this.cleanFolderInfoTable()
+    await this.cleanRssInfoTable()
     for (const folderItem of folderInfoList) {
       await this.syncFolderInfo(folderItem)
     }
@@ -311,10 +349,38 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async loadFolderItemList(): Promise<ErrorData<RssFolderItem[]>> {
+    const folderData = await this.queryFolderByFolderId()
+    const rssData = await this.queryRssByRssId()
+    const folderInfoList: RssFolderItem[] = []
+    folderData.data.forEach((item: any) => {
+      const folderName = item.name
+      const folderId = item.id
+      const folderInfo: RssFolderItem = {
+        folderName,
+        data: [],
+        children: []
+      }
+      rssData.data.forEach((item1: any) => {
+        const rssId = item1.rss_id
+        const rssFolderId = item1.folder_id
+        if (rssFolderId === folderId) {
+          folderInfo.data.push({
+            id: rssId,
+            title: item1.title,
+            unread: 0,
+            htmlUrl: item1.html_url,
+            feedUrl: item1.feed_url,
+            avatar: item1.avatar,
+            lastUpdateTime: item1.update_time
+          })
+        }
+      })
+      folderInfoList.push(folderInfo)
+    })
     return {
       success: true,
       msg: '',
-      data: []
+      data: folderInfoList
     }
   }
 }

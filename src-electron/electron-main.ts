@@ -6,7 +6,14 @@ import {
   getRssContent,
   getPostContent,
   openLink,
-  getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription, importOpmlFile, dumpFolderToDb
+  getRssFolderList,
+  addRssSubscription,
+  addFolder,
+  removeFolder,
+  removeRssSubscription,
+  importOpmlFile,
+  dumpFolderToDb,
+  loadFolderFromDb
 } from "src-electron/rss/api";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
 import {RssFolderItem} from "src/common/RssInfoItem";
@@ -115,6 +122,9 @@ app.whenReady().then(() => {
   ipcMain.handle('rss:dumpFolderToDb', async (event, ...args) => {
     const [folderInfoListJson] = args
     return await dumpFolderToDb(folderInfoListJson)
+  })
+  ipcMain.handle('rss:loadFolderFromDb', async () => {
+    return await loadFolderFromDb()
   })
   createWindow()
 });

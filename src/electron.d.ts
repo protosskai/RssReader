@@ -18,7 +18,8 @@ export interface electronAPI {
   addFolder: (folderName: string) => Promise<ErrorMsg>,
   removeFolder: (folderName: string) => Promise<ErrorMsg>
   importOpmlFile: () => Promise<ErrorMsg>,
-  dumpFolderToDb: (folderInfoListJson: string) => Promise<ErrorMsg>
+  dumpFolderToDb: (folderInfoListJson: string) => Promise<ErrorMsg>,
+  loadFolderFromDb: () => Promise<string>
 }
 
 declare  global {
