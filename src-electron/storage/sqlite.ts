@@ -301,6 +301,9 @@ export class SqliteUtil implements StorageUtil {
 
 
   async dumpFolderItemList(folderInfoList: RssFolderItem[]): Promise<ErrorMsg> {
+    for (const folderItem of folderInfoList) {
+      await this.syncFolderInfo(folderItem)
+    }
     return {
       success: true,
       msg: ''

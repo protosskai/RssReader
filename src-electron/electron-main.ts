@@ -6,7 +6,7 @@ import {
   getRssContent,
   getPostContent,
   openLink,
-  getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription, importOpmlFile
+  getRssFolderList, addRssSubscription, addFolder, removeFolder, removeRssSubscription, importOpmlFile, dumpFolderToDb
 } from "src-electron/rss/api";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
 import {RssFolderItem} from "src/common/RssInfoItem";
@@ -112,33 +112,11 @@ app.whenReady().then(() => {
     const [folderName] = args
     return await removeFolder(folderName)
   })
-  createWindow()
-  const sqliteClient = SqliteUtil.getInstance()
-  const folder: RssFolderItem = {
-    folderName: "kkk",
-    data: [{
-      id: 'qqq',
-      title: 'aaa',
-      unread: 0,
-      htmlUrl: 'aa',
-      feedUrl: 'bb',
-      avatar: 'cc',
-      lastUpdateTime: 'dd'
-    },
-      {
-        id: 'www',
-        title: 'aaa',
-        unread: 0,
-        htmlUrl: 'aa',
-        feedUrl: 'bb',
-        avatar: 'cc',
-        lastUpdateTime: 'dd'
-      }],
-    children: []
-  }
-  sqliteClient.init().then(() => {
-    sqliteClient.syncFolderInfo(folder)
+  ipcMain.handle('rss:dumpFolderToDb', async (event, ...args) => {
+    const [folderInfoList] = args
+    return await dumpFolderToDb(folderInfoList)
   })
+  createWindow()
 });
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

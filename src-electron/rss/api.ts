@@ -8,6 +8,8 @@ import {ContentInfo} from "src/common/ContentInfo";
 import {shell, dialog} from "electron";
 import {getRssId, parseRssFromUrl} from "app/src-electron/rss/utils";
 import {ErrorMsg} from "src/common/ErrorMsg";
+import {SqliteUtil} from "app/src-electron/storage/sqlite";
+import {StorageUtil} from "app/src-electron/storage/common";
 
 export const rssItemMap: Record<string, Source> = {}
 type RssPostListMap = Record<string, Record<number, PostInfoObject>>
@@ -196,4 +198,10 @@ export const importOpmlFile = async (): Promise<ErrorMsg> => {
       msg: e
     }
   }
+}
+
+export const dumpFolderToDb = async (folderInfoList: RssFolderItem[]): Promise<ErrorMsg> => {
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
+  return await storageUtil.dumpFolderItemList(folderInfoList)
 }
