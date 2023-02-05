@@ -5,18 +5,22 @@
 import {OpmlOutline, OpmlObject} from "./opmlUtil";
 import {readOpmlFromFile, dumpOpmlToFile} from "./opmlUtil";
 import {promises as fs} from "fs";
-import {buildAvatarUrl} from "app/src-electron/rss/utils";
+import {buildAvatarUrl, getRssId} from "app/src-electron/rss/utils";
+import {StorageUtil} from "app/src-electron/storage/common";
+import {SqliteUtil} from "app/src-electron/storage/sqlite";
+import {RssFolderItem, RssInfoItem} from "src/common/RssInfoItem";
 
-export const DEFAULT_FOLDER = "__rss_client_default__";
+export const DEFAULT_FOLDER = "默认";
 
 export class Source {
-  url: string;
+  rssId: string = "";
+  url: string = "";
   name: string = "";
   folder: string = "";
   avatar: string = "";
   htmlUrl: string = "";
 
-  constructor(url: string, name?: string, folder?: string, avatar?: string, htmlUrl?: string) {
+  constructor(url: string, name?: string, folder?: string, avatar?: string, htmlUrl?: string, rssId?: string) {
     this.url = url;
     if (name) {
       this.name = name;
@@ -29,6 +33,9 @@ export class Source {
     }
     if (htmlUrl) {
       this.htmlUrl = htmlUrl
+    }
+    if (rssId) {
+      this.rssId = rssId
     }
   }
 }
@@ -51,6 +58,9 @@ export class Folder {
       source = value;
     }
     source.folder = this.name;
+    if (!source.rssId || source.rssId.trim() === '') {
+      source.rssId = getRssId()
+    }
     this.sourceArray.push(source);
   }
 
@@ -131,6 +141,43 @@ export class SourceManage {
     }
   }
 
+  getFolderInfoList(): RssFolderItem[] {
+    const result: RssFolderItem[] = []
+    for (const folderName in this.folderMap) {
+      const folder = this.folderMap[folderName]
+      const rssInfoList: RssInfoItem[] = []
+      folder?.sourceArray.forEach(item => {
+        rssInfoList.push({
+          id: item.rssId,
+          title: item.name,
+          unread: 0,
+          htmlUrl: item.htmlUrl,
+          feedUrl: item.url,
+          avatar: item.avatar,
+          lastUpdateTime: undefined
+        })
+      })
+      result.push({
+        folderName,
+        data: rssInfoList,
+        children: []
+      })
+    }
+    return result
+  }
+
+  loadFolderInfoList(folderInfoList: RssFolderItem[]) {
+    folderInfoList.forEach(item => {
+      const {folderName, data} = item
+      const folder: Folder = new Folder(folderName)
+      data.forEach(rssItem => {
+        const source: Source = new Source(rssItem.feedUrl, rssItem.title, folderName, rssItem.avatar, rssItem.htmlUrl, rssItem.id)
+        folder.addSource(source)
+      })
+      this.addFolder(folder)
+    })
+  }
+
   dump(): OpmlObject {
     const opmlObject = new OpmlObject();
     opmlObject.title = "feedOpml";
@@ -150,7 +197,7 @@ export class SourceManage {
         outline.text = DEFAULT_FOLDER
         outline.title = DEFAULT_FOLDER
         sourceArray.forEach(item => {
-          const subOutline = new OpmlOutline(item.name, item.name, [], "rss", item.url, item.url);
+          const subOutline = new OpmlOutline(item.name, item.name, [], "rss", item.url, item.url, item.rssId);
           outline.addOutline(subOutline);
         });
         opmlObject.addOutline(outline)
@@ -164,11 +211,15 @@ export class SourceManage {
     const name = outline.getName();
     let htmlUrl: string = "";
     let avatarUrl: string = "";
+    let rssId: string = "";
     if (outline.htmlUrl) {
       htmlUrl = outline.htmlUrl
       avatarUrl = buildAvatarUrl(htmlUrl)
     }
-    const source = new Source(url, name, undefined, avatarUrl, htmlUrl);
+    if (outline.rssId) {
+      rssId = outline.rssId
+    }
+    const source = new Source(url, name, undefined, avatarUrl, htmlUrl, rssId);
     if (folder) {
       source.folder = folder.name;
     }
@@ -182,7 +233,7 @@ export class SourceManage {
       if (item.type === "rss") {
         // 根目录的rss节点直接挂载默认目录里面
         const source = this.convertOutlineToSource(item, this.folderMap[DEFAULT_FOLDER]!);
-        this.folderMap[DEFAULT_FOLDER]!.sourceArray.push(source);
+        this.folderMap[DEFAULT_FOLDER]!.addSource(source)
       } else {
         if (!this.getFolder(item.getName())) {
           this.folderMap[item.getName()] = new Folder(item.getName());
@@ -254,5 +305,31 @@ export class SourceManage {
   async dumpToDefaultConfigFile() {
     const defaultPath = await this.getDefaultConfigFilePath()
     await this.saveToFile(defaultPath)
+  }
+
+  async dumpToDb() {
+    const storageUtil: StorageUtil = SqliteUtil.getInstance()
+    await storageUtil.init()
+    const folderInfoList = this.getFolderInfoList()
+    await storageUtil.dumpFolderItemList(folderInfoList)
+  }
+
+  async loadFromDb() {
+    const storageUtil: StorageUtil = SqliteUtil.getInstance()
+    await storageUtil.init()
+    const folderInfoList = (await storageUtil.loadFolderItemList()).data
+    this.loadFolderInfoList(folderInfoList)
+  }
+
+  getSourceByRssId(rssId: string): Source | null {
+    for (const folderName in this.folderMap) {
+      const folder = this.getFolder(folderName)
+      for (const source of folder!.sourceArray) {
+        if (source && source.rssId === rssId) {
+          return source
+        }
+      }
+    }
+    return null
   }
 }

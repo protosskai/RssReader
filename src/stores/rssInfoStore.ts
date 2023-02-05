@@ -7,9 +7,7 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
   const rssFolderList: Ref<RssFolderItem[]> = ref([])
   const folderNameList = computed(() => (rssFolderList.value.map(item => item.folderName)))
   const refresh = async () => {
-    const data = await window.electronAPI.getRssFolderList()
-    rssFolderList.value = data
-    await window.electronAPI.dumpFolderToDb(JSON.stringify(rssFolderList.value))
+    rssFolderList.value = await window.electronAPI.getRssInfoListFromDb()
   }
   const addRssSubscription = async (feedUrl: string, title: string, folderName: string) => {
     const obj: RssInfoNew = {
@@ -41,7 +39,7 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     return errMsg
   }
   // 初始化RSS菜单数据
-  window.electronAPI.getRssFolderList().then(data => {
+  window.electronAPI.getRssInfoListFromDb().then(data => {
     rssFolderList.value = data
   })
   return {

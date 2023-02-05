@@ -8,8 +8,9 @@ export class OpmlOutline {
   type?: "rss" | "folder" | null = null;
   xmlUrl?: string | null = null;
   htmlUrl?: string | null = null;
+  rssId: string = ""
 
-  constructor(title?: string, text?: string, subOutlines?: OpmlOutline[], type?: "rss" | null, xmlUrl?: string | null, htmlUrl?: string | null) {
+  constructor(title?: string, text?: string, subOutlines?: OpmlOutline[], type?: "rss" | null, xmlUrl?: string | null, htmlUrl?: string | null, rssId?: string) {
     if (title) {
       this.title = title;
     }
@@ -27,6 +28,9 @@ export class OpmlOutline {
     }
     if (htmlUrl) {
       this.htmlUrl = htmlUrl;
+    }
+    if (rssId) {
+      this.rssId = rssId
     }
   }
 

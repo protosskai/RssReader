@@ -6,45 +6,18 @@ import {PostInfoItem} from "src/common/PostInfoItem";
 import {PostManager} from "app/src-electron/rss/postListManeger";
 import {ContentInfo} from "src/common/ContentInfo";
 import {shell, dialog} from "electron";
-import {getRssId, parseRssFromUrl} from "app/src-electron/rss/utils";
+import {parseRssFromUrl} from "app/src-electron/rss/utils";
 import {ErrorMsg} from "src/common/ErrorMsg";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
 import {StorageUtil} from "app/src-electron/storage/common";
 
-export const rssItemMap: Record<string, Source> = {}
 type RssPostListMap = Record<string, Record<number, PostInfoObject>>
 const postItemMap: RssPostListMap = {}
 
-export const getRssFolderList = async (): Promise<RssFolderItem[]> => {
-  const result = []
+export const getRssInfoListFromDb = async (): Promise<RssFolderItem[]> => {
   const sourceManager = SourceManage.getInstance()
-  await sourceManager.loadDefaultConfigFile()
-  for (const folderName in sourceManager.folderMap) {
-    const folderItem: RssFolderItem = {
-      folderName: folderName === DEFAULT_FOLDER ? '默认' : folderName,
-      data: [],
-      children: [] // 暂时不支持嵌套目录
-    }
-    const folder = sourceManager.folderMap[folderName]
-    if (!folder) {
-      continue
-    }
-    for (const source of folder.sourceArray) {
-      const id = String(getRssId())
-      const rssMapItem = {
-        id,
-        title: source.name,
-        unread: 0,
-        avatar: source.avatar,
-        htmlUrl: source.htmlUrl,
-        feedUrl: source.url
-      }
-      folderItem.data.push(rssMapItem)
-      rssItemMap[id] = source
-    }
-    result.push(folderItem)
-  }
-  return result
+  await sourceManager.loadFromDb()
+  return sourceManager.getFolderInfoList()
 }
 
 export const addRssSubscription = async (obj: RssInfoNew): Promise<void> => {
@@ -68,7 +41,7 @@ export const addRssSubscription = async (obj: RssInfoNew): Promise<void> => {
   }
   const source: Source = new Source(rssInfoItem.feedUrl, rssInfoItem.title, folder.name, rssInfoItem.avatar, rssInfoItem.htmlUrl)
   folder.addSource(source)
-  await sourceManager.dumpToDefaultConfigFile()
+  await sourceManager.dumpToDb()
 }
 export const removeRssSubscription = async (folderName: string, rssUrl: string): Promise<ErrorMsg> => {
   const sourceManager = SourceManage.getInstance()
@@ -92,7 +65,7 @@ export const removeRssSubscription = async (folderName: string, rssUrl: string):
     }
   }
   folder.sourceArray.splice(sourceIndex, 1)
-  await sourceManager.dumpToDefaultConfigFile()
+  await sourceManager.dumpToDb()
   return {
     success: true,
     msg: ''
@@ -100,7 +73,11 @@ export const removeRssSubscription = async (folderName: string, rssUrl: string):
 }
 
 export const getRssContent = async (rssItemId: string): Promise<string> => {
-  const rssItem = rssItemMap[rssItemId]
+  const sourceManager = SourceManage.getInstance()
+  const rssItem = sourceManager.getSourceByRssId(rssItemId)
+  if (!rssItem) {
+    throw new Error(`rssID: [${rssItemId}] not exist!`)
+  }
   const url = rssItem.url
   const content = await getUrl(url)
   if (!content) {
@@ -111,7 +88,11 @@ export const getRssContent = async (rssItemId: string): Promise<string> => {
 
 
 export const getPostListInfo = async (rssItemId: string): Promise<PostInfoItem[]> => {
-  const rssItem = rssItemMap[rssItemId]
+  const sourceManager = SourceManage.getInstance()
+  const rssItem = sourceManager.getSourceByRssId(rssItemId)
+  if (!rssItem) {
+    throw new Error(`rssID: [${rssItemId}] not exist!`)
+  }
   const url = rssItem.url
   const postManager = new PostManager()
   const postList: PostInfoItem[] = await postManager.getPostList(url)
@@ -126,8 +107,12 @@ export const getPostListInfo = async (rssItemId: string): Promise<PostInfoItem[]
 }
 
 export const getPostContent = (rssItemId: string, postId: number): ContentInfo => {
+  const sourceManager = SourceManage.getInstance()
+  const source = sourceManager.getSourceByRssId(rssItemId)
+  if (!source) {
+    throw new Error(`rssID: [${rssItemId}] not exist!`)
+  }
   const postObj = postItemMap[rssItemId][postId]
-  const source = rssItemMap[rssItemId]
   const contentInfo: ContentInfo = {
     title: postObj.title,
     content: postObj.contentEncoded && postObj.contentEncoded.trim() !== '' ? postObj.contentEncoded : postObj.description,

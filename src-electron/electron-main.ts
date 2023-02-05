@@ -6,14 +6,13 @@ import {
   getRssContent,
   getPostContent,
   openLink,
-  getRssFolderList,
   addRssSubscription,
   addFolder,
   removeFolder,
   removeRssSubscription,
   importOpmlFile,
   dumpFolderToDb,
-  loadFolderFromDb
+  loadFolderFromDb, getRssInfoListFromDb
 } from "src-electron/rss/api";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
 import {RssFolderItem} from "src/common/RssInfoItem";
@@ -90,7 +89,6 @@ app.whenReady().then(() => {
     const [rssItemId, postId] = args
     return getPostContent(rssItemId, postId)
   })
-  ipcMain.handle('rss:folderList', getRssFolderList)
   ipcMain.handle('rss:addRssSubscription', async (event, ...args) => {
     const [obj] = args
     return await addRssSubscription(obj)
@@ -125,6 +123,9 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('rss:loadFolderFromDb', async () => {
     return await loadFolderFromDb()
+  })
+  ipcMain.handle('rss:getRssInfoListFromDb', async () => {
+    return await getRssInfoListFromDb()
   })
   createWindow()
 });
