@@ -27,12 +27,7 @@
             刷新订阅
           </q-tooltip>
         </q-btn>
-        <q-btn flat round color="white" icon="settings" @click="openSettingPage" v-if="settingOrHome=== 'home'">
-          <q-tooltip>
-            设置
-          </q-tooltip>
-        </q-btn>
-        <q-btn flat round color="white" icon="home" @click="openHomePage" v-if="settingOrHome=== 'setting'">
+        <q-btn flat round color="white" icon="home" @click="openHomePage">
           <q-tooltip>
             主页
           </q-tooltip>

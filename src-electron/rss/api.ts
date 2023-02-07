@@ -137,7 +137,29 @@ export const addFolder = async (folderName: string): Promise<ErrorMsg> => {
     }
   }
   sourceManager.addFolder(new Folder(folderName))
-  await sourceManager.dumpToDefaultConfigFile()
+  await sourceManager.dumpToDb()
+  return {
+    success: true,
+    msg: ''
+  }
+}
+
+export const editFolder = async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
+  const sourceManager = SourceManage.getInstance()
+  if (!sourceManager.getFolder(oldFolderName)) {
+    return {
+      success: false,
+      msg: `文件夹[${oldFolderName}]不存在!`
+    }
+  }
+  if (sourceManager.getFolder(newFolderName)) {
+    return {
+      success: false,
+      msg: `文件夹[${newFolderName}]已存在!`
+    }
+  }
+  sourceManager.editFolder(oldFolderName, newFolderName)
+  await sourceManager.dumpToDb()
   return {
     success: true,
     msg: ''
@@ -153,7 +175,8 @@ export const removeFolder = async (folderName: string): Promise<ErrorMsg> => {
     }
   }
   sourceManager.deleteFolder(folderName)
-  await sourceManager.dumpToDefaultConfigFile()
+  // #TODO: 删除文件夹关联rss表信息
+  await sourceManager.dumpToDb()
   return {
     success: true,
     msg: ''

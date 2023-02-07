@@ -337,6 +337,7 @@ export class SqliteUtil implements StorageUtil {
 
 
   async dumpFolderItemList(folderInfoList: RssFolderItem[]): Promise<ErrorMsg> {
+    // #TODO: 只做差异化修改，避免清空表，防止后续存储内容的时候找不到相应的主键id
     await this.cleanFolderInfoTable()
     await this.cleanRssInfoTable()
     for (const folderItem of folderInfoList) {

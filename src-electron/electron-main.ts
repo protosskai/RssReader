@@ -12,7 +12,7 @@ import {
   removeRssSubscription,
   importOpmlFile,
   dumpFolderToDb,
-  loadFolderFromDb, getRssInfoListFromDb
+  loadFolderFromDb, getRssInfoListFromDb, editFolder
 } from "src-electron/rss/api";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
 import {RssFolderItem} from "src/common/RssInfoItem";
@@ -126,6 +126,10 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('rss:getRssInfoListFromDb', async () => {
     return await getRssInfoListFromDb()
+  })
+  ipcMain.handle('rss:editFolder', async (event, ...args) => {
+    const [oldFolderName, newFolderName] = args;
+    return await editFolder(oldFolderName, newFolderName);
   })
   createWindow()
 });

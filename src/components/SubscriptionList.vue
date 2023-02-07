@@ -17,6 +17,7 @@
                 {{ props.node.label }}
               </q-item-label>
             </q-item-section>
+            <folder-context-menu :folder-name="props.node.label"/>
           </q-item>
         </div>
         <div v-else></div>
@@ -67,6 +68,7 @@ import {RSS_FOLDER_LIST_REF} from "src/const/InjectionKey";
 import {QItem} from "quasar";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
 import {switchPage} from "src/common/util";
+import FolderContextMenu from "components/FolderContextMenu.vue";
 
 
 const RssFolderList = inject(RSS_FOLDER_LIST_REF)

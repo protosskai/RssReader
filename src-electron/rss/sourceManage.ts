@@ -48,6 +48,10 @@ export class Folder {
     this.name = name;
   }
 
+  setName(name: string) {
+    this.name = name
+  }
+
   addSource(url: string): void;
   addSource(source: Source): void;
   addSource(value: string | Source): void {
@@ -122,6 +126,20 @@ export class SourceManage {
 
   getFolder(name: string): Folder | null {
     return this.folderMap[name];
+  }
+
+  editFolder(oldName: string, newName: string): boolean {
+    if (!this.getFolder(oldName)) {
+      return false;
+    }
+    if (this.getFolder(newName)) {
+      return false;
+    }
+    const oldFolder = this.getFolder(oldName)
+    oldFolder!.setName(newName)
+    this.addFolder(oldFolder!)
+    this.deleteFolder(oldName)
+    return true;
   }
 
   getDefaultFolder(): Folder {

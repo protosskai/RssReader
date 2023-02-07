@@ -28,6 +28,11 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     await refresh()
     return errMsg
   }
+  const editFolder = async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
+    const errMsg = await window.electronAPI.editFolder(oldFolderName, newFolderName)
+    await refresh()
+    return errMsg
+  }
   const removeFolder = async (folderName: string): Promise<ErrorMsg> => {
     const errMsg = await window.electronAPI.removeFolder(folderName)
     await refresh()
@@ -49,6 +54,7 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     folderNameList,
     addFolder,
     removeFolder,
-    importOpmlFile
+    importOpmlFile,
+    editFolder
   }
 })

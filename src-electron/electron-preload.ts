@@ -77,5 +77,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   getRssInfoListFromDb: async (): Promise<string> => {
     return await ipcRenderer.invoke('rss:getRssInfoListFromDb')
+  },
+  editFolder: async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('rss:editFolder', oldFolderName, newFolderName)
   }
 })

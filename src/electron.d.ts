@@ -19,7 +19,8 @@ export interface electronAPI {
   importOpmlFile: () => Promise<ErrorMsg>,
   dumpFolderToDb: (folderInfoListJson: string) => Promise<ErrorMsg>,
   loadFolderFromDb: () => Promise<string>,
-  getRssInfoListFromDb: () => Promise<RssFolderItem[]>
+  getRssInfoListFromDb: () => Promise<RssFolderItem[]>,
+  editFolder: (oldFolderName: string, newFolderName: string) => Promise<ErrorMsg>
 }
 
 declare  global {

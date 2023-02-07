@@ -9,6 +9,7 @@
       </q-input>
     </q-toolbar>
     <subscription-list/>
+    <edit-folder-dialog/>
   </q-drawer>
 </template>
 
@@ -17,6 +18,7 @@ import {computed, inject, onMounted, provide, Ref, ref} from "vue";
 import {RSS_FOLDER_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
 import SubscriptionList from "components/SubscriptionList.vue";
 import {useRssInfoStore} from "stores/rssInfoStore";
+import EditFolderDialog from "components/EditFolderDialog.vue";
 
 const store = useRssInfoStore()
 const search = ref('')
