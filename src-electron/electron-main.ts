@@ -113,9 +113,13 @@ app.whenReady().then(() => {
     const [folderName] = args
     return await addFolder(folderName)
   })
+  ipcMain.handle('editFolder', async (event, ...args) => {
+    const [oldFolderName, newFolderName] = args;
+    return await editFolder(oldFolderName, newFolderName);
+  })
   ipcMain.handle('removeFolder', async (event, ...args) => {
-    const [folderName] = args
-    return await removeFolder(folderName)
+    const [folderName] = args;
+    return await removeFolder(folderName);
   })
   ipcMain.handle('rss:dumpFolderToDb', async (event, ...args) => {
     const [folderInfoListJson] = args
@@ -126,10 +130,6 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('rss:getRssInfoListFromDb', async () => {
     return await getRssInfoListFromDb()
-  })
-  ipcMain.handle('rss:editFolder', async (event, ...args) => {
-    const [oldFolderName, newFolderName] = args;
-    return await editFolder(oldFolderName, newFolderName);
   })
   createWindow()
 });

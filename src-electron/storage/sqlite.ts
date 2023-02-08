@@ -287,6 +287,49 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
+  async deleteRssInfoByFolderName(folderName: string): Promise<ErrorMsg> {
+    if (!await this.checkFolderExist(folderName)) {
+      return {
+        success: false,
+        msg: `${folderName}不存在!`
+      }
+    }
+    const folderInfo = (await this.queryFolderByFolderName(folderName)).data[0]
+    let sql: string = `delete from rss_info where folder_id=${folderInfo.id}`
+    return new Promise((resolve) => {
+      this.db?.run(sql, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        }
+        resolve({
+          success: true,
+          msg: ''
+        })
+      })
+    })
+  }
+
+  async deleteFolderInfo(folderName: string): Promise<ErrorMsg> {
+    const sql = `delete from folder_info where name='${folderName}';`
+    return new Promise((resolve) => {
+      this.db?.run(sql, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        }
+        resolve({
+          success: true,
+          msg: ''
+        })
+      })
+    })
+  }
+
   async checkFolderExist(folderName: string): Promise<boolean> {
     const folderData = await this.queryFolderByFolderName(folderName)
     if (!folderData.success) {
@@ -326,7 +369,7 @@ export class SqliteUtil implements StorageUtil {
         }
       }
       const [rssData] = (await this.queryRssByRssId(rssInfo.id)).data
-      const result = await this.updateRssInfo(rssData.id, folderId, rssInfo.title, rssInfo.htmlUrl,
+      const result = await this.updateRssInfo(rssData.rss_id, folderId, rssInfo.title, rssInfo.htmlUrl,
         rssInfo.feedUrl, rssInfo.avatar ? rssInfo.avatar : "",
         rssInfo.lastUpdateTime ? rssInfo.lastUpdateTime : "")
       if (!result.success) {
@@ -337,11 +380,19 @@ export class SqliteUtil implements StorageUtil {
 
 
   async dumpFolderItemList(folderInfoList: RssFolderItem[]): Promise<ErrorMsg> {
-    // #TODO: 只做差异化修改，避免清空表，防止后续存储内容的时候找不到相应的主键id
-    await this.cleanFolderInfoTable()
-    await this.cleanRssInfoTable()
     for (const folderItem of folderInfoList) {
       await this.syncFolderInfo(folderItem)
+    }
+    // 开始清理多余的folder和rss
+    const allFolderInfo = (await this.queryFolderByFolderName()).data
+    const folderNameList = folderInfoList.map(item => item.folderName)
+    for (const folderInfo of allFolderInfo) {
+      if (!folderNameList.includes(folderInfo.name)) {
+        // folder关联的rss信息也要一起删除
+        await this.deleteRssInfoByFolderName(folderInfo.name)
+        // 不存在的folder要从db中删除
+        await this.deleteFolderInfo(folderInfo.name)
+      }
     }
     return {
       success: true,

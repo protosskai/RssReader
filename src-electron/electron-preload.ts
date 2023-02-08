@@ -63,8 +63,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addFolder: async (folderName: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('addFolder', folderName)
   },
+  editFolder: async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('editFolder', oldFolderName, newFolderName)
+  },
   removeFolder: async (folderName: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('removeFolder', folderName)
+    return await ipcRenderer.invoke('removeFolder', folderName);
   },
   importOpmlFile: async (): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('rss:importOpmlFile')
@@ -78,7 +81,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getRssInfoListFromDb: async (): Promise<string> => {
     return await ipcRenderer.invoke('rss:getRssInfoListFromDb')
   },
-  editFolder: async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('rss:editFolder', oldFolderName, newFolderName)
-  }
 })

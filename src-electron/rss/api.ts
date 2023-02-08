@@ -175,7 +175,6 @@ export const removeFolder = async (folderName: string): Promise<ErrorMsg> => {
     }
   }
   sourceManager.deleteFolder(folderName)
-  // #TODO: 删除文件夹关联rss表信息
   await sourceManager.dumpToDb()
   return {
     success: true,

@@ -31,6 +31,8 @@ const props = defineProps<{
 const $q = useQuasar()
 const systemDialogStore = useSystemDialogStore()
 const {toggleEditFolderDialog, setEditFolderDialogOldFolderName} = systemDialogStore
+const rssInfoStore = useRssInfoStore()
+const {removeFolder} = rssInfoStore
 
 export interface ContextMenuItem {
   title: string,
@@ -48,7 +50,7 @@ const onRename = () => {
   toggleEditFolderDialog()
 }
 const onDeleted = async () => {
-
+  await removeFolder(props.folderName)
 }
 const contextMenuInfo: ContextMenuItem[] = [
   {
