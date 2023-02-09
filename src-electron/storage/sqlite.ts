@@ -2,6 +2,7 @@ import sqlite3 from "sqlite3"
 import {StorageUtil} from "app/src-electron/storage/common";
 import {RssFolderItem} from "src/common/RssInfoItem";
 import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
+import {PostInfoItem} from "src/common/PostInfoItem";
 
 const DB_FILE_PATH = './sqlite.db'
 
@@ -65,9 +66,9 @@ export class SqliteUtil implements StorageUtil {
         )
     `)
     }
-    if (!await this.checkTableExist('post')) {
+    if (!await this.checkTableExist('post_info')) {
       this.db?.exec(`
-         CREATE TABLE post(
+         CREATE TABLE post_info(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             rss_id VARCHAR(255) NOT NULL,
             title VARCHAR(255) NOT NULL,
@@ -142,6 +143,27 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
+  async insertPostInfo(rssId: string, title: string, author: string,
+                       content: string, updateTime: string): Promise<ErrorMsg> {
+    const sql = `insert into post_info (rss_id, title, author, content, update_time)
+                    values("${rssId}", "${title}", "${author}", "${content}", "${updateTime}")`
+    return new Promise((resolve) => {
+      this.db?.run(sql!, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        } else {
+          resolve({
+            success: true,
+            msg: ''
+          })
+        }
+      })
+    })
+  }
+
   /**
    * 通过rssId更新rss_info的内容
    * @param rssId
@@ -159,6 +181,27 @@ export class SqliteUtil implements StorageUtil {
     const sql = `update rss_info set folder_id=${folderId}, title="${title}", html_url="${htmlUrl}",
                 feed_url="${feedUrl}", avatar="${avatar}", update_time="${updateTime}"
                 where rss_id="${rssId}"`
+    return new Promise((resolve) => {
+      this.db?.run(sql!, (err) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message
+          })
+        } else {
+          resolve({
+            success: true,
+            msg: ''
+          })
+        }
+      })
+    })
+  }
+
+  async updatePostInfo(postId: number, rssId: string, title: string, author: string,
+                       content: string, updateTime: string): Promise<ErrorMsg> {
+    const sql = `update post_info set rss_id="${rssId}", title="${title}", author="${author}",
+                    content="${content}", update_time="${updateTime}"`
     return new Promise((resolve) => {
       this.db?.run(sql!, (err) => {
         if (err) {
@@ -446,6 +489,13 @@ export class SqliteUtil implements StorageUtil {
       success: true,
       msg: '',
       data: folderInfoList
+    }
+  }
+
+  async syncRssPostList(rssId: string, postInfoItemList: PostInfoItem[]): Promise<ErrorMsg> {
+    return {
+      success: false,
+      msg: ''
     }
   }
 }
