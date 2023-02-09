@@ -192,7 +192,8 @@ export const importOpmlFile = async (): Promise<ErrorMsg> => {
         const sourceManager = SourceManage.getInstance()
         const path = result.filePaths[0]
         await sourceManager.loadFromFile(path)
-        await sourceManager.dumpToDefaultConfigFile()
+        // await sourceManager.dumpToDefaultConfigFile()
+        await sourceManager.dumpToDb()
       }
     }
     return {

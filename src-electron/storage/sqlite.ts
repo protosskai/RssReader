@@ -55,6 +55,7 @@ export class SqliteUtil implements StorageUtil {
       this.db?.exec(`
         CREATE TABLE rss_info(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rss_id VARCHAR(255) NOT NULL,
             folder_id INTEGER NOT NULL,
             title VARCHAR(255) NOT NULL,
             html_url VARCHAR(255) NOT NULL,
@@ -63,6 +64,18 @@ export class SqliteUtil implements StorageUtil {
             update_time DATETIME NULL
         )
     `)
+    }
+    if (!await this.checkTableExist('post')) {
+      this.db?.exec(`
+         CREATE TABLE post(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rss_id VARCHAR(255) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            author VARCHAR(255) NOT NULL,
+            content TEXT NOT NULL,
+            update_time DATETIME NOT NULL
+        )
+      `)
     }
   }
 

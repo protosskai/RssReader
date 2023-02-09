@@ -1,6 +1,7 @@
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {getUrl} from "app/src-electron/net/NetUtil";
 import xml2js from "xml2js";
+import moment from "moment";
 
 
 export interface PostInfoObject {
@@ -38,9 +39,11 @@ export const convertPostObjToItem = (postInfoObj: any): any => {
     result["author"] = author
   }
   if (pubDate instanceof Array) {
-    result["pubDate"] = pubDate[0]
+    const t = moment(pubDate[0])
+    result["pubDate"] = t.format('YYYY-MM-DD HH:mm:ss')
   } else {
-    result["pubDate"] = pubDate
+    const t = moment(pubDate)
+    result["pubDate"] = t.format('YYYY-MM-DD HH:mm:ss')
   }
   if (guid instanceof Array) {
     result["guid"] = guid[0]
