@@ -10,7 +10,7 @@ export interface PostInfoObject {
   link: string,
   pubDate: string,
   author: string,
-  guid?: string,
+  guid: string,
   contentEncoded?: string
 }
 
@@ -46,9 +46,9 @@ export const convertPostObjToItem = (postInfoObj: any): any => {
     result["pubDate"] = t.format('YYYY-MM-DD HH:mm:ss')
   }
   if (guid instanceof Array) {
-    result["guid"] = guid[0]
+    result["guid"] = guid[0]._
   } else {
-    result["guid"] = guid
+    result["guid"] = guid._
   }
   if (link instanceof Array) {
     result["link"] = link[0]
@@ -120,6 +120,7 @@ export class PostManager {
         read: false,
         author: postObject.author,
         updateTime: postObject.pubDate,
+        guid: postObject.guid
       }
       result.push(postInfoItem)
       this.postItemMap[postId] = postObject

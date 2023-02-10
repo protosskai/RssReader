@@ -3,6 +3,7 @@ export interface PostInfoItem {
   title: string,
   desc: string,
   read: boolean, // 是否已读
-  author?: string,
-  updateTime?: string
+  author: string,
+  updateTime: string,
+  guid: string
 }

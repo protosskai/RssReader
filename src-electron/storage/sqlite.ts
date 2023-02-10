@@ -3,6 +3,7 @@ import {StorageUtil} from "app/src-electron/storage/common";
 import {RssFolderItem} from "src/common/RssInfoItem";
 import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
 import {PostInfoItem} from "src/common/PostInfoItem";
+import moment from "moment";
 
 const DB_FILE_PATH = './sqlite.db'
 
@@ -73,7 +74,8 @@ export class SqliteUtil implements StorageUtil {
             rss_id VARCHAR(255) NOT NULL,
             title VARCHAR(255) NOT NULL,
             author VARCHAR(255) NOT NULL,
-            content TEXT NOT NULL,
+            content BLOB NOT NULL,
+            guid VARCHAR(255) NOT NULL,
             update_time DATETIME NOT NULL
         )
       `)
@@ -144,11 +146,13 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async insertPostInfo(rssId: string, title: string, author: string,
-                       content: string, updateTime: string): Promise<ErrorMsg> {
-    const sql = `insert into post_info (rss_id, title, author, content, update_time)
-                    values("${rssId}", "${title}", "${author}", "${content}", "${updateTime}")`
+                       content: string, guid: string, updateTime: string): Promise<ErrorMsg> {
+    const sql = `insert into post_info (rss_id, title, author, content, guid, update_time)
+                    values("${rssId}", "${title}", "${author}", $content, "${guid}", "${updateTime}")`
     return new Promise((resolve) => {
-      this.db?.run(sql!, (err) => {
+      this.db?.run(sql!, {
+        $content: Buffer.from(content).toString('base64')
+      }, (err) => {
         if (err) {
           resolve({
             success: false,
@@ -201,9 +205,11 @@ export class SqliteUtil implements StorageUtil {
   async updatePostInfo(postId: number, rssId: string, title: string, author: string,
                        content: string, updateTime: string): Promise<ErrorMsg> {
     const sql = `update post_info set rss_id="${rssId}", title="${title}", author="${author}",
-                    content="${content}", update_time="${updateTime}"`
+                    content=$content, update_time="${updateTime}"`
     return new Promise((resolve) => {
-      this.db?.run(sql!, (err) => {
+      this.db?.run(sql!, {
+        $content: Buffer.from(content).toString('base64')
+      }, (err) => {
         if (err) {
           resolve({
             success: false,
@@ -492,9 +498,38 @@ export class SqliteUtil implements StorageUtil {
     }
   }
 
+  async checkPostInfoExist(guid: string): Promise<boolean> {
+    const sql = `SELECT * FROM post_info where guid="${guid}";`
+    return new Promise<boolean>((resolve, reject) => {
+      this.db?.all(sql, (err, rows) => {
+        if (err) {
+          reject(err)
+        }
+        if (rows.length > 0) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
+    })
+  }
+
   async syncRssPostList(rssId: string, postInfoItemList: PostInfoItem[]): Promise<ErrorMsg> {
+    const rssInfoResult = await this.queryRssByRssId(rssId)
+    if (!rssInfoResult.success) {
+      throw new Error(rssInfoResult.msg)
+    }
+    const {data: rssData} = rssInfoResult
+    for (const item of postInfoItemList) {
+      if (!await this.checkPostInfoExist(item.guid)) {
+        const result = await this.insertPostInfo(rssId, item.title, item.author, item.desc, item.guid, item.updateTime)
+        if (!result.success) {
+          throw new Error(result.msg)
+        }
+      }
+    }
     return {
-      success: false,
+      success: true,
       msg: ''
     }
   }

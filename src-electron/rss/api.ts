@@ -89,6 +89,8 @@ export const getRssContent = async (rssItemId: string): Promise<string> => {
 
 export const getPostListInfo = async (rssItemId: string): Promise<PostInfoItem[]> => {
   const sourceManager = SourceManage.getInstance()
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
   const rssItem = sourceManager.getSourceByRssId(rssItemId)
   if (!rssItem) {
     throw new Error(`rssID: [${rssItemId}] not exist!`)
@@ -102,6 +104,10 @@ export const getPostListInfo = async (rssItemId: string): Promise<PostInfoItem[]
       postItemMap[rssItemId] = {}
     }
     postItemMap[rssItemId][postId] = _postItemMap[postId]
+  }
+  const result = await storageUtil.syncRssPostList(rssItemId, postList)
+  if (!result.success) {
+    throw new Error(result.msg)
   }
   return postList
 }
