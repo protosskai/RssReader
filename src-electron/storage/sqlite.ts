@@ -1,5 +1,5 @@
 import sqlite3 from "sqlite3"
-import {StorageUtil} from "app/src-electron/storage/common";
+import {PostIndexItem, StorageUtil} from "app/src-electron/storage/common";
 import {RssFolderItem} from "src/common/RssInfoItem";
 import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
 import {PostInfoItem} from "src/common/PostInfoItem";
@@ -76,6 +76,7 @@ export class SqliteUtil implements StorageUtil {
             author VARCHAR(255) NOT NULL,
             content BLOB NOT NULL,
             guid VARCHAR(255) NOT NULL,
+            read INTEGER NOT NULL,
             update_time DATETIME NOT NULL
         )
       `)
@@ -147,8 +148,8 @@ export class SqliteUtil implements StorageUtil {
 
   async insertPostInfo(rssId: string, title: string, author: string,
                        content: string, guid: string, updateTime: string): Promise<ErrorMsg> {
-    const sql = `insert into post_info (rss_id, title, author, content, guid, update_time)
-                    values("${rssId}", "${title}", "${author}", $content, "${guid}", "${updateTime}")`
+    const sql = `insert into post_info (rss_id, title, author, content, guid, update_time, read)
+                    values("${rssId}", "${title}", "${author}", $content, "${guid}", "${updateTime}", 0)`
     return new Promise((resolve) => {
       this.db?.run(sql!, {
         $content: Buffer.from(content).toString('base64')
@@ -203,12 +204,13 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async updatePostInfo(postId: number, rssId: string, title: string, author: string,
-                       content: string, updateTime: string): Promise<ErrorMsg> {
+                       content: string, updateTime: string, read: boolean): Promise<ErrorMsg> {
     const sql = `update post_info set rss_id="${rssId}", title="${title}", author="${author}",
-                    content=$content, update_time="${updateTime}"`
+                    content=$content, update_time="${updateTime}", read=$read`
     return new Promise((resolve) => {
       this.db?.run(sql!, {
-        $content: Buffer.from(content).toString('base64')
+        $content: Buffer.from(content).toString('base64'),
+        $read: read ? 1 : 0
       }, (err) => {
         if (err) {
           resolve({
@@ -306,11 +308,55 @@ export class SqliteUtil implements StorageUtil {
         })
       })
     })
-    return {
-      success: true,
-      msg: '',
-      data: []
-    }
+  }
+
+  async queryPostListByRssId(rssId: string): Promise<ErrorData<PostIndexItem[]>> {
+    const sql = `select title, guid, author, update_time, read from post_info where rss_id="${rssId}"`
+    return new Promise<ErrorData<any>>((resolve) => {
+      this.db?.all(sql!, (err, rows) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message,
+            data: []
+          })
+        }
+        resolve({
+          success: true,
+          msg: '',
+          data: rows
+        })
+      })
+    })
+  }
+
+  async queryPostContentByGuid(guid: string): Promise<ErrorData<string>> {
+    const sql = `select content from post_info where guid="${guid}"`
+    return new Promise<ErrorData<any>>((resolve) => {
+      this.db?.all(sql!, (err, rows) => {
+        if (err) {
+          resolve({
+            success: false,
+            msg: err.message,
+            data: []
+          })
+        }
+        if (rows.length === 0) {
+          resolve({
+            success: false,
+            msg: `guid【${guid}】不存在!`,
+            data: ""
+          })
+        } else {
+          const [row] = rows;
+          resolve({
+            success: false,
+            msg: `guid【${guid}】不存在!`,
+            data: Buffer.from(row.content, 'base64').toString('utf-8')
+          })
+        }
+      })
+    })
   }
 
   async cleanFolderInfoTable(): Promise<ErrorMsg> {

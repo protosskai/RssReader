@@ -6,5 +6,14 @@ export interface StorageUtil {
   dumpFolderItemList: (folderInfoList: RssFolderItem[]) => Promise<ErrorMsg>,
   loadFolderItemList: () => Promise<ErrorData<RssFolderItem[]>>,
   init: () => void,
-  syncRssPostList: (rssId: string, postInfoItemList: PostInfoItem[]) => Promise<ErrorMsg>
+  syncRssPostList: (rssId: string, postInfoItemList: PostInfoItem[]) => Promise<ErrorMsg>,
+  queryPostContentByGuid: (guid: string) => Promise<ErrorData<string>>
+}
+
+export interface PostIndexItem {
+  title: string,
+  guid: string,
+  author: string,
+  updateTime: string,
+  read: boolean
 }
