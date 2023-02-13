@@ -9,7 +9,7 @@ import {shell, dialog} from "electron";
 import {parseRssFromUrl} from "app/src-electron/rss/utils";
 import {ErrorMsg} from "src/common/ErrorMsg";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
-import {StorageUtil} from "app/src-electron/storage/common";
+import {PostIndexItem, StorageUtil} from "app/src-electron/storage/common";
 
 type RssPostListMap = Record<string, Record<number, PostInfoObject>>
 const postItemMap: RssPostListMap = {}
@@ -128,6 +128,20 @@ export const getPostContent = (rssItemId: string, postId: number): ContentInfo =
     link: postObj.link
   }
   return contentInfo
+}
+
+/**
+ * 通过rssId查询文章目录
+ * @param rssId
+ */
+export const queryPostIndexByRssId = async (rssId: string): Promise<PostIndexItem[]> => {
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
+  const result = await storageUtil.queryPostIndexByRssId(rssId)
+  if (!result.success) {
+    throw new Error(result.msg)
+  }
+  return result.data
 }
 
 export const openLink = async (url: string): Promise<void> => {

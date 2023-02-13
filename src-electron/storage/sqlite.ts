@@ -4,6 +4,7 @@ import {RssFolderItem} from "src/common/RssInfoItem";
 import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import moment from "moment";
+import {extractTextFromHtml, beautyStr, convertStringToBase64, parseBase64ToString} from 'src-electron/util/string'
 
 const DB_FILE_PATH = './sqlite.db'
 
@@ -152,7 +153,7 @@ export class SqliteUtil implements StorageUtil {
                     values("${rssId}", "${title}", "${author}", $content, "${guid}", "${updateTime}", 0)`
     return new Promise((resolve) => {
       this.db?.run(sql!, {
-        $content: Buffer.from(content).toString('base64')
+        $content: convertStringToBase64(content)
       }, (err) => {
         if (err) {
           resolve({
@@ -209,7 +210,7 @@ export class SqliteUtil implements StorageUtil {
                     content=$content, update_time="${updateTime}", read=$read`
     return new Promise((resolve) => {
       this.db?.run(sql!, {
-        $content: Buffer.from(content).toString('base64'),
+        $content: convertStringToBase64(content),
         $read: read ? 1 : 0
       }, (err) => {
         if (err) {
@@ -310,8 +311,8 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
-  async queryPostListByRssId(rssId: string): Promise<ErrorData<PostIndexItem[]>> {
-    const sql = `select title, guid, author, update_time, read from post_info where rss_id="${rssId}"`
+  async queryPostIndexByRssId(rssId: string): Promise<ErrorData<PostIndexItem[]>> {
+    const sql = `select title, guid, content,author, update_time, read from post_info where rss_id="${rssId}"`
     return new Promise<ErrorData<any>>((resolve) => {
       this.db?.all(sql!, (err, rows) => {
         if (err) {
@@ -321,10 +322,23 @@ export class SqliteUtil implements StorageUtil {
             data: []
           })
         }
+        const result: PostIndexItem[] = [];
+        for (const row of rows) {
+          let desc: string = parseBase64ToString(row['content'])
+          desc = beautyStr(extractTextFromHtml(desc), 100)
+          result.push({
+            title: row['title'],
+            guid: row['guid'],
+            author: row['author'],
+            updateTime: row['update_time'],
+            read: row['read'] === 1,
+            desc
+          })
+        }
         resolve({
           success: true,
           msg: '',
-          data: rows
+          data: result
         })
       })
     })
@@ -352,7 +366,7 @@ export class SqliteUtil implements StorageUtil {
           resolve({
             success: false,
             msg: `guid【${guid}】不存在!`,
-            data: Buffer.from(row.content, 'base64').toString('utf-8')
+            data: parseBase64ToString(row.content)
           })
         }
       })

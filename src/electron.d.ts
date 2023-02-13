@@ -3,6 +3,7 @@ import {PostInfoItem} from "src/common/PostInfoItem";
 import {ContentInfo} from "src/common/ContentInfo";
 import {addRssSubscription} from "app/src-electron/rss/api";
 import {ErrorMsg} from "src/common/ErrorMsg";
+import {PostIndexItem} from "app/src-electron/storage/common";
 
 export interface electronAPI {
   getRssContent: (rssItemId: string) => Promise<string>,
@@ -20,7 +21,8 @@ export interface electronAPI {
   dumpFolderToDb: (folderInfoListJson: string) => Promise<ErrorMsg>,
   loadFolderFromDb: () => Promise<string>,
   getRssInfoListFromDb: () => Promise<RssFolderItem[]>,
-  editFolder: (oldFolderName: string, newFolderName: string) => Promise<ErrorMsg>
+  editFolder: (oldFolderName: string, newFolderName: string) => Promise<ErrorMsg>,
+  queryPostIndexByRssId: (rssId: string) => Promise<PostIndexItem[]>
 }
 
 declare  global {

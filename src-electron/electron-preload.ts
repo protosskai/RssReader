@@ -31,8 +31,15 @@ import {contextBridge, ipcRenderer} from 'electron'
 import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {ContentInfo} from "src/common/ContentInfo";
-import {addRssSubscription, dumpFolderToDb, getRssInfoListFromDb, loadFolderFromDb} from "app/src-electron/rss/api";
+import {
+  addRssSubscription,
+  dumpFolderToDb,
+  getRssInfoListFromDb,
+  loadFolderFromDb,
+  queryPostIndexByRssId
+} from "app/src-electron/rss/api";
 import {ErrorMsg} from "src/common/ErrorMsg";
+import {PostIndexItem} from "app/src-electron/storage/common";
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -81,4 +88,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getRssInfoListFromDb: async (): Promise<string> => {
     return await ipcRenderer.invoke('rss:getRssInfoListFromDb')
   },
+  queryPostIndexByRssId: async (rssId: string): Promise<PostIndexItem[]> => {
+    return await ipcRenderer.invoke('rss:queryPostIndexByRssId', rssId)
+  }
 })

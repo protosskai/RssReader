@@ -6,3 +6,7 @@ export const switchPage = (name: string, params?: any) => {
     params,
   });
 }
+
+export const extractTextFromHtml = (html: string): string => {
+  return html.replace(/<[^>]*(>|$)| |‌|»|«|>/g, '')
+}

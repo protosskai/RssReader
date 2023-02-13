@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import {PostInfoItem} from "src/common/PostInfoItem";
-import {switchPage} from "src/common/util";
+import {switchPage, extractTextFromHtml} from "src/common/util";
 
 const props = defineProps<{
   rssId: string,
@@ -56,9 +56,7 @@ const openContentPage = () => {
     PostId: props.postInfo.postId
   })
 }
-const extractTextFromHtml = (html: string): string => {
-  return html.replace(/<[^>]*(>|$)| |‌|»|«|>/g, '')
-}
+
 </script>
 
 <style scoped lang="scss">

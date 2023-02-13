@@ -12,10 +12,9 @@ import {
   removeRssSubscription,
   importOpmlFile,
   dumpFolderToDb,
-  loadFolderFromDb, getRssInfoListFromDb, editFolder
+  loadFolderFromDb, getRssInfoListFromDb, editFolder,
+  queryPostIndexByRssId
 } from "src-electron/rss/api";
-import {SqliteUtil} from "app/src-electron/storage/sqlite";
-import {RssFolderItem} from "src/common/RssInfoItem";
 
 
 // needed in case process is undefined under Linux
@@ -130,6 +129,10 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('rss:getRssInfoListFromDb', async () => {
     return await getRssInfoListFromDb()
+  })
+  ipcMain.handle('rss:queryPostIndexByRssId', async (event, ...args) => {
+    const [rssId] = args
+    return await queryPostIndexByRssId(rssId)
   })
   createWindow()
 });
