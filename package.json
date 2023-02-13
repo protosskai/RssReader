@@ -11,6 +11,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "@vueuse/core": "^9.11.1",
+    "appdata-path": "^1.0.0",
     "axios": "^0.21.1",
     "moment": "^2.29.4",
     "pinia": "^2.0.11",

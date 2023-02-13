@@ -3,11 +3,11 @@ import {PostIndexItem, StorageUtil} from "app/src-electron/storage/common";
 import {RssFolderItem} from "src/common/RssInfoItem";
 import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
 import {PostInfoItem} from "src/common/PostInfoItem";
-import moment from "moment";
 import {extractTextFromHtml, beautyStr, convertStringToBase64, parseBase64ToString} from 'src-electron/util/string'
 import {ContentInfo} from "src/common/ContentInfo";
+import getAppDataPath from "appdata-path";
 
-const DB_FILE_PATH = './sqlite.db'
+const DB_FILE_PATH = `${getAppDataPath()}/sqlite.db`
 
 export class SqliteUtil implements StorageUtil {
   private db: sqlite3.Database | null = null
