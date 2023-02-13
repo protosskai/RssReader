@@ -327,14 +327,12 @@ export class SourceManage {
 
   async dumpToDb() {
     const storageUtil: StorageUtil = SqliteUtil.getInstance()
-    await storageUtil.init()
     const folderInfoList = this.getFolderInfoList()
     await storageUtil.dumpFolderItemList(folderInfoList)
   }
 
   async loadFromDb() {
     const storageUtil: StorageUtil = SqliteUtil.getInstance()
-    await storageUtil.init()
     const folderInfoList = (await storageUtil.loadFolderItemList()).data
     this.loadFolderInfoList(folderInfoList)
   }

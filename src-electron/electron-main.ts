@@ -10,7 +10,7 @@ import {
   importOpmlFile,
   dumpFolderToDb,
   loadFolderFromDb, getRssInfoListFromDb, editFolder,
-  queryPostIndexByRssId, queryPostContentByGuid, fetchRssIndexList
+  queryPostIndexByRssId, queryPostContentByGuid, fetchRssIndexList, initDB
 } from "src-electron/rss/api";
 
 
@@ -127,7 +127,9 @@ app.whenReady().then(() => {
     const [rssId] = args
     return await fetchRssIndexList(rssId)
   })
-  createWindow()
+  initDB().then(() => {
+    createWindow()
+  })
 });
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

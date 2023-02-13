@@ -85,7 +85,6 @@ const nodes = computed(() => (
   })) ?? []
 ))
 const openPostList = (RssId: number) => {
-  console.log(RssId)
   switchPage('PostList', {
     RssId
   })

@@ -15,7 +15,7 @@
           {{ curContentInfo.title }}
         </q-item-label>
 
-        <q-item-label lines="1" class="text-h6 text-weight-light">
+        <q-item-label lines="1" class="text-h6 text-weight-light" v-if="curContentInfo.author">
           {{ curContentInfo.author }}
         </q-item-label>
       </q-item-section>
@@ -47,6 +47,7 @@ const getContentById = async (postId: string): Promise<ContentInfo> => {
     message: '加载中...'
   })
   const result = await window.electronAPI.queryPostContentByGuid(postId)
+  console.log(result)
   $q.loading.hide()
   return result
 }

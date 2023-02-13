@@ -92,7 +92,6 @@ export const getRssContent = async (rssItemId: string): Promise<string> => {
  */
 export const queryPostIndexByRssId = async (rssId: string): Promise<PostIndexItem[]> => {
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  await storageUtil.init()
   const result = await storageUtil.queryPostIndexByRssId(rssId)
   if (!result.success) {
     throw new Error(result.msg)
@@ -106,7 +105,6 @@ export const queryPostIndexByRssId = async (rssId: string): Promise<PostIndexIte
 export const queryPostContentByGuid = async (guid: string): Promise<ContentInfo> => {
   const sourceManager = SourceManage.getInstance()
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  await storageUtil.init()
   const result = await storageUtil.queryPostContentByGuid(guid)
   if (!result.success) {
     throw new Error(result.msg)
@@ -126,7 +124,6 @@ export const queryPostContentByGuid = async (guid: string): Promise<ContentInfo>
 export const fetchRssIndexList = async (rssId: string): Promise<ErrorMsg> => {
   const sourceManager = SourceManage.getInstance()
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  await storageUtil.init()
   const rssItem = sourceManager.getSourceByRssId(rssId)
   if (!rssItem) {
     throw new Error(`rssID: [${rssId}] not exist!`)
@@ -232,12 +229,15 @@ export const importOpmlFile = async (): Promise<ErrorMsg> => {
 export const dumpFolderToDb = async (folderInfoListJson: string): Promise<ErrorMsg> => {
   const folderInfoList = JSON.parse(folderInfoListJson)
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  await storageUtil.init()
   return await storageUtil.dumpFolderItemList(folderInfoList)
 }
 export const loadFolderFromDb = async (): Promise<string> => {
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  await storageUtil.init()
   const folderInfoList = (await storageUtil.loadFolderItemList()).data
   return JSON.stringify(folderInfoList)
+}
+
+export const initDB = async (): Promise<void> => {
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
 }

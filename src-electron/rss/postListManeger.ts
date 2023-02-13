@@ -12,17 +12,19 @@ export interface PostInfoObject {
   author: string,
   guid: string,
   contentEncoded?: string
+  dcCreator?: string
 }
 
 export const convertPostObjToItem = (postInfoObj: any): any => {
   const result: any = {}
-  const description: any = postInfoObj["description"]
-  const author: any = postInfoObj["author"]
-  const pubDate: any = postInfoObj["pubDate"]
-  const guid: any = postInfoObj["guid"]
-  const link: any = postInfoObj["link"]
-  const title: any = postInfoObj["title"]
-  const contentEncoded: any = postInfoObj["content:encoded"]
+  const description: any = postInfoObj["description"] ? postInfoObj["description"] : ""
+  const author: any = postInfoObj["author"] ? postInfoObj["author"] : ""
+  const pubDate: any = postInfoObj["pubDate"] ? postInfoObj["pubDate"] : ""
+  const guid: any = postInfoObj["guid"] ? postInfoObj["guid"] : ""
+  const link: any = postInfoObj["link"] ? postInfoObj["link"] : ""
+  const title: any = postInfoObj["title"] ? postInfoObj["title"] : ""
+  const contentEncoded: any = postInfoObj["content:encoded"] ? postInfoObj["content:encoded"] : ""
+  const dcCreator: any = postInfoObj["dc:creator"] ? postInfoObj["dc:creator"] : ""
   if (title instanceof Array) {
     result["title"] = title[0]
   } else {
@@ -62,6 +64,13 @@ export const convertPostObjToItem = (postInfoObj: any): any => {
       result["contentEncoded"] = contentEncoded
     }
   }
+  if (dcCreator) {
+    if (dcCreator instanceof Array) {
+      result["dcCreator"] = dcCreator[0]
+    } else {
+      result["dcCreator"] = dcCreator
+    }
+  }
   return result
 }
 
@@ -81,7 +90,8 @@ export const parsePostList = (data: string): PostInfoObject[] => {
         author: tmpObj["author"],
         pubDate: tmpObj["pubDate"],
         guid: tmpObj["guid"],
-        link: tmpObj["link"]
+        link: tmpObj["link"],
+        dcCreator: tmpObj["dcCreator"]
       }
       if (tmpObj.contentEncoded) {
         obj.contentEncoded = tmpObj["contentEncoded"]
@@ -118,7 +128,7 @@ export class PostManager {
         title: postObject.title,
         desc: postObject.contentEncoded && postObject.contentEncoded.trim() !== '' ? postObject.contentEncoded : postObject.description,
         read: false,
-        author: postObject.author,
+        author: postObject.dcCreator && postObject.dcCreator.trim() !== '' ? postObject.dcCreator : postObject.author,
         updateTime: postObject.pubDate,
         guid: postObject.guid,
         link: postObject.link
