@@ -8,20 +8,21 @@
 </template>
 <script setup lang="ts">
 import {useRoute} from "vue-router";
-import {PostInfoItem} from "src/common/PostInfoItem";
 import {onMounted, Ref, ref} from "vue";
 import PostListItem from "src/components/PostListItem.vue";
 import {useQuasar} from "quasar";
+import {PostIndexItem} from "app/src-electron/storage/common";
 
 const $q = useQuasar()
 const route = useRoute();
 const rssId: any = route.params.RssId
-const PostInfoList: Ref<PostInfoItem[]> = ref([]);
-const getPostListById = async (rssItemId: string): Promise<PostInfoItem[]> => {
+const PostInfoList: Ref<PostIndexItem[]> = ref([]);
+const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
   $q.loading.show({
     message: '加载中...'
   })
-  const result = await window.electronAPI.getPostListInfo(rssItemId)
+  await window.electronAPI.fetchRssIndexList(rssItemId)
+  const result = await window.electronAPI.queryPostIndexByRssId(rssItemId)
   $q.loading.hide()
   return result
 }

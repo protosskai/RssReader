@@ -43,17 +43,17 @@
 </template>
 
 <script setup lang="ts">
-import {PostInfoItem} from "src/common/PostInfoItem";
 import {switchPage, extractTextFromHtml} from "src/common/util";
+import {PostIndexItem} from "app/src-electron/storage/common";
 
 const props = defineProps<{
   rssId: string,
-  postInfo: PostInfoItem
+  postInfo: PostIndexItem
 }>()
 const openContentPage = () => {
   switchPage('Content', {
     RssId: props.rssId,
-    PostId: props.postInfo.postId
+    PostId: props.postInfo.guid
   })
 }
 

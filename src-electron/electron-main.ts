@@ -2,9 +2,6 @@ import {app, BrowserWindow, ipcMain, nativeTheme, shell} from 'electron';
 import path from 'path';
 import os from 'os';
 import {
-  getPostListInfo,
-  getRssContent,
-  getPostContent,
   openLink,
   addRssSubscription,
   addFolder,
@@ -13,7 +10,7 @@ import {
   importOpmlFile,
   dumpFolderToDb,
   loadFolderFromDb, getRssInfoListFromDb, editFolder,
-  queryPostIndexByRssId
+  queryPostIndexByRssId, queryPostContentByGuid, fetchRssIndexList
 } from "src-electron/rss/api";
 
 
@@ -21,7 +18,7 @@ import {
 const platform = process.platform || os.platform();
 
 try {
-  if (platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
+  if (platform === 'win32' && nativeTheme.shouldUseDarkColors) {
     require('fs').unlinkSync(
       path.join(app.getPath('userData'), 'DevTools Extensions')
     );
@@ -76,18 +73,6 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('rss:rssContent', async (event, ...args) => {
-    const [rssItemId] = args
-    return await getRssContent(rssItemId)
-  })
-  ipcMain.handle('rss:getPostList', async (event, ...args) => {
-    const [rssItemId] = args
-    return await getPostListInfo(rssItemId)
-  })
-  ipcMain.handle('rss:getPostContent', async (event, ...args) => {
-    const [rssItemId, postId] = args
-    return getPostContent(rssItemId, postId)
-  })
   ipcMain.handle('rss:addRssSubscription', async (event, ...args) => {
     const [obj] = args
     return await addRssSubscription(obj)
@@ -133,6 +118,14 @@ app.whenReady().then(() => {
   ipcMain.handle('rss:queryPostIndexByRssId', async (event, ...args) => {
     const [rssId] = args
     return await queryPostIndexByRssId(rssId)
+  })
+  ipcMain.handle('rss:queryPostContentByGuid', async (event, ...args) => {
+    const [guid] = args
+    return await queryPostContentByGuid(guid)
+  })
+  ipcMain.handle('rss:fetchRssIndexList', async (event, ...args) => {
+    const [rssId] = args
+    return await fetchRssIndexList(rssId)
   })
   createWindow()
 });

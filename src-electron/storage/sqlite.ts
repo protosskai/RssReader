@@ -5,6 +5,7 @@ import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import moment from "moment";
 import {extractTextFromHtml, beautyStr, convertStringToBase64, parseBase64ToString} from 'src-electron/util/string'
+import {ContentInfo} from "src/common/ContentInfo";
 
 const DB_FILE_PATH = './sqlite.db'
 
@@ -75,6 +76,7 @@ export class SqliteUtil implements StorageUtil {
             rss_id VARCHAR(255) NOT NULL,
             title VARCHAR(255) NOT NULL,
             author VARCHAR(255) NOT NULL,
+            link VARCHAR(255) NOT NULL,
             content BLOB NOT NULL,
             guid VARCHAR(255) NOT NULL,
             read INTEGER NOT NULL,
@@ -147,10 +149,10 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
-  async insertPostInfo(rssId: string, title: string, author: string,
+  async insertPostInfo(rssId: string, title: string, author: string, link: string,
                        content: string, guid: string, updateTime: string): Promise<ErrorMsg> {
-    const sql = `insert into post_info (rss_id, title, author, content, guid, update_time, read)
-                    values("${rssId}", "${title}", "${author}", $content, "${guid}", "${updateTime}", 0)`
+    const sql = `insert into post_info (rss_id, title, author, link, content, guid, update_time, read)
+                    values("${rssId}", "${title}", "${author}", "${link}", $content, "${guid}", "${updateTime}", 0)`
     return new Promise((resolve) => {
       this.db?.run(sql!, {
         $content: convertStringToBase64(content)
@@ -204,9 +206,9 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
-  async updatePostInfo(postId: number, rssId: string, title: string, author: string,
+  async updatePostInfo(postId: number, rssId: string, title: string, author: string, link: string,
                        content: string, updateTime: string, read: boolean): Promise<ErrorMsg> {
-    const sql = `update post_info set rss_id="${rssId}", title="${title}", author="${author}",
+    const sql = `update post_info set rss_id="${rssId}", title="${title}", author="${author}",link="${link}",
                     content=$content, update_time="${updateTime}", read=$read`
     return new Promise((resolve) => {
       this.db?.run(sql!, {
@@ -344,8 +346,8 @@ export class SqliteUtil implements StorageUtil {
     })
   }
 
-  async queryPostContentByGuid(guid: string): Promise<ErrorData<string>> {
-    const sql = `select content from post_info where guid="${guid}"`
+  async queryPostContentByGuid(guid: string): Promise<ErrorData<ContentInfo>> {
+    const sql = `select rss_id,title,content,link,author,update_time from post_info where guid="${guid}"`
     return new Promise<ErrorData<any>>((resolve) => {
       this.db?.all(sql!, (err, rows) => {
         if (err) {
@@ -363,10 +365,18 @@ export class SqliteUtil implements StorageUtil {
           })
         } else {
           const [row] = rows;
+          const contentInfo: ContentInfo = {
+            title: row["title"],
+            content: parseBase64ToString(row.content),
+            link: row["link"],
+            author: row["author"],
+            updateTime: row["update_time"],
+            rssId: row["rss_id"]
+          }
           resolve({
-            success: false,
-            msg: `guid【${guid}】不存在!`,
-            data: parseBase64ToString(row.content)
+            success: true,
+            msg: ``,
+            data: contentInfo
           })
         }
       })
@@ -582,7 +592,7 @@ export class SqliteUtil implements StorageUtil {
     const {data: rssData} = rssInfoResult
     for (const item of postInfoItemList) {
       if (!await this.checkPostInfoExist(item.guid)) {
-        const result = await this.insertPostInfo(rssId, item.title, item.author, item.desc, item.guid, item.updateTime)
+        const result = await this.insertPostInfo(rssId, item.title, item.author, item.link, item.desc, item.guid, item.updateTime)
         if (!result.success) {
           throw new Error(result.msg)
         }

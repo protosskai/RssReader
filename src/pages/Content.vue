@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import {useRoute} from "vue-router";
 import {ContentInfo} from "src/common/ContentInfo";
-import {onMounted, ref, Ref, watch} from "vue";
+import {onMounted, ref, Ref} from "vue";
 import {useQuasar} from "quasar";
 
 const route = useRoute();
@@ -39,19 +39,19 @@ const curContentInfo: Ref<ContentInfo> = ref({
   content: '',
   author: '',
   updateTime: '',
-  link: ''
+  link: '',
+  rssId: ''
 });
-const getContentById = async (rssId: string, postId: number): Promise<ContentInfo> => {
+const getContentById = async (postId: string): Promise<ContentInfo> => {
   $q.loading.show({
     message: '加载中...'
   })
-  const result = await window.electronAPI.getPostContent(rssId, postId)
+  const result = await window.electronAPI.queryPostContentByGuid(postId)
   $q.loading.hide()
   return result
 }
 onMounted(async () => {
-  const result = await getContentById(rssId, Number(PostId))
-  curContentInfo.value = result
+  curContentInfo.value = await getContentById(String(PostId))
 })
 
 const openUrl = (url: string) => {

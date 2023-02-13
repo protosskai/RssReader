@@ -28,30 +28,13 @@
  * }
  */
 import {contextBridge, ipcRenderer} from 'electron'
-import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
-import {PostInfoItem} from "src/common/PostInfoItem";
+import {RssInfoNew} from "src/common/RssInfoItem";
 import {ContentInfo} from "src/common/ContentInfo";
-import {
-  addRssSubscription,
-  dumpFolderToDb,
-  getRssInfoListFromDb,
-  loadFolderFromDb,
-  queryPostIndexByRssId
-} from "app/src-electron/rss/api";
 import {ErrorMsg} from "src/common/ErrorMsg";
 import {PostIndexItem} from "app/src-electron/storage/common";
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  getRssContent: async (rssItemId: string): Promise<string> => {
-    return await ipcRenderer.invoke('rss:rssContent', rssItemId)
-  },
-  getPostListInfo: async (rssItemId: string): Promise<PostInfoItem[]> => {
-    return await ipcRenderer.invoke('rss:getPostList', rssItemId)
-  },
-  getPostContent: async (rssItemId: string, postId: number): Promise<ContentInfo> => {
-    return await ipcRenderer.invoke('rss:getPostContent', rssItemId, postId)
-  },
   addRssSubscription: async (obj: RssInfoNew): Promise<void> => {
     return await ipcRenderer.invoke('rss:addRssSubscription', obj)
   },
@@ -90,5 +73,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   queryPostIndexByRssId: async (rssId: string): Promise<PostIndexItem[]> => {
     return await ipcRenderer.invoke('rss:queryPostIndexByRssId', rssId)
+  },
+  queryPostContentByGuid: async (guid: string): Promise<ContentInfo> => {
+    return await ipcRenderer.invoke('rss:queryPostContentByGuid', guid)
+  },
+  fetchRssIndexList: async (rssId: string): Promise<ErrorMsg> => {
+    return await ipcRenderer.invoke('rss:fetchRssIndexList', rssId)
   }
 })

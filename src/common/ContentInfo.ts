@@ -6,5 +6,6 @@ export interface ContentInfo {
   link: string,
   author?: string,
   updateTime?: string,
-  rssSource?: Source
+  rssSource?: Source,
+  rssId: string
 }

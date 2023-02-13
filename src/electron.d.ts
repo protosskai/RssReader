@@ -6,10 +6,6 @@ import {ErrorMsg} from "src/common/ErrorMsg";
 import {PostIndexItem} from "app/src-electron/storage/common";
 
 export interface electronAPI {
-  getRssContent: (rssItemId: string) => Promise<string>,
-  testRssPostList: () => void,
-  getPostListInfo: (rssItemId: string) => Promise<PostInfoItem[]>,
-  getPostContent: (rssItemId: string, postId: number) => Promise<ContentInfo>,
   addRssSubscription: (obj: RssInfoNew) => Promise<void>,
   removeRssSubscription: (folderName: string, rssUrl: string) => Promise<ErrorMsg>
   openLink: (url: string) => Promise<void>,
@@ -22,7 +18,9 @@ export interface electronAPI {
   loadFolderFromDb: () => Promise<string>,
   getRssInfoListFromDb: () => Promise<RssFolderItem[]>,
   editFolder: (oldFolderName: string, newFolderName: string) => Promise<ErrorMsg>,
-  queryPostIndexByRssId: (rssId: string) => Promise<PostIndexItem[]>
+  queryPostIndexByRssId: (rssId: string) => Promise<PostIndexItem[]>,
+  queryPostContentByGuid: (guid: string) => Promise<ContentInfo>,
+  fetchRssIndexList: (rssId: string) => Promise<ErrorMsg>
 }
 
 declare  global {

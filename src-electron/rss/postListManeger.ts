@@ -120,7 +120,8 @@ export class PostManager {
         read: false,
         author: postObject.author,
         updateTime: postObject.pubDate,
-        guid: postObject.guid
+        guid: postObject.guid,
+        link: postObject.link
       }
       result.push(postInfoItem)
       this.postItemMap[postId] = postObject

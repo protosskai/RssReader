@@ -86,50 +86,6 @@ export const getRssContent = async (rssItemId: string): Promise<string> => {
   return content
 }
 
-
-export const getPostListInfo = async (rssItemId: string): Promise<PostInfoItem[]> => {
-  const sourceManager = SourceManage.getInstance()
-  const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  await storageUtil.init()
-  const rssItem = sourceManager.getSourceByRssId(rssItemId)
-  if (!rssItem) {
-    throw new Error(`rssID: [${rssItemId}] not exist!`)
-  }
-  const url = rssItem.url
-  const postManager = new PostManager()
-  const postList: PostInfoItem[] = await postManager.getPostList(url)
-  const _postItemMap = postManager.getPostItmMap()
-  for (const postId in _postItemMap) {
-    if (!postItemMap[rssItemId]) {
-      postItemMap[rssItemId] = {}
-    }
-    postItemMap[rssItemId][postId] = _postItemMap[postId]
-  }
-  const result = await storageUtil.syncRssPostList(rssItemId, postList)
-  if (!result.success) {
-    throw new Error(result.msg)
-  }
-  return postList
-}
-
-export const getPostContent = (rssItemId: string, postId: number): ContentInfo => {
-  const sourceManager = SourceManage.getInstance()
-  const source = sourceManager.getSourceByRssId(rssItemId)
-  if (!source) {
-    throw new Error(`rssID: [${rssItemId}] not exist!`)
-  }
-  const postObj = postItemMap[rssItemId][postId]
-  const contentInfo: ContentInfo = {
-    title: postObj.title,
-    content: postObj.contentEncoded && postObj.contentEncoded.trim() !== '' ? postObj.contentEncoded : postObj.description,
-    author: postObj.author,
-    updateTime: postObj.pubDate,
-    rssSource: source,
-    link: postObj.link
-  }
-  return contentInfo
-}
-
 /**
  * 通过rssId查询文章目录
  * @param rssId
@@ -142,6 +98,51 @@ export const queryPostIndexByRssId = async (rssId: string): Promise<PostIndexIte
     throw new Error(result.msg)
   }
   return result.data
+}
+/**
+ * 通过guid查询文章内容
+ * @param guid
+ */
+export const queryPostContentByGuid = async (guid: string): Promise<ContentInfo> => {
+  const sourceManager = SourceManage.getInstance()
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
+  const result = await storageUtil.queryPostContentByGuid(guid)
+  if (!result.success) {
+    throw new Error(result.msg)
+  }
+  const contentInfo: ContentInfo = result.data
+  const {rssId} = contentInfo
+  const source = sourceManager.getSourceByRssId(rssId)
+  if (source) {
+    contentInfo.rssSource = source
+  }
+  return contentInfo
+}
+/**
+ * 同步指定rss订阅最新的文章列表
+ * @param rssId
+ */
+export const fetchRssIndexList = async (rssId: string): Promise<ErrorMsg> => {
+  const sourceManager = SourceManage.getInstance()
+  const storageUtil: StorageUtil = SqliteUtil.getInstance()
+  await storageUtil.init()
+  const rssItem = sourceManager.getSourceByRssId(rssId)
+  if (!rssItem) {
+    throw new Error(`rssID: [${rssId}] not exist!`)
+  }
+  const url = rssItem.url
+  const postManager = new PostManager()
+  const postList: PostInfoItem[] = await postManager.getPostList(url)
+  const result = await storageUtil.syncRssPostList(rssId, postList)
+  if (!result.success) {
+    throw new Error(result.msg)
+  }
+  return {
+    success: true,
+    msg: ''
+  }
+
 }
 
 export const openLink = async (url: string): Promise<void> => {
