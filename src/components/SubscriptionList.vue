@@ -30,9 +30,10 @@
           @click="openPostList(prop.node.data.id)"
         >
           <q-item-section avatar>
-            <q-avatar>
-              <img :src="prop.node.data.avatar">
-            </q-avatar>
+            <!--            <q-avatar>-->
+            <!--              <img :src="prop.node.data.avatar">-->
+            <!--            </q-avatar>-->
+            <rss-icon :src="prop.node.data.avatar" :title="prop.node.data.title" style="width: 100%;height: 100%"/>
           </q-item-section>
 
           <q-item-section>
@@ -69,6 +70,7 @@ import {QItem} from "quasar";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
 import {switchPage} from "src/common/util";
 import FolderContextMenu from "components/FolderContextMenu.vue";
+import RssIcon from "components/RssIcon.vue";
 
 
 const RssFolderList = inject(RSS_FOLDER_LIST_REF)
