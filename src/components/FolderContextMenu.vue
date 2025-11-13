@@ -19,7 +19,6 @@
 </template>
 <script setup lang="ts">
 import {ref} from "vue";
-import {useQuasar} from 'quasar'
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {useSystemDialogStore} from "stores/systemDialogStore";
 
@@ -28,7 +27,6 @@ const feedUrl = ref('')
 const props = defineProps<{
   folderName: string
 }>()
-const $q = useQuasar()
 const systemDialogStore = useSystemDialogStore()
 const {toggleEditFolderDialog, setEditFolderDialogOldFolderName} = systemDialogStore
 const rssInfoStore = useRssInfoStore()

@@ -32,10 +32,24 @@
           </q-item-section>
         </q-item>
       </q-card-section>
-      <q-card-section>
-        <q-btn label="阅读" color="primary" @click="openContentPage"/>
-        <q-btn label="收藏" color="primary" flat class="q-ml-sm"/>
-        <q-btn label="标为已读" color="primary" flat class="q-ml-sm"/>
+      <q-card-section class="action-buttons">
+        <q-btn label="阅读" color="primary" @click="openContentPage" unelevated/>
+        <q-btn 
+          :label="postInfo.read ? '标为未读' : '标为已读'" 
+          color="primary" 
+          flat 
+          class="q-ml-sm"
+          @click.stop="toggleReadStatus"
+        />
+        <q-btn 
+          icon="open_in_new" 
+          color="primary" 
+          flat 
+          class="q-ml-sm"
+          @click.stop="openInBrowser"
+        >
+          <q-tooltip>在浏览器中打开</q-tooltip>
+        </q-btn>
       </q-card-section>
 
     </q-card>
@@ -53,6 +67,22 @@ const props = defineProps<{
 }>()
 
 const $q = useQuasar();
+
+const toggleReadStatus = () => {
+  // TODO: 实现标记已读/未读功能
+  $q.notify({
+    message: props.postInfo.read ? '已标记为未读' : '已标记为已读',
+    color: 'positive',
+    position: 'top',
+    timeout: 1000
+  });
+};
+
+const openInBrowser = () => {
+  if (props.postInfo.link) {
+    window.electronAPI.openLink(props.postInfo.link);
+  }
+};
 
 // 实现一个能处理Unicode字符的base64编码函数
 const safeBtoa = (str: string): string => {

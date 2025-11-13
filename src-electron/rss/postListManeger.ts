@@ -1,6 +1,6 @@
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {getUrl} from "app/src-electron/net/NetUtil";
-import xml2js from "xml2js";
+import {FeedParser, ParsedPost} from "./parser/FeedParser";
 import moment from "moment";
 
 
@@ -15,146 +15,35 @@ export interface PostInfoObject {
   dcCreator?: string
 }
 
-export const convertPostObjToItem = (postInfoObj: any): any => {
-  const result: any = {}
-  const description: any = postInfoObj["description"] ? postInfoObj["description"] : ""
-  const author: any = postInfoObj["author"] ? postInfoObj["author"] : ""
-  const pubDate: any = postInfoObj["pubDate"] ? postInfoObj["pubDate"] : ""
-  const guid: any = postInfoObj["guid"] ? postInfoObj["guid"] : ""
-  const link: any = postInfoObj["link"] ? postInfoObj["link"] : ""
-  const title: any = postInfoObj["title"] ? postInfoObj["title"] : ""
-  const contentEncoded: any = postInfoObj["content:encoded"] ? postInfoObj["content:encoded"] : ""
-  const dcCreator: any = postInfoObj["dc:creator"] ? postInfoObj["dc:creator"] : ""
-  if (title instanceof Array) {
-    result["title"] = title[0]
-  } else {
-    result["title"] = title
-  }
-  if (description instanceof Array) {
-    result["description"] = description[0]
-  } else {
-    result["description"] = description
-  }
-  if (author instanceof Array) {
-    result["author"] = author[0]
-  } else {
-    result["author"] = author
-  }
-  if (pubDate instanceof Array) {
-    const t = moment(pubDate[0])
-    result["pubDate"] = t.format('YYYY-MM-DD HH:mm:ss')
-  } else {
-    const t = moment(pubDate)
-    result["pubDate"] = t.format('YYYY-MM-DD HH:mm:ss')
-  }
-  // 处理guid字段，兼容不同格式
-  if (guid instanceof Array) {
-    if (guid[0] && typeof guid[0] === 'object' && guid[0]._) {
-      result["guid"] = guid[0]._
-    } else {
-      result["guid"] = guid[0]
-    }
-  } else {
-    if (guid && typeof guid === 'object' && guid._) {
-      result["guid"] = guid._
-    } else {
-      result["guid"] = guid
-    }
-  }
-  if (link instanceof Array) {
-    result["link"] = link[0]
-  } else {
-    result["link"] = link
-  }
-  if (contentEncoded) {
-    if (contentEncoded instanceof Array) {
-      result["contentEncoded"] = contentEncoded[0]
-    } else {
-      result["contentEncoded"] = contentEncoded
-    }
-  }
-  if (dcCreator) {
-    if (dcCreator instanceof Array) {
-      result["dcCreator"] = dcCreator[0]
-    } else {
-      result["dcCreator"] = dcCreator
-    }
-  }
-  return result
-}
-
-
-export const parsePostList = (data: string): PostInfoObject[] => {
-  const res: PostInfoObject[] = []
+/**
+ * Convert ParsedPost to PostInfoObject with date formatting
+ */
+const convertParsedPostToObject = (post: ParsedPost): PostInfoObject => {
+  const formattedDate = post.pubDate ? moment(post.pubDate).format('YYYY-MM-DD HH:mm:ss') : '';
   
-  // Input validation
-  if (!data || typeof data !== 'string' || data.trim() === '') {
-    return res
-  }
-  
+  return {
+    title: post.title || '',
+    description: post.description || '',
+    author: post.author || '',
+    pubDate: formattedDate,
+    guid: post.guid || '',
+    link: post.link || '',
+    contentEncoded: post.contentEncoded,
+    dcCreator: post.dcCreator
+  };
+};
+
+/**
+ * Parse post list using the unified FeedParser
+ */
+export const parsePostList = async (data: string): Promise<PostInfoObject[]> => {
   try {
-    xml2js.parseString(data, (err, result) => {
-      if (err) {
-        console.error('XML解析错误:', err)
-        return
-      }
-      
-      // 安全地获取RSS结构
-      try {
-        // 检查result是否包含预期的RSS结构
-        if (!result || !result["rss"] || !result["rss"]["channel"] || 
-            !Array.isArray(result["rss"]["channel"]) || result["rss"]["channel"].length === 0) {
-          console.warn('无效的RSS结构: 缺少channel元素')
-          return
-        }
-        
-        const channel = result["rss"]["channel"][0]
-        
-        // 检查channel是否包含item数组
-        if (!channel || !channel["item"] || !Array.isArray(channel["item"])) {
-          console.warn('无效的RSS结构: 缺少item数组')
-          return
-        }
-        
-        const items = channel["item"]
-        
-        // 处理每个item
-        for (const item of items) {
-          try {
-            const tmpObj = convertPostObjToItem(item)
-            
-            // 只添加有效的文章条目（至少需要标题或链接）
-            if (tmpObj.title || tmpObj.link) {
-              const obj: PostInfoObject = {
-                title: tmpObj["title"],
-                description: tmpObj["description"],
-                author: tmpObj["author"],
-                pubDate: tmpObj["pubDate"],
-                guid: tmpObj["guid"],
-                link: tmpObj["link"],
-                dcCreator: tmpObj["dcCreator"]
-              }
-              
-              if (tmpObj.contentEncoded) {
-                obj.contentEncoded = tmpObj["contentEncoded"]
-              }
-              
-              res.push(obj)
-            }
-          } catch (itemError) {
-            console.error('处理文章条目时出错:', itemError)
-            // 跳过错误的条目，继续处理其他条目
-          }
-        }
-      } catch (structureError) {
-        console.error('处理RSS结构时出错:', structureError)
-      }
-    })
-  } catch (parseError) {
-    console.error('XML解析过程中出错:', parseError)
+    const parsedPosts = await FeedParser.parsePosts(data);
+    return parsedPosts.map(post => convertParsedPostToObject(post));
+  } catch (error) {
+    console.error('Error parsing post list:', error);
+    return [];
   }
-  
-  return res
 }
 
 // 定义PostManager类（单例模式）
@@ -178,34 +67,43 @@ export class PostManager {
   }
 
   async getPostList(url: string): Promise<PostInfoItem[]> {
-    const result: PostInfoItem[] = []
-    let postId = 0
-    const content = await getUrl(url)
-    if (!content) {
-      throw new Error("get content null!")
-    }
-    let postListInfo: PostInfoObject[] = []
+    const result: PostInfoItem[] = [];
+    let postId = 0;
+    
     try {
-      postListInfo = parsePostList(content)
-    } catch (e) {
-      return []
-    }
-    postListInfo.forEach((postObject) => {
-      const postInfoItem: PostInfoItem = {
-        postId,
-        title: postObject.title,
-        desc: postObject.contentEncoded && postObject.contentEncoded.trim() !== '' ? postObject.contentEncoded : postObject.description,
-        read: false,
-        author: postObject.dcCreator && postObject.dcCreator.trim() !== '' ? postObject.dcCreator : postObject.author,
-        updateTime: postObject.pubDate,
-        guid: postObject.guid,
-        link: postObject.link
+      const content = await getUrl(url);
+      if (!content) {
+        throw new Error("Failed to fetch content from URL");
       }
-      result.push(postInfoItem)
-      this.postItemMap[postId] = postObject
-      postId++
-    })
-    return result;
+      
+      const postListInfo = await parsePostList(content);
+      
+      postListInfo.forEach((postObject) => {
+        const postInfoItem: PostInfoItem = {
+          postId,
+          title: postObject.title,
+          desc: postObject.contentEncoded && postObject.contentEncoded.trim() !== '' 
+                ? postObject.contentEncoded 
+                : postObject.description,
+          read: false,
+          author: postObject.dcCreator && postObject.dcCreator.trim() !== '' 
+                  ? postObject.dcCreator 
+                  : postObject.author,
+          updateTime: postObject.pubDate,
+          guid: postObject.guid,
+          link: postObject.link
+        };
+        
+        result.push(postInfoItem);
+        this.postItemMap[postId] = postObject;
+        postId++;
+      });
+      
+      return result;
+    } catch (error) {
+      console.error('Error fetching post list:', error);
+      return [];
+    }
   }
 
   getPostItmMap(): Record<number, PostInfoObject> {

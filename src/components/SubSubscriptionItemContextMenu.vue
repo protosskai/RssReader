@@ -31,7 +31,7 @@ const props = defineProps<{
   rssInfo: RssInfoItem,
   folderName: string
 }>()
-const $q = useQuasar()
+
 const rssInfoStore = useRssInfoStore()
 const {removeRssSubscription} = rssInfoStore
 
@@ -53,6 +53,7 @@ const onOpenEditDialog = () => {
 
 }
 const onCopyFeedUrl = () => {
+  const $q = useQuasar()
   feedUrl.value = props.rssInfo.feedUrl
   if (isSupported) {
     copy(feedUrl.value)
@@ -70,6 +71,7 @@ const onRename = () => {
 
 }
 const onDeleted = async () => {
+  const $q = useQuasar()
   const errMsg = await removeRssSubscription(props.folderName, props.rssInfo)
   if (!errMsg.success) {
     $q.notify({

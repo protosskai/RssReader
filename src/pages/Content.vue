@@ -1,5 +1,23 @@
 <template>
   <q-page class="content-page">
+    <!-- 工具栏 -->
+    <div class="toolbar q-mb-md">
+      <q-btn icon="arrow_back" flat round @click="goBack">
+        <q-tooltip>返回</q-tooltip>
+      </q-btn>
+      <q-space/>
+      <q-btn icon="text_decrease" flat round @click="decreaseFontSize">
+        <q-tooltip>减小字体</q-tooltip>
+      </q-btn>
+      <span class="q-mx-sm text-body2">{{ fontSize }}%</span>
+      <q-btn icon="text_increase" flat round @click="increaseFontSize">
+        <q-tooltip>增大字体</q-tooltip>
+      </q-btn>
+      <q-btn icon="open_in_new" flat round @click="openInBrowser" v-if="curContentInfo.link">
+        <q-tooltip>在浏览器中打开</q-tooltip>
+      </q-btn>
+    </div>
+
     <q-item style="width: 100%;">
       <q-item-section>
         <q-item-label v-if="curContentInfo.rssSource"
@@ -31,7 +49,7 @@
       </q-card>
     </div>
     
-    <div v-else-if="curContentInfo" v-html="curContentInfo.content" class="content-area">
+    <div v-else-if="curContentInfo" v-html="curContentInfo.content" class="content-area" :style="{ fontSize: fontSize + '%' }">
     </div>
     
     <q-spinner-dots v-if="loading" class="q-ma-auto q-my-xl" size="50px" color="primary"/>
@@ -55,6 +73,29 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const retryCount = ref(0);
 const maxRetryCount = 2;
+
+// 字体大小控制
+const fontSize = ref(100);
+
+const increaseFontSize = () => {
+  if (fontSize.value < 200) {
+    fontSize.value += 10;
+    localStorage.setItem('contentFontSize', fontSize.value.toString());
+  }
+};
+
+const decreaseFontSize = () => {
+  if (fontSize.value > 60) {
+    fontSize.value -= 10;
+    localStorage.setItem('contentFontSize', fontSize.value.toString());
+  }
+};
+
+const openInBrowser = () => {
+  if (curContentInfo.value?.link) {
+    window.electronAPI.openLink(curContentInfo.value.link);
+  }
+};
 
 // 定义一个兼容的局部接口，用于初始值
 interface PartialContentInfo {
@@ -231,6 +272,12 @@ const goBack = () => {
 onMounted(async () => {
   console.log('[Content.vue] onMounted: route params:', { RssId, PostId });
   
+  // 恢复字体大小设置
+  const savedFontSize = localStorage.getItem('contentFontSize');
+  if (savedFontSize) {
+    fontSize.value = parseInt(savedFontSize, 10);
+  }
+  
   // 重置状态
   loading.value = true;
   error.value = null;
@@ -315,6 +362,15 @@ const openUrl = (url: string) => {
   align-items: flex-start;
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 16px;
+}
+
 .content-area {
   width: 100%;
   font-size: 16px;
@@ -322,9 +378,12 @@ const openUrl = (url: string) => {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
+  transition: font-size 0.2s ease;
+  line-height: 1.8;
 
   :deep(img) {
     max-width: 80%;
+    height: auto;
   }
 
   :deep(h1) {
@@ -359,6 +418,19 @@ const openUrl = (url: string) => {
 
   :deep(a) {
     color: $primary;
+  }
+
+  :deep(pre) {
+    background-color: #f5f5f5;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+
+  :deep(code) {
+    background-color: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 3px;
   }
 }
 

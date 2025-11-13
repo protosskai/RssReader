@@ -19,6 +19,11 @@
             <q-icon name="attachment" size="24px"/>
             <span>{{ IMPORT_OPML }}</span></div>
         </q-btn>
+        <q-btn @click="refreshAllFeeds" :loading="isRefreshing">
+          <div class="btn-item">
+            <q-icon name="refresh" size="24px"/>
+            <span>刷新所有</span></div>
+        </q-btn>
         <q-btn>
           <div class="btn-item">
             <q-icon name="settings" size="24px"/>
@@ -32,11 +37,35 @@
 import {SOFT_NAME, ADD_FOLDER, ADD_FEED, IMPORT_OPML, SETTING} from "src/const/string";
 import {useSystemDialogStore} from "stores/systemDialogStore";
 import {useRssInfoStore} from "stores/rssInfoStore";
+import {ref} from 'vue';
+import {useQuasar} from 'quasar';
 
 const systemDialogStore = useSystemDialogStore()
 const rssInfoStore = useRssInfoStore()
 const {toggleSubscriptionDialog, toggleAddFolderDialog} = systemDialogStore
 const {importOpmlFile} = rssInfoStore
+const $q = useQuasar();
+const isRefreshing = ref(false);
+
+const refreshAllFeeds = async () => {
+  isRefreshing.value = true;
+  try {
+    await rssInfoStore.refresh();
+    $q.notify({
+      type: 'positive',
+      message: '所有订阅源已刷新',
+      position: 'top'
+    });
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: '刷新失败: ' + (error as Error).message,
+      position: 'top'
+    });
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 </script>
 

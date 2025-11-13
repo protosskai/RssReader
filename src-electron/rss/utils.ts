@@ -1,6 +1,6 @@
 import {RssInfoItem} from "src/common/RssInfoItem";
 import {getUrl} from "app/src-electron/net/NetUtil";
-import xml2js from "xml2js";
+import {FeedParser} from "./parser/FeedParser";
 // @ts-ignore
 import {v4 as uuidv4} from 'uuid';
 
@@ -39,40 +39,21 @@ export const parseRssFromUrl = async (feedUrl: string): Promise<RssInfoItem> => 
   if (!content) {
     throw new Error(`parse feedUrl [${feedUrl}] error!`)
   }
-  return new Promise<RssInfoItem>((resolve, reject) => {
-    xml2js.parseString(content, (err, result) => {
-      if (err) {
-        reject(err)
-      }
-      let checkResult = checkFieldExist(result, 'rss')
-      if (!checkResult.success) {
-        throw new Error(checkResult.errorMsg)
-      }
-      const rss = result["rss"];
-      checkResult = checkFieldExist(rss, 'channel')
-      if (!checkResult.success) {
-        throw new Error(checkResult.errorMsg)
-      }
-      const channel = rss["channel"][0]
-      checkResult = checkFieldExist(channel, 'link')
-      if (!checkResult.success) {
-        throw new Error(checkResult.errorMsg)
-      }
-      checkResult = checkFieldExist(channel, 'title')
-      if (!checkResult.success) {
-        throw new Error(checkResult.errorMsg)
-      }
-      // lastBuildDate不是强制字段，不进行验证
-      const rssInfoItem: RssInfoItem = {
-        id: getRssId(),
-        title: channel["title"],
-        unread: 0,
-        htmlUrl: channel["link"],
-        feedUrl,
-        avatar: buildAvatarUrl(channel["link"]),
-        lastUpdateTime: channel["lastBuildDate"] || new Date().toISOString()
-      }
-      resolve(rssInfoItem)
-    })
-  })
+  
+  try {
+    const parsedFeed = await FeedParser.parse(content)
+    
+    const rssInfoItem: RssInfoItem = {
+      id: getRssId(),
+      title: parsedFeed.title,
+      unread: 0,
+      htmlUrl: parsedFeed.link,
+      feedUrl,
+      avatar: buildAvatarUrl(parsedFeed.link),
+      lastUpdateTime: parsedFeed.lastBuildDate || new Date().toISOString()
+    }
+    return rssInfoItem
+  } catch (error) {
+    throw new Error(`Failed to parse feed from ${feedUrl}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 }
