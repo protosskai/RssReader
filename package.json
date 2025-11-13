@@ -6,7 +6,12 @@
   "author": "ktrzhang <ktrzhang@tencent.com>",
   "private": true,
   "scripts": {
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "npx quasar dev",
+    "build": "npx quasar build",
+    "serve": "npx quasar serve dist/spa",
+    "dev:electron": "npx quasar dev -m electron",
+    "build:electron": "npx quasar build -m electron"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

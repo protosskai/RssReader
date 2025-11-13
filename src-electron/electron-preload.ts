@@ -31,7 +31,7 @@ import {contextBridge, ipcRenderer} from 'electron'
 import {RssInfoNew} from "src/common/RssInfoItem";
 import {ContentInfo} from "src/common/ContentInfo";
 import {ErrorMsg} from "src/common/ErrorMsg";
-import {PostIndexItem} from "app/src-electron/storage/common";
+import {PostIndexItem} from "src-electron/storage/common";
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -68,14 +68,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadFolderFromDb: async (): Promise<string> => {
     return await ipcRenderer.invoke('rss:loadFolderFromDb')
   },
-  getRssInfoListFromDb: async (): Promise<string> => {
+  getRssInfoListFromDb: async (): Promise<any[]> => {
     return await ipcRenderer.invoke('rss:getRssInfoListFromDb')
   },
   queryPostIndexByRssId: async (rssId: string): Promise<PostIndexItem[]> => {
     return await ipcRenderer.invoke('rss:queryPostIndexByRssId', rssId)
   },
   queryPostContentByGuid: async (guid: string): Promise<ContentInfo> => {
-    return await ipcRenderer.invoke('rss:queryPostContentByGuid', guid)
+    console.log('[electron-preload] queryPostContentByGuid called with guid:', guid);
+    try {
+      const result = await ipcRenderer.invoke('rss:queryPostContentByGuid', guid);
+      console.log('[electron-preload] queryPostContentByGuid result received:', result);
+      return result;
+    } catch (error) {
+      console.error('[electron-preload] queryPostContentByGuid error:', error);
+      throw error;
+    }
   },
   fetchRssIndexList: async (rssId: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('rss:fetchRssIndexList', rssId)

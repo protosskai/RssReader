@@ -47,15 +47,8 @@ function createWindow() {
 
   mainWindow.loadURL(process.env.APP_URL);
 
-  if (process.env.DEBUGGING) {
-    // if on DEV or Production with debug enabled
-    mainWindow.webContents.openDevTools();
-  } else {
-    // we're on production; no access to devtools pls
-    mainWindow.webContents.on('devtools-opened', () => {
-      mainWindow?.webContents.closeDevTools();
-    });
-  }
+  // 开发调试期间，始终打开开发者工具以便查看调试日志
+  mainWindow.webContents.openDevTools();
 
   mainWindow.on('closed', () => {
     mainWindow = undefined;
@@ -80,6 +73,20 @@ app.whenReady().then(() => {
   ipcMain.handle('rss:removeRssSubscription', async (event, ...args) => {
     const [folderName, rssUrl] = args
     return await removeRssSubscription(folderName, rssUrl)
+  })
+  ipcMain.handle('rss:queryPostContentByGuid', async (event, ...args) => {
+    console.log('[electron-main] rss:queryPostContentByGuid event received, args:', args);
+    const [postId] = args;
+    console.log('[electron-main] rss:queryPostContentByGuid extracting postId:', postId);
+    try {
+      console.log('[electron-main] rss:queryPostContentByGuid calling queryPostContentByGuid API');
+      const result = await queryPostContentByGuid(postId);
+      console.log('[electron-main] rss:queryPostContentByGuid API returned result:', result);
+      return result;
+    } catch (error) {
+      console.error('[electron-main] rss:queryPostContentByGuid error:', error);
+      throw error;
+    }
   })
   ipcMain.handle('rss:importOpmlFile', importOpmlFile)
   ipcMain.handle('openLink', async (event, ...args) => {
@@ -119,10 +126,7 @@ app.whenReady().then(() => {
     const [rssId] = args
     return await queryPostIndexByRssId(rssId)
   })
-  ipcMain.handle('rss:queryPostContentByGuid', async (event, ...args) => {
-    const [guid] = args
-    return await queryPostContentByGuid(guid)
-  })
+  
   ipcMain.handle('rss:fetchRssIndexList', async (event, ...args) => {
     const [rssId] = args
     return await fetchRssIndexList(rssId)

@@ -62,10 +62,7 @@ export const parseRssFromUrl = async (feedUrl: string): Promise<RssInfoItem> => 
       if (!checkResult.success) {
         throw new Error(checkResult.errorMsg)
       }
-      checkResult = checkFieldExist(channel, 'lastBuildDate')
-      if (!checkResult.success) {
-        throw new Error(checkResult.errorMsg)
-      }
+      // lastBuildDate不是强制字段，不进行验证
       const rssInfoItem: RssInfoItem = {
         id: getRssId(),
         title: channel["title"],
@@ -73,7 +70,7 @@ export const parseRssFromUrl = async (feedUrl: string): Promise<RssInfoItem> => 
         htmlUrl: channel["link"],
         feedUrl,
         avatar: buildAvatarUrl(channel["link"]),
-        lastUpdateTime: channel["lastBuildDate"]
+        lastUpdateTime: channel["lastBuildDate"] || new Date().toISOString()
       }
       resolve(rssInfoItem)
     })

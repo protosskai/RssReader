@@ -11,8 +11,7 @@ import {ErrorMsg} from "src/common/ErrorMsg";
 import {SqliteUtil} from "app/src-electron/storage/sqlite";
 import {PostIndexItem, StorageUtil} from "app/src-electron/storage/common";
 
-type RssPostListMap = Record<string, Record<number, PostInfoObject>>
-const postItemMap: RssPostListMap = {}
+// RssPostListMap和postItemMap已移除，不再需要全局缓存
 
 export const getRssInfoListFromDb = async (): Promise<RssFolderItem[]> => {
   const sourceManager = SourceManage.getInstance()
@@ -103,19 +102,39 @@ export const queryPostIndexByRssId = async (rssId: string): Promise<PostIndexIte
  * @param guid
  */
 export const queryPostContentByGuid = async (guid: string): Promise<ContentInfo> => {
-  const sourceManager = SourceManage.getInstance()
-  const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  const result = await storageUtil.queryPostContentByGuid(guid)
-  if (!result.success) {
-    throw new Error(result.msg)
+  console.log('[api.ts] queryPostContentByGuid called with guid:', guid);
+  try {
+    const sourceManager = SourceManage.getInstance();
+    const storageUtil: StorageUtil = SqliteUtil.getInstance();
+    console.log('[api.ts] queryPostContentByGuid: Getting content from storage...');
+    const result = await storageUtil.queryPostContentByGuid(guid);
+    console.log('[api.ts] queryPostContentByGuid: Storage query result:', result);
+    
+    if (!result.success) {
+      console.error('[api.ts] queryPostContentByGuid: Storage query failed:', result.msg);
+      throw new Error(result.msg);
+    }
+    
+    const contentInfo: ContentInfo = result.data;
+    console.log('[api.ts] queryPostContentByGuid: Retrieved contentInfo:', contentInfo);
+    
+    const {rssId} = contentInfo;
+    console.log('[api.ts] queryPostContentByGuid: Extracted rssId:', rssId);
+    
+    const source = sourceManager.getSourceByRssId(rssId);
+    console.log('[api.ts] queryPostContentByGuid: Retrieved source:', source);
+    
+    if (source) {
+      contentInfo.rssSource = source;
+      console.log('[api.ts] queryPostContentByGuid: Added rssSource to contentInfo');
+    }
+    
+    console.log('[api.ts] queryPostContentByGuid: Returning contentInfo:', contentInfo);
+    return contentInfo;
+  } catch (error) {
+    console.error('[api.ts] queryPostContentByGuid error:', error);
+    throw error;
   }
-  const contentInfo: ContentInfo = result.data
-  const {rssId} = contentInfo
-  const source = sourceManager.getSourceByRssId(rssId)
-  if (source) {
-    contentInfo.rssSource = source
-  }
-  return contentInfo
 }
 /**
  * 同步指定rss订阅最新的文章列表
@@ -129,7 +148,7 @@ export const fetchRssIndexList = async (rssId: string): Promise<ErrorMsg> => {
     throw new Error(`rssID: [${rssId}] not exist!`)
   }
   const url = rssItem.url
-  const postManager = new PostManager()
+  const postManager = PostManager.getInstance()
   const postList: PostInfoItem[] = await postManager.getPostList(url)
   const result = await storageUtil.syncRssPostList(rssId, postList)
   if (!result.success) {

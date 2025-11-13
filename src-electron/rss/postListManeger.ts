@@ -47,10 +47,19 @@ export const convertPostObjToItem = (postInfoObj: any): any => {
     const t = moment(pubDate)
     result["pubDate"] = t.format('YYYY-MM-DD HH:mm:ss')
   }
+  // 处理guid字段，兼容不同格式
   if (guid instanceof Array) {
-    result["guid"] = guid[0]._
+    if (guid[0] && typeof guid[0] === 'object' && guid[0]._) {
+      result["guid"] = guid[0]._
+    } else {
+      result["guid"] = guid[0]
+    }
   } else {
-    result["guid"] = guid._
+    if (guid && typeof guid === 'object' && guid._) {
+      result["guid"] = guid._
+    } else {
+      result["guid"] = guid
+    }
   }
   if (link instanceof Array) {
     result["link"] = link[0]
@@ -77,36 +86,95 @@ export const convertPostObjToItem = (postInfoObj: any): any => {
 
 export const parsePostList = (data: string): PostInfoObject[] => {
   const res: PostInfoObject[] = []
-  xml2js.parseString(data, (err, result) => {
-    if (err) {
-      throw err
-    }
-    const items = result["rss"]["channel"][0]["item"]
-    for (const item of items) {
-      const tmpObj = convertPostObjToItem(item)
-      const obj: PostInfoObject = {
-        title: tmpObj["title"],
-        description: tmpObj["description"],
-        author: tmpObj["author"],
-        pubDate: tmpObj["pubDate"],
-        guid: tmpObj["guid"],
-        link: tmpObj["link"],
-        dcCreator: tmpObj["dcCreator"]
+  
+  // Input validation
+  if (!data || typeof data !== 'string' || data.trim() === '') {
+    return res
+  }
+  
+  try {
+    xml2js.parseString(data, (err, result) => {
+      if (err) {
+        console.error('XML解析错误:', err)
+        return
       }
-      if (tmpObj.contentEncoded) {
-        obj.contentEncoded = tmpObj["contentEncoded"]
+      
+      // 安全地获取RSS结构
+      try {
+        // 检查result是否包含预期的RSS结构
+        if (!result || !result["rss"] || !result["rss"]["channel"] || 
+            !Array.isArray(result["rss"]["channel"]) || result["rss"]["channel"].length === 0) {
+          console.warn('无效的RSS结构: 缺少channel元素')
+          return
+        }
+        
+        const channel = result["rss"]["channel"][0]
+        
+        // 检查channel是否包含item数组
+        if (!channel || !channel["item"] || !Array.isArray(channel["item"])) {
+          console.warn('无效的RSS结构: 缺少item数组')
+          return
+        }
+        
+        const items = channel["item"]
+        
+        // 处理每个item
+        for (const item of items) {
+          try {
+            const tmpObj = convertPostObjToItem(item)
+            
+            // 只添加有效的文章条目（至少需要标题或链接）
+            if (tmpObj.title || tmpObj.link) {
+              const obj: PostInfoObject = {
+                title: tmpObj["title"],
+                description: tmpObj["description"],
+                author: tmpObj["author"],
+                pubDate: tmpObj["pubDate"],
+                guid: tmpObj["guid"],
+                link: tmpObj["link"],
+                dcCreator: tmpObj["dcCreator"]
+              }
+              
+              if (tmpObj.contentEncoded) {
+                obj.contentEncoded = tmpObj["contentEncoded"]
+              }
+              
+              res.push(obj)
+            }
+          } catch (itemError) {
+            console.error('处理文章条目时出错:', itemError)
+            // 跳过错误的条目，继续处理其他条目
+          }
+        }
+      } catch (structureError) {
+        console.error('处理RSS结构时出错:', structureError)
       }
-      res.push(obj)
-    }
-  })
+    })
+  } catch (parseError) {
+    console.error('XML解析过程中出错:', parseError)
+  }
+  
   return res
 }
 
+// 定义PostManager类（单例模式）
 export class PostManager {
   private readonly postItemMap: Record<number, PostInfoObject>;
-
-  constructor() {
+  
+  // 私有静态实例
+  private static instance: PostManager;
+  
+  // 私有构造函数，防止外部直接实例化
+  private constructor() {
     this.postItemMap = {}
+  }
+  
+  // 公共静态方法获取单例实例
+  static getInstance(): PostManager {
+    if (!PostManager.instance) {
+      PostManager.instance = new PostManager()
+    }
+    return PostManager.instance
   }
 
   async getPostList(url: string): Promise<PostInfoItem[]> {
@@ -144,3 +212,6 @@ export class PostManager {
     return this.postItemMap
   }
 }
+
+// 导出单例实例
+export const postManager = PostManager.getInstance()

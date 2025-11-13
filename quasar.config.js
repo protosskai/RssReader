@@ -81,7 +81,7 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: true // opens browser window automatically
+      open: false // 不自动打开浏览器窗口，避免Electron模式下浏览器和Electron窗口同时打开
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework

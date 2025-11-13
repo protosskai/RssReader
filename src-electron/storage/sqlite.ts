@@ -152,11 +152,9 @@ export class SqliteUtil implements StorageUtil {
   async insertPostInfo(rssId: string, title: string, author: string, link: string,
                        content: string, guid: string, updateTime: string): Promise<ErrorMsg> {
     const sql = `insert into post_info (rss_id, title, author, link, content, guid, update_time, read)
-                    values("${rssId}", "${title}", "${author}", "${link}", $content, "${guid}", "${updateTime}", 0)`
+                    values(?, ?, ?, ?, ?, ?, ?, ?)`
     return new Promise((resolve) => {
-      this.db?.run(sql!, {
-        $content: convertStringToBase64(content)
-      }, (err) => {
+      this.db?.run(sql!, [rssId, title, author, link, convertStringToBase64(content), guid, updateTime, 0], (err) => {
         if (err) {
           resolve({
             success: false,
@@ -347,9 +345,9 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async queryPostContentByGuid(guid: string): Promise<ErrorData<ContentInfo>> {
-    const sql = `select rss_id,title,content,link,author,update_time from post_info where guid="${guid}"`
+    const sql = `select rss_id,title,content,link,author,update_time from post_info where guid = ?`
     return new Promise<ErrorData<any>>((resolve) => {
-      this.db?.all(sql!, (err, rows) => {
+      this.db?.all(sql!, [guid], (err, rows) => {
         if (err) {
           resolve({
             success: false,
@@ -589,14 +587,44 @@ export class SqliteUtil implements StorageUtil {
     if (!rssInfoResult.success) {
       throw new Error(rssInfoResult.msg)
     }
-    const {data: rssData} = rssInfoResult
-    for (const item of postInfoItemList) {
-      if (!await this.checkPostInfoExist(item.guid)) {
-        const result = await this.insertPostInfo(rssId, item.title, item.author, item.link, item.desc, item.guid, item.updateTime)
-        if (!result.success) {
-          throw new Error(result.msg)
+    
+    try {
+      // 获取现有文章的guid列表，用于增量更新判断
+      const existingGuids = await new Promise<string[]>((resolve, reject) => {
+        const querySql = `SELECT guid FROM post_info WHERE rss_id = ?`
+        this.db?.all(querySql, [rssId], (err, rows: any[]) => {
+          if (err) {
+            reject(err)
+          } else {
+            // 提取guid值，创建一个Set用于快速查找
+            const guids = rows.map(row => row.guid)
+            resolve(guids)
+          }
+        })
+      })
+      
+      // 使用Set提高查找效率
+      const existingGuidSet = new Set(existingGuids)
+      let newArticleCount = 0
+      
+      // 只插入新的文章（guid不存在于现有列表中）
+      for (const item of postInfoItemList) {
+        // 检查是否已存在相同guid的文章
+        if (!existingGuidSet.has(item.guid)) {
+          const result = await this.insertPostInfo(rssId, item.title, item.author, item.link, item.desc, item.guid, item.updateTime)
+          if (!result.success) {
+            console.error(`插入新文章失败: ${result.msg}`)
+            // 继续处理其他文章，不中断整个同步过程
+            continue
+          }
+          newArticleCount++
         }
       }
+      
+      console.log(`同步完成: RSS源 ${rssId} 添加了 ${newArticleCount} 篇新文章`)
+    } catch (error) {
+      console.error(`增量同步RSS文章列表失败: ${error instanceof Error ? error.message : String(error)}`)
+      // 即使出错也继续执行，返回错误信息但不中断
     }
     return {
       success: true,

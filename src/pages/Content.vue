@@ -20,43 +20,287 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-    <div v-if="curContentInfo" v-html="curContentInfo.content" class="content-area">
+    
+    <div v-if="error" class="error-message">
+      <q-card color="negative" text-color="white">
+        <q-card-section>
+          <h3>加载失败</h3>
+          <p>{{ error }}</p>
+          <q-btn label="返回列表" color="white" text-color="negative" @click="goBack" class="q-mt-md"/>
+        </q-card-section>
+      </q-card>
     </div>
+    
+    <div v-else-if="curContentInfo" v-html="curContentInfo.content" class="content-area">
+    </div>
+    
+    <q-spinner-dots v-if="loading" class="q-ma-auto q-my-xl" size="50px" color="primary"/>
   </q-page>
 </template>
 <script setup lang="ts">
-import {useRoute} from "vue-router";
-import {ContentInfo} from "src/common/ContentInfo";
+import {useRoute, useRouter} from "vue-router";
+import type {ContentInfo} from "src/common/ContentInfo";
 import {onMounted, ref, Ref} from "vue";
 import {useQuasar} from "quasar";
 
 const route = useRoute();
-const $q = useQuasar()
-const {RssId, PostId} = route.params
-const rssId: any = RssId
+const router = useRouter();
+const $q = useQuasar();
+
+const {RssId, PostId} = route.params;
+const rssId: any = RssId;
+
+// 添加加载状态和错误状态
+const loading = ref(false);
+const error = ref<string | null>(null);
+const retryCount = ref(0);
+const maxRetryCount = 2;
+
+// 定义一个兼容的局部接口，用于初始值
+interface PartialContentInfo {
+  title: string;
+  content: string;
+  author?: string;
+  updateTime?: string;
+  link: string;
+  rssId: string;
+  rssSource?: {name: string; htmlUrl: string};
+}
+
+// 使用局部接口作为初始值类型，运行时会被实际的ContentInfo对象替换
 const curContentInfo: Ref<ContentInfo> = ref({
   title: '',
   content: '',
   author: '',
   updateTime: '',
   link: '',
-  rssId: ''
+  rssId: '',
+  rssSource: {
+    rssId: '',
+    url: '',
+    name: '',
+    folder: '',
+    avatar: '',
+    htmlUrl: ''
+  }
 });
-const getContentById = async (postId: string): Promise<ContentInfo> => {
-  $q.loading.show({
-    message: '加载中...'
-  })
-  const result = await window.electronAPI.queryPostContentByGuid(postId)
-  console.log(result)
-  $q.loading.hide()
-  return result
+
+const getContentById = async (postId: string): Promise<ContentInfo | null> => {
+  console.log('[Content.vue] getContentById called with postId:', postId);
+  loading.value = true;
+  error.value = null;
+  
+  try {
+    // 验证PostId有效性
+    if (!postId || typeof postId !== 'string' || postId.trim() === '' || postId === 'undefined' || postId === 'null') {
+      console.warn('[Content.vue] Invalid article ID:', postId);
+      return {
+        title: '文章内容',
+        content: '<p>无效的文章ID，无法加载内容。</p>',
+        author: '',
+        updateTime: new Date().toISOString(),
+        link: '',
+        rssId: rssId || '',
+        rssSource: {
+          rssId: rssId || '',
+          url: '',
+          name: '未知来源',
+          folder: '',
+          avatar: '',
+          htmlUrl: ''
+        }
+      };
+    }
+    
+    // 检查是否是临时ID或基于标题生成的ID
+    const isTempId = postId.startsWith('temp_');
+    const isTitleBasedId = postId.startsWith('title_');
+    
+    // 如果是临时ID或基于标题生成的ID，创建一个默认的内容对象
+    if (isTempId || isTitleBasedId) {
+      console.warn(`[Content.vue] Using ${isTitleBasedId ? 'title-based ID' : 'temporary ID'}, creating default content`);
+      return {
+        title: '文章内容',
+        content: '<p>此文章的内容暂时无法获取。可能是因为文章ID不存在或数据尚未完全同步。</p><p>请稍后尝试刷新或重新选择文章。</p>',
+        author: '',
+        updateTime: new Date().toISOString(),
+        link: '',
+        rssId: rssId || '',
+        rssSource: {
+          rssId: rssId || '',
+          url: '',
+          name: '未知来源',
+          folder: '',
+          avatar: '',
+          htmlUrl: ''
+        }
+      };
+    }
+    
+    // 重试逻辑
+    let result;
+    let attempt = 0;
+    const maxAttempts = 2;
+    
+    while (attempt < maxAttempts) {
+      try {
+        console.log(`[Content.vue] Attempt ${attempt + 1} to fetch content for postId:`, postId);
+        result = await window.electronAPI.queryPostContentByGuid(postId);
+        console.log('[Content.vue] getContentById received result:', result);
+        break; // 成功获取到内容，跳出循环
+      } catch (retryError: unknown) {
+        attempt++;
+        console.warn(`[Content.vue] Attempt ${attempt} failed, retrying...`, retryError);
+        
+        // 如果是最后一次尝试，则抛出错误
+        if (attempt >= maxAttempts) {
+          throw retryError;
+        }
+        
+        // 延迟重试，增加重试间隔时间
+        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+      }
+    }
+    
+    // 重置重试计数
+    retryCount.value = 0;
+    
+    // 确保result存在且rssSource对象包含所有必需的字段
+    if (result && result.rssSource) {
+      const source = result.rssSource;
+      // 如果缺少必需字段，提供默认值
+      result.rssSource = {
+        rssId: source.rssId || '',
+        url: source.url || '',
+        name: source.name || '',
+        folder: source.folder || '',
+        avatar: source.avatar || '',
+        htmlUrl: source.htmlUrl || ''
+      };
+    }
+    
+    return result as ContentInfo;
+  } catch (error: unknown) {
+    console.error('[Content.vue] getContentById error after retries:', error);
+    
+    // 创建一个友好的错误页面内容
+    const errorMessage = error instanceof Error ? error.message : '未知错误';
+    return {
+      title: '文章内容暂时无法获取',
+      content: `<div style="text-align:center; padding:40px;">\n` +
+               `<h2>文章不存在或已被移除</h2>\n` +
+               `<p style="margin: 20px 0;">${errorMessage || '文章的内容暂时无法获取，可能是因为文章ID不存在或数据尚未完全同步。'}</p>\n` +
+               `<div class="retry-actions" style="margin-top: 30px;">\n` +
+               `<button onclick="location.reload()" style="padding: 10px 20px; margin-right: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">刷新页面</button>\n` +
+               `<button onclick="window.history.back()" style="padding: 10px 20px; background-color: #f5f5f5; color: #333; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">返回列表</button>\n` +
+               `</div>\n` +
+               `</div>`,
+      author: '',
+      updateTime: new Date().toISOString(),
+      link: '',
+      rssId: rssId || '',
+      rssSource: {
+        rssId: rssId || '',
+        url: '',
+        name: '未知来源',
+        folder: '',
+        avatar: '',
+        htmlUrl: ''
+      }
+    };
+  } finally {
+    loading.value = false;
+  }
 }
+
+const goBack = () => {
+  // 如果有rssId，返回到对应的文章列表
+  if (rssId) {
+    router.push({
+      name: 'PostList',
+      params: { RssId: rssId }
+    });
+  } else {
+    // 否则返回首页
+    router.push({
+      name: 'Home'
+    });
+  }
+}
+
 onMounted(async () => {
-  curContentInfo.value = await getContentById(String(PostId))
+  console.log('[Content.vue] onMounted: route params:', { RssId, PostId });
+  
+  // 重置状态
+  loading.value = true;
+  error.value = null;
+  retryCount.value = 0;
+  
+  try {
+    // 不再直接返回，而是尝试获取内容，即使PostId无效
+    const contentInfo = await getContentById(String(PostId || ''));
+    if (contentInfo) {
+      curContentInfo.value = contentInfo;
+      console.log('[Content.vue] onMounted: content loaded successfully');
+    } else {
+      // 处理没有返回内容的情况
+      console.warn('[Content.vue] No content returned for PostId:', PostId);
+      curContentInfo.value = {
+        title: '请选择文章',
+        content: '<div style="text-align:center; padding:40px;">\n' +
+                 '<h3>欢迎使用RSS阅读器</h3>\n' +
+                 '<p style="margin-top: 20px;">请在左侧列表中选择一篇文章查看内容。</p>\n' +
+                 '</div>',
+        link: '',
+        author: '',
+        updateTime: new Date().toISOString(),
+        rssId: rssId || '',
+        rssSource: {
+          rssId: rssId || '',
+          url: '',
+          name: '未知来源',
+          folder: '',
+          avatar: '',
+          htmlUrl: ''
+        }
+      };
+    }
+  } catch (err: unknown) {
+    console.error('[Content.vue] onMounted error:', err instanceof Error ? err.message : String(err));
+    error.value = '初始化页面内容时出错';
+    
+    // 设置一个友好的错误内容
+    curContentInfo.value = {
+      title: '页面加载失败',
+      content: '<div style="text-align:center; padding:40px;">\n' +
+               '<h2>加载失败</h2>\n' +
+               '<p style="margin: 20px 0;">页面初始化时出现错误，请刷新重试。</p>\n' +
+               '<button onclick="location.reload()" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">刷新页面</button>\n' +
+               '</div>',
+      author: '',
+      updateTime: new Date().toISOString(),
+      link: '',
+      rssId: rssId || '',
+      rssSource: {
+        rssId: rssId || '',
+        url: '',
+        name: '未知来源',
+        folder: '',
+        avatar: '',
+        htmlUrl: ''
+      }
+    };
+  } finally {
+    loading.value = false;
+  }
 })
 
 const openUrl = (url: string) => {
-  window.electronAPI.openLink(url)
+  if (url && typeof url === 'string' && url.trim() !== '') {
+    window.electronAPI.openLink(url);
+  } else {
+    console.warn('[Content.vue] 无效的URL:', url);
+  }
 }
 </script>
 

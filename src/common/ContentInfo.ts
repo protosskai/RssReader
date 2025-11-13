@@ -1,4 +1,4 @@
-import {Source} from "app/src-electron/rss/sourceManage";
+import {Source} from "src-electron/rss/sourceManage";
 
 export interface ContentInfo {
   title: string,
