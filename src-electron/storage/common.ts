@@ -15,6 +15,7 @@ export interface StorageUtil {
 export interface PostIndexItem {
   title: string,
   guid: string,
+  link: string,
   author: string,
   updateTime: string,
   read: boolean,

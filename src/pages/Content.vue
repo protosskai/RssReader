@@ -153,31 +153,6 @@ const getContentById = async (postId: string): Promise<ContentInfo | null> => {
       };
     }
     
-    // 检查是否是临时ID或基于标题生成的ID
-    const isTempId = postId.startsWith('temp_');
-    const isTitleBasedId = postId.startsWith('title_');
-    
-    // 如果是临时ID或基于标题生成的ID，创建一个默认的内容对象
-    if (isTempId || isTitleBasedId) {
-      console.warn(`[Content.vue] Using ${isTitleBasedId ? 'title-based ID' : 'temporary ID'}, creating default content`);
-      return {
-        title: '文章内容',
-        content: '<p>此文章的内容暂时无法获取。可能是因为文章ID不存在或数据尚未完全同步。</p><p>请稍后尝试刷新或重新选择文章。</p>',
-        author: '',
-        updateTime: new Date().toISOString(),
-        link: '',
-        rssId: rssId || '',
-        rssSource: {
-          rssId: rssId || '',
-          url: '',
-          name: '未知来源',
-          folder: '',
-          avatar: '',
-          htmlUrl: ''
-        }
-      };
-    }
-    
     // 重试逻辑
     let result;
     let attempt = 0;

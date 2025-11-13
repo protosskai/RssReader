@@ -312,7 +312,7 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async queryPostIndexByRssId(rssId: string): Promise<ErrorData<PostIndexItem[]>> {
-    const sql = `select title, guid, content,author, update_time, read from post_info where rss_id="${rssId}"`
+    const sql = `select title, guid, link, content, author, update_time, read from post_info where rss_id="${rssId}"`
     return new Promise<ErrorData<any>>((resolve) => {
       this.db?.all(sql!, (err, rows) => {
         if (err) {
@@ -329,6 +329,7 @@ export class SqliteUtil implements StorageUtil {
           result.push({
             title: row['title'],
             guid: row['guid'],
+            link: row['link'],
             author: row['author'],
             updateTime: row['update_time'],
             read: row['read'] === 1,
@@ -356,10 +357,31 @@ export class SqliteUtil implements StorageUtil {
           })
         }
         if (rows.length === 0) {
-          resolve({
-            success: false,
-            msg: `guid【${guid}】不存在!`,
-            data: ""
+          // Fallback: 尝试通过link查询
+          const fallbackSql = `select rss_id,title,content,link,author,update_time from post_info where link = ?`
+          this.db?.all(fallbackSql, [guid], (fallbackErr, fallbackRows) => {
+            if (fallbackErr || fallbackRows.length === 0) {
+              resolve({
+                success: false,
+                msg: `guid【${guid}】不存在!`,
+                data: ""
+              })
+            } else {
+              const [row] = fallbackRows;
+              const contentInfo: ContentInfo = {
+                title: row["title"],
+                content: parseBase64ToString(row.content),
+                link: row["link"],
+                author: row["author"],
+                updateTime: row["update_time"],
+                rssId: row["rss_id"]
+              }
+              resolve({
+                success: true,
+                msg: ``,
+                data: contentInfo
+              })
+            }
           })
         } else {
           const [row] = rows;

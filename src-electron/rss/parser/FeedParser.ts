@@ -162,15 +162,16 @@ export class FeedParser {
   private static parseRSS2Item(item: any): ParsedFeedItem {
     const guid = this.extractGuid(item.guid);
     const link = this.extractValue(item.link);
+    const title = this.extractValue(item.title) || 'Untitled';
     const pubDate = this.extractValue(item.pubDate);
     
     return {
-      title: this.extractValue(item.title) || 'Untitled',
+      title: title,
       description: this.extractValue(item.description) || '',
       link: link || guid || '',
       pubDate: this.normalizeDate(pubDate),
       author: this.extractValue(item['dc:creator']) || this.extractValue(item.author),
-      guid: guid || link || this.generateGuid(),
+      guid: guid || link || this.generateStableGuid(link, title),
       content: this.extractValue(item['content:encoded'])
     };
   }
@@ -214,15 +215,16 @@ export class FeedParser {
   private static parseAtomEntry(entry: any): ParsedFeedItem {
     const id = this.extractValue(entry.id);
     const link = this.extractAtomLink(entry.link);
+    const title = this.extractValue(entry.title) || 'Untitled';
     const content = this.extractValue(entry.content) || this.extractValue(entry.summary);
     
     return {
-      title: this.extractValue(entry.title) || 'Untitled',
+      title: title,
       description: this.extractValue(entry.summary) || '',
       link: link || id || '',
       pubDate: this.normalizeDate(this.extractValue(entry.updated) || this.extractValue(entry.published)),
       author: this.extractAtomAuthor(entry.author),
-      guid: id || link || this.generateGuid(),
+      guid: id || link || this.generateStableGuid(link, title),
       content: content
     };
   }
@@ -481,9 +483,19 @@ export class FeedParser {
   }
 
   /**
-   * 生成GUID
+   * 生成GUID（已废弃，保留用于兼容）
    */
   private static generateGuid(): string {
     return `generated-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 生成稳定的GUID（基于link或title的hash）
+   */
+  private static generateStableGuid(link: string, title: string): string {
+    const crypto = require('crypto');
+    const source = link || title || `fallback-${Date.now()}`;
+    const hash = crypto.createHash('md5').update(source).digest('hex');
+    return `hash-${hash}`;
   }
 }
