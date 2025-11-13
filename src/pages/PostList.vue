@@ -31,11 +31,23 @@
       <post-list-item class="post-list-item" v-for="(item,index) in PostInfoList" :post-info="item" :key="index"
                       :rss-id="rssId"/>
     </q-list>
+    
+    <!-- 滚动到顶部按钮 -->
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+      <q-btn
+        v-show="showScrollToTop"
+        fab
+        icon="keyboard_arrow_up"
+        color="primary"
+        @click="scrollToTop"
+        aria-label="滚动到顶部"
+      />
+    </q-page-sticky>
   </q-page>
 </template>
 <script setup lang="ts">
 import {useRoute} from "vue-router";
-import {onMounted, Ref, ref} from "vue";
+import {onMounted, onUnmounted, Ref, ref} from "vue";
 import PostListItem from "src/components/PostListItem.vue";
 import {useQuasar} from "quasar";
 import {PostIndexItem} from "app/src-electron/storage/common";
@@ -46,6 +58,8 @@ const rssId: any = route.params.RssId
 const PostInfoList: Ref<PostIndexItem[]> = ref([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const showScrollToTop = ref(false);
+const scrollContainer = ref<HTMLElement | null>(null);
 
 const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
   loading.value = true;
@@ -68,9 +82,33 @@ const retryLoad = async () => {
   PostInfoList.value = await getPostListById(rssId)
 }
 
+const handleScroll = () => {
+  if (scrollContainer.value) {
+    showScrollToTop.value = scrollContainer.value.scrollTop > 300;
+  }
+};
+
+const scrollToTop = () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
 onMounted(async () => {
   PostInfoList.value = await getPostListById(rssId)
-})
+  
+  // 获取滚动容器并添加滚动监听
+  scrollContainer.value = document.querySelector('.post-list-container') as HTMLElement;
+  if (scrollContainer.value) {
+    scrollContainer.value.addEventListener('scroll', handleScroll);
+  }
+});
+
+onUnmounted(() => {
+  if (scrollContainer.value) {
+    scrollContainer.value.removeEventListener('scroll', handleScroll);
+  }
+});
 </script>
 
 <style scoped lang="scss">

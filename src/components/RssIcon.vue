@@ -1,24 +1,41 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 const props = defineProps<{
   src: string,
   title: string
 }>()
+
+const imageLoadError = ref(false)
+
 const generateIconDesc = () => {
   if (props.title === '') {
-    return ''
+    return 'RSS'
   }
-  return props.title[0]
+  return props.title[0].toUpperCase()
+}
+
+const onImageError = () => {
+  imageLoadError.value = true
 }
 </script>
 
 <template>
   <div>
-    <div v-if="src ===''" class="blank">
+    <div v-if="src === '' || imageLoadError" class="blank">
       <span class="content">
        {{ generateIconDesc() }}
       </span>
     </div>
-    <q-img v-else :src="src"/>
+    <q-img v-else :src="src" @error="onImageError">
+      <template v-slot:error>
+        <div class="blank">
+          <span class="content">
+            {{ generateIconDesc() }}
+          </span>
+        </div>
+      </template>
+    </q-img>
   </div>
 </template>
 
