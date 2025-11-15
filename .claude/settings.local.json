@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(yarn dev:electron)",
-      "Bash(npx quasar dev -m electron)"
+      "Bash(npx quasar dev -m electron)",
+      "Bash(npx quasar build:*)",
+      "Bash(Start-Process:*)",
+      "Bash(./RssReader-win32-x64/RssReader.exe:*)",
+      "Bash(./\"Quasar App.exe\":*)",
+      "Bash(node:*)",
+      "Bash(cd:*)",
+      "Bash(sqlite3:*)"
     ],
     "deny": [],
     "ask": []

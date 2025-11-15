@@ -14,9 +14,29 @@ import {PostIndexItem, StorageUtil} from "app/src-electron/storage/common";
 // RssPostListMap和postItemMap已移除，不再需要全局缓存
 
 export const getRssInfoListFromDb = async (): Promise<RssFolderItem[]> => {
-  const sourceManager = SourceManage.getInstance()
-  await sourceManager.loadFromDb()
-  return sourceManager.getFolderInfoList()
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [api.ts] getRssInfoListFromDb called`);
+
+  try {
+    console.log(`[${timestamp}] [api.ts] Getting SourceManage instance...`);
+    const sourceManager = SourceManage.getInstance();
+    console.log(`[${timestamp}] [api.ts] SourceManage instance:`, sourceManager);
+
+    console.log(`[${timestamp}] [api.ts] Starting loadFromDb...`);
+    await sourceManager.loadFromDb();
+    console.log(`[${timestamp}] [api.ts] loadFromDb completed`);
+
+    console.log(`[${timestamp}] [api.ts] Getting folder info list...`);
+    const folderInfoList = sourceManager.getFolderInfoList();
+    console.log(`[${timestamp}] [api.ts] Folder info list:`, folderInfoList);
+    console.log(`[${timestamp}] [api.ts] Returning result with ${folderInfoList.length} folders`);
+
+    return folderInfoList;
+  } catch (error) {
+    console.error(`[${timestamp}] [api.ts] getRssInfoListFromDb ERROR:`, error);
+    console.error(`[${timestamp}] [api.ts] Error stack:`, error.stack);
+    throw error;
+  }
 }
 
 export const addRssSubscription = async (obj: RssInfoNew): Promise<void> => {
@@ -90,12 +110,31 @@ export const getRssContent = async (rssItemId: string): Promise<string> => {
  * @param rssId
  */
 export const queryPostIndexByRssId = async (rssId: string): Promise<PostIndexItem[]> => {
-  const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  const result = await storageUtil.queryPostIndexByRssId(rssId)
-  if (!result.success) {
-    throw new Error(result.msg)
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [api.ts] queryPostIndexByRssId called`);
+  console.log(`[${timestamp}] [api.ts] rssId:`, rssId);
+
+  try {
+    console.log(`[${timestamp}] [api.ts] Getting SqliteUtil instance...`);
+    const storageUtil: StorageUtil = SqliteUtil.getInstance();
+    console.log(`[${timestamp}] [api.ts] StorageUtil instance:`, storageUtil);
+
+    console.log(`[${timestamp}] [api.ts] Calling storageUtil.queryPostIndexByRssId...`);
+    const result = await storageUtil.queryPostIndexByRssId(rssId);
+    console.log(`[${timestamp}] [api.ts] Query result:`, result);
+
+    if (!result.success) {
+      console.error(`[${timestamp}] [api.ts] Query failed:`, result.msg);
+      throw new Error(result.msg);
+    }
+
+    console.log(`[${timestamp}] [api.ts] Returning ${result.data.length} articles`);
+    return result.data;
+  } catch (error) {
+    console.error(`[${timestamp}] [api.ts] queryPostIndexByRssId ERROR:`, error);
+    console.error(`[${timestamp}] [api.ts] Error stack:`, error.stack);
+    throw error;
   }
-  return result.data
 }
 /**
  * 通过guid查询文章内容
@@ -141,24 +180,52 @@ export const queryPostContentByGuid = async (guid: string): Promise<ContentInfo>
  * @param rssId
  */
 export const fetchRssIndexList = async (rssId: string): Promise<ErrorMsg> => {
-  const sourceManager = SourceManage.getInstance()
-  const storageUtil: StorageUtil = SqliteUtil.getInstance()
-  const rssItem = sourceManager.getSourceByRssId(rssId)
-  if (!rssItem) {
-    throw new Error(`rssID: [${rssId}] not exist!`)
-  }
-  const url = rssItem.url
-  const postManager = PostManager.getInstance()
-  const postList: PostInfoItem[] = await postManager.getPostList(url)
-  const result = await storageUtil.syncRssPostList(rssId, postList)
-  if (!result.success) {
-    throw new Error(result.msg)
-  }
-  return {
-    success: true,
-    msg: ''
-  }
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [api.ts] fetchRssIndexList called`);
+  console.log(`[${timestamp}] [api.ts] rssId:`, rssId);
 
+  try {
+    console.log(`[${timestamp}] [api.ts] Getting SourceManage instance...`);
+    const sourceManager = SourceManage.getInstance();
+    console.log(`[${timestamp}] [api.ts] Getting SqliteUtil instance...`);
+    const storageUtil: StorageUtil = SqliteUtil.getInstance();
+
+    console.log(`[${timestamp}] [api.ts] Getting RSS source by rssId...`);
+    const rssItem = sourceManager.getSourceByRssId(rssId);
+    if (!rssItem) {
+      throw new Error(`rssID: [${rssId}] not exist!`);
+    }
+    console.log(`[${timestamp}] [api.ts] RSS source found:`, rssItem);
+
+    const url = rssItem.url;
+    console.log(`[${timestamp}] [api.ts] RSS URL:`, url);
+
+    console.log(`[${timestamp}] [api.ts] Getting PostManager instance...`);
+    const postManager = PostManager.getInstance();
+
+    console.log(`[${timestamp}] [api.ts] Fetching post list from URL...`);
+    console.log(`[${timestamp}] [api.ts] This may take up to 30 seconds...`);
+    const postList: PostInfoItem[] = await postManager.getPostList(url);
+    console.log(`[${timestamp}] [api.ts] Post list fetched, count:`, postList.length);
+
+    console.log(`[${timestamp}] [api.ts] Syncing post list to database...`);
+    const result = await storageUtil.syncRssPostList(rssId, postList);
+    console.log(`[${timestamp}] [api.ts] Sync result:`, result);
+
+    if (!result.success) {
+      throw new Error(result.msg);
+    }
+
+    console.log(`[${timestamp}] [api.ts] fetchRssIndexList completed successfully`);
+    return {
+      success: true,
+      msg: ''
+    };
+  } catch (error) {
+    console.error(`[${timestamp}] [api.ts] fetchRssIndexList ERROR:`, error);
+    console.error(`[${timestamp}] [api.ts] Error stack:`, error.stack);
+    throw error;
+  }
 }
 
 export const openLink = async (url: string): Promise<void> => {

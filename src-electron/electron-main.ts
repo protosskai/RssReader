@@ -40,8 +40,11 @@ function createWindow() {
     icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
     width: 1280,
     height: 960,
-    useContentSize: true,
-    frame: false,
+    minWidth: 800,        // 最小宽度，保证在小屏幕上也能使用
+    minHeight: 600,       // 最小高度
+    useContentSize: true, // 窗口大小包含标题栏
+    frame: false,         // 无边框窗口，但可以调整大小
+    resizable: true,      // 允许调整窗口大小
     webPreferences: {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
@@ -69,7 +72,18 @@ function createWindow() {
   })
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // 首先初始化数据库
+  try {
+    console.log('[electron-main] Initializing database...');
+    await initDB();
+    console.log('[electron-main] Database initialized successfully');
+  } catch (error) {
+    console.error('[electron-main] Failed to initialize database:', error);
+    throw error;
+  }
+
+  // 数据库初始化完成后，再设置IPC处理器
   ipcMain.handle('rss:addRssSubscription', async (event, ...args) => {
     const [obj] = args
     return await addRssSubscription(obj)
@@ -123,17 +137,83 @@ app.whenReady().then(() => {
   ipcMain.handle('rss:loadFolderFromDb', async () => {
     return await loadFolderFromDb()
   })
-  ipcMain.handle('rss:getRssInfoListFromDb', async () => {
-    return await getRssInfoListFromDb()
+  ipcMain.handle('rss:getRssInfoListFromDb', async (event, ...args) => {
+    try {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] [electron-main] rss:getRssInfoListFromDb called`);
+      console.log(`[${timestamp}] [electron-main] Event:`, event);
+      console.log(`[${timestamp}] [electron-main] Args:`, args);
+      console.log(`[${timestamp}] [electron-main] Starting getRssInfoListFromDb...`);
+
+      // 添加超时保护
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout after 30 seconds')), 30000);
+      });
+
+      const resultPromise = getRssInfoListFromDb();
+
+      const result = await Promise.race([resultPromise, timeoutPromise]);
+
+      console.log(`[${timestamp}] [electron-main] rss:getRssInfoListFromDb SUCCESS, result:`, result);
+      console.log(`[${timestamp}] [electron-main] Result type:`, typeof result);
+      console.log(`[${timestamp}] [electron-main] Result length:`, Array.isArray(result) ? result.length : 'N/A');
+
+      return result;
+    } catch (error) {
+      const timestamp = new Date().toISOString();
+      console.error(`[${timestamp}] [electron-main] rss:getRssInfoListFromDb ERROR:`, error);
+      console.error(`[${timestamp}] [electron-main] Error stack:`, error.stack);
+      throw error;
+    }
   })
   ipcMain.handle('rss:queryPostIndexByRssId', async (event, ...args) => {
-    const [rssId] = args
-    return await queryPostIndexByRssId(rssId)
+    const timestamp = new Date().toISOString();
+    const [rssId] = args;
+
+    console.log(`[${timestamp}] [electron-main] rss:queryPostIndexByRssId called`);
+    console.log(`[${timestamp}] [electron-main] rssId:`, rssId);
+    console.log(`[${timestamp}] [electron-main] Args:`, args);
+
+    try {
+      // 添加超时保护
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout after 30 seconds')), 30000);
+      });
+
+      const queryPromise = queryPostIndexByRssId(rssId);
+      console.log(`[${timestamp}] [electron-main] Starting queryPostIndexByRssId...`);
+
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+
+      console.log(`[${timestamp}] [electron-main] rss:queryPostIndexByRssId SUCCESS`);
+      console.log(`[${timestamp}] [electron-main] Result type:`, typeof result);
+      console.log(`[${timestamp}] [electron-main] Result length:`, Array.isArray(result) ? result.length : 'N/A');
+      console.log(`[${timestamp}] [electron-main] Result:`, result);
+
+      return result;
+    } catch (error) {
+      console.error(`[${timestamp}] [electron-main] rss:queryPostIndexByRssId ERROR:`, error);
+      console.error(`[${timestamp}] [electron-main] Error stack:`, error.stack);
+      throw error;
+    }
   })
-  
+
   ipcMain.handle('rss:fetchRssIndexList', async (event, ...args) => {
-    const [rssId] = args
-    return await fetchRssIndexList(rssId)
+    const timestamp = new Date().toISOString();
+    const [rssId] = args;
+    console.log(`[${timestamp}] [electron-main] rss:fetchRssIndexList called`);
+    console.log(`[${timestamp}] [electron-main] rssId:`, rssId);
+
+    try {
+      console.log(`[${timestamp}] [electron-main] Starting fetchRssIndexList...`);
+      const result = await fetchRssIndexList(rssId);
+      console.log(`[${timestamp}] [electron-main] fetchRssIndexList SUCCESS:`, result);
+      return result;
+    } catch (error) {
+      console.error(`[${timestamp}] [electron-main] fetchRssIndexList ERROR:`, error);
+      console.error(`[${timestamp}] [electron-main] Error stack:`, error.stack);
+      throw error;
+    }
   })
 
   // 新API处理器（基于Article架构）
@@ -245,9 +325,9 @@ app.whenReady().then(() => {
     return article?.favorite || false
   })
 
-  initDB().then(() => {
-    createWindow()
-  })
+  // 所有初始化完成后，创建窗口
+  console.log('[electron-main] All IPC handlers registered, creating window...');
+  createWindow()
 });
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

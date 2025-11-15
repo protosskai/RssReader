@@ -67,33 +67,43 @@ export class PostManager {
   }
 
   async getPostList(url: string): Promise<PostInfoItem[]> {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [postListManeger.ts] getPostList called`);
+    console.log(`[${timestamp}] [postListManeger.ts] URL:`, url);
+
     const result: PostInfoItem[] = [];
     let postId = 0;
-    
+
     try {
+      console.log(`[${timestamp}] [postListManeger.ts] Fetching URL content...`);
+      console.log(`[${timestamp}] [postListManeger.ts] Timeout set to 30 seconds...`);
       const content = await getUrl(url);
+      console.log(`[${timestamp}] [postListManeger.ts] Content received, length:`, content?.length);
+
       if (!content) {
         throw new Error("Failed to fetch content from URL");
       }
-      
+
+      console.log(`[${timestamp}] [postListManeger.ts] Parsing post list...`);
       const postListInfo = await parsePostList(content);
-      
+      console.log(`[${timestamp}] [postListManeger.ts] Parsed posts count:`, postListInfo.length);
+
       postListInfo.forEach((postObject) => {
         const postInfoItem: PostInfoItem = {
           postId,
           title: postObject.title,
-          desc: postObject.contentEncoded && postObject.contentEncoded.trim() !== '' 
-                ? postObject.contentEncoded 
+          desc: postObject.contentEncoded && postObject.contentEncoded.trim() !== ''
+                ? postObject.contentEncoded
                 : postObject.description,
           read: false,
-          author: postObject.dcCreator && postObject.dcCreator.trim() !== '' 
-                  ? postObject.dcCreator 
+          author: postObject.dcCreator && postObject.dcCreator.trim() !== ''
+                  ? postObject.dcCreator
                   : postObject.author,
           updateTime: postObject.pubDate,
           guid: postObject.guid,
           link: postObject.link
         };
-        
+
         result.push(postInfoItem);
         this.postItemMap[postId] = postObject;
         postId++;

@@ -55,7 +55,7 @@ export const useFolderStore = defineStore('folder', () => {
   // 添加文件夹
   const addFolder = async (name: string) => {
     try {
-      await window.electronAPI.addFolder(name);
+      await window.electronAPI.addFolderV2(name);
       await loadFolders(); // 重新加载列表
     } catch (err: any) {
       console.error('添加文件夹失败:', err);
@@ -66,7 +66,7 @@ export const useFolderStore = defineStore('folder', () => {
   // 删除文件夹
   const removeFolder = async (name: string) => {
     try {
-      await window.electronAPI.removeFolder(name);
+      await window.electronAPI.removeFolderV2(name);
       await loadFolders(); // 重新加载列表
     } catch (err: any) {
       console.error('删除文件夹失败:', err);

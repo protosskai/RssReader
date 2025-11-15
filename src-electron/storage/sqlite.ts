@@ -1,33 +1,28 @@
-import sqlite3 from "sqlite3"
 import {PostIndexItem, StorageUtil} from "app/src-electron/storage/common";
 import {RssFolderItem} from "src/common/RssInfoItem";
 import {ErrorData, ErrorMsg} from "src/common/ErrorMsg";
 import {PostInfoItem} from "src/common/PostInfoItem";
 import {extractTextFromHtml, beautyStr, convertStringToBase64, parseBase64ToString} from 'src-electron/util/string'
 import {ContentInfo} from "src/common/ContentInfo";
-import getAppDataPath from "appdata-path";
-
-const DB_FILE_PATH = `${getAppDataPath()}/sqlite.db`
+import { SqliteHelper } from './SqliteHelper';
 
 export class SqliteUtil implements StorageUtil {
-  private db: sqlite3.Database | null = null
-  private static instance: SqliteUtil | null = null
+  private dbHelper: SqliteHelper;
+  private static instance: SqliteUtil | null = null;
 
   static getInstance(): SqliteUtil {
     if (SqliteUtil.instance === null) {
-      SqliteUtil.instance = new SqliteUtil()
+      SqliteUtil.instance = new SqliteUtil();
     }
-    return SqliteUtil.instance
+    return SqliteUtil.instance;
+  }
+
+  private constructor() {
+    this.dbHelper = SqliteHelper.getInstance();
   }
 
   async init() {
-    this.db = new sqlite3.Database(DB_FILE_PATH, (error) => {
-      if (error) {
-        throw error
-      }
-    })
-    console.log("Connection with SQLite has been established");
-    await this.createTable()
+    await this.dbHelper.init();
   }
 
   private async checkTableExist(tableName: string): Promise<boolean> {
@@ -151,23 +146,32 @@ export class SqliteUtil implements StorageUtil {
 
   async insertPostInfo(rssId: string, title: string, author: string, link: string,
                        content: string, guid: string, updateTime: string): Promise<ErrorMsg> {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sqlite.ts] insertPostInfo called`);
+    console.log(`[${timestamp}] [sqlite.ts] rssId:`, rssId);
+    console.log(`[${timestamp}] [sqlite.ts] title:`, title);
+    console.log(`[${timestamp}] [sqlite.ts] guid:`, guid);
+
     const sql = `insert into post_info (rss_id, title, author, link, content, guid, update_time, read)
-                    values(?, ?, ?, ?, ?, ?, ?, ?)`
-    return new Promise((resolve) => {
-      this.db?.run(sql!, [rssId, title, author, link, convertStringToBase64(content), guid, updateTime, 0], (err) => {
-        if (err) {
-          resolve({
-            success: false,
-            msg: err.message
-          })
-        } else {
-          resolve({
-            success: true,
-            msg: ''
-          })
-        }
-      })
-    })
+                    values(?, ?, ?, ?, ?, ?, ?, ?)`;
+    const params = [rssId, title, author, link, convertStringToBase64(content), guid, updateTime, 0];
+
+    try {
+      console.log(`[${timestamp}] [sqlite.ts] Executing INSERT...`);
+      await this.dbHelper.run(sql, params);
+      console.log(`[${timestamp}] [sqlite.ts] INSERT successful`);
+      return {
+        success: true,
+        msg: ''
+      };
+    } catch (err: any) {
+      console.error(`[${timestamp}] [sqlite.ts] INSERT failed:`, err);
+      console.error(`[${timestamp}] [sqlite.ts] Error stack:`, err.stack);
+      return {
+        success: false,
+        msg: err.message
+      };
+    }
   }
 
   /**
@@ -287,62 +291,88 @@ export class SqliteUtil implements StorageUtil {
    * @param feedUrl
    */
   async queryRssByRssId(rssId?: string): Promise<ErrorData<any>> {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sqlite.ts] queryRssByRssId called`);
+    console.log(`[${timestamp}] [sqlite.ts] rssId:`, rssId);
+
     let sql: string | null
     if (rssId) {
-      sql = `select * from rss_info where rss_id="${rssId}"`
+      sql = `select * from rss_info where rss_id=?`;
     } else {
-      sql = `select * from rss_info`
+      sql = `select * from rss_info`;
     }
-    return new Promise<ErrorData<any>>((resolve) => {
-      this.db?.all(sql!, (err, rows) => {
-        if (err) {
-          resolve({
-            success: false,
-            msg: err.message,
-            data: []
-          })
-        }
-        resolve({
-          success: true,
-          msg: '',
-          data: rows
-        })
-      })
-    })
+
+    try {
+      console.log(`[${timestamp}] [sqlite.ts] Executing query...`);
+      console.log(`[${timestamp}] [sqlite.ts] SQL:`, sql);
+      console.log(`[${timestamp}] [sqlite.ts] Parameters:`, rssId ? [rssId] : []);
+
+      const rows = await this.dbHelper.all<any>(sql, rssId ? [rssId] : []);
+      console.log(`[${timestamp}] [sqlite.ts] Query result rows:`, rows.length);
+
+      return {
+        success: true,
+        msg: '',
+        data: rows
+      };
+    } catch (err: any) {
+      console.error(`[${timestamp}] [sqlite.ts] Query failed:`, err);
+      console.error(`[${timestamp}] [sqlite.ts] Error stack:`, err.stack);
+      return {
+        success: false,
+        msg: err.message,
+        data: []
+      };
+    }
   }
 
   async queryPostIndexByRssId(rssId: string): Promise<ErrorData<PostIndexItem[]>> {
-    const sql = `select title, guid, link, content, author, update_time, read from post_info where rss_id="${rssId}"`
-    return new Promise<ErrorData<any>>((resolve) => {
-      this.db?.all(sql!, (err, rows) => {
-        if (err) {
-          resolve({
-            success: false,
-            msg: err.message,
-            data: []
-          })
-        }
-        const result: PostIndexItem[] = [];
-        for (const row of rows) {
-          let desc: string = parseBase64ToString(row['content'])
-          desc = beautyStr(extractTextFromHtml(desc), 100)
-          result.push({
-            title: row['title'],
-            guid: row['guid'],
-            link: row['link'],
-            author: row['author'],
-            updateTime: row['update_time'],
-            read: row['read'] === 1,
-            desc
-          })
-        }
-        resolve({
-          success: true,
-          msg: '',
-          data: result
-        })
-      })
-    })
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sqlite.ts] queryPostIndexByRssId called`);
+    console.log(`[${timestamp}] [sqlite.ts] rssId:`, rssId);
+
+    try {
+      const sql = `SELECT title, guid, link, content, author, update_time, read FROM post_info WHERE rss_id = ? ORDER BY update_time DESC`;
+      console.log(`[${timestamp}] [sqlite.ts] Executing SQL:`, sql);
+      console.log(`[${timestamp}] [sqlite.ts] Query parameter:`, rssId);
+
+      const rows = await this.dbHelper.all<any>(sql, [rssId]);
+      console.log(`[${timestamp}] [sqlite.ts] Query result rows:`, rows);
+      console.log(`[${timestamp}] [sqlite.ts] Row count:`, rows.length);
+
+      const result: PostIndexItem[] = [];
+      for (const row of rows) {
+        let desc: string = parseBase64ToString(row.content);
+        desc = beautyStr(extractTextFromHtml(desc), 100);
+        result.push({
+          title: row.title,
+          guid: row.guid,
+          link: row.link,
+          author: row.author,
+          updateTime: row.update_time,
+          read: row.read === 1,
+          desc
+        });
+      }
+
+      console.log(`[${timestamp}] [sqlite.ts] Processed ${result.length} articles`);
+      console.log(`[${timestamp}] [sqlite.ts] queryPostIndexByRssId completed successfully`);
+
+      return {
+        success: true,
+        msg: '',
+        data: result
+      };
+    } catch (error) {
+      console.error(`[${timestamp}] [sqlite.ts] queryPostIndexByRssId ERROR:`, error);
+      console.error(`[${timestamp}] [sqlite.ts] Error stack:`, error.stack);
+
+      return {
+        success: false,
+        msg: error instanceof Error ? error.message : String(error),
+        data: []
+      };
+    }
   }
 
   async queryPostContentByGuid(guid: string): Promise<ErrorData<ContentInfo>> {
@@ -553,38 +583,66 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async loadFolderItemList(): Promise<ErrorData<RssFolderItem[]>> {
-    const folderData = await this.queryFolderByFolderId()
-    const rssData = await this.queryRssByRssId()
-    const folderInfoList: RssFolderItem[] = []
-    folderData.data.forEach((item: any) => {
-      const folderName = item.name
-      const folderId = item.id
-      const folderInfo: RssFolderItem = {
-        folderName,
-        data: [],
-        children: []
-      }
-      rssData.data.forEach((item1: any) => {
-        const rssId = item1.rss_id
-        const rssFolderId = item1.folder_id
-        if (rssFolderId === folderId) {
-          folderInfo.data.push({
-            id: rssId,
-            title: item1.title,
-            unread: 0,
-            htmlUrl: item1.html_url,
-            feedUrl: item1.feed_url,
-            avatar: item1.avatar,
-            lastUpdateTime: item1.update_time
-          })
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sqlite.ts] SqliteUtil.loadFolderItemList called`);
+
+    try {
+      // 使用新的dbHelper查询数据
+      console.log(`[${timestamp}] [sqlite.ts] Querying folders from database...`);
+      const folderData = await this.dbHelper.all<any>('SELECT * FROM folder_info ORDER BY name');
+      console.log(`[${timestamp}] [sqlite.ts] Folder query result:`, folderData);
+
+      console.log(`[${timestamp}] [sqlite.ts] Querying RSS sources from database...`);
+      const rssData = await this.dbHelper.all<any>('SELECT * FROM rss_info');
+      console.log(`[${timestamp}] [sqlite.ts] RSS query result:`, rssData);
+
+      console.log(`[${timestamp}] [sqlite.ts] Processing data...`);
+      const folderInfoList: RssFolderItem[] = [];
+
+      for (const item of folderData) {
+        const folderName = item.name;
+        const folderId = item.id;
+        const folderInfo: RssFolderItem = {
+          folderName,
+          data: [],
+          children: []
+        };
+
+        for (const item1 of rssData) {
+          const rssId = item1.rss_id;
+          const rssFolderId = item1.folder_id;
+          if (rssFolderId === folderId) {
+            folderInfo.data.push({
+              id: rssId,
+              title: item1.title,
+              unread: 0,
+              htmlUrl: item1.html_url,
+              feedUrl: item1.feed_url,
+              avatar: item1.avatar,
+              lastUpdateTime: item1.update_time
+            });
+          }
         }
-      })
-      folderInfoList.push(folderInfo)
-    })
-    return {
-      success: true,
-      msg: '',
-      data: folderInfoList
+
+        folderInfoList.push(folderInfo);
+      }
+
+      console.log(`[${timestamp}] [sqlite.ts] loadFolderItemList completed, returning ${folderInfoList.length} folders`);
+
+      return {
+        success: true,
+        msg: '',
+        data: folderInfoList
+      };
+    } catch (error) {
+      console.error(`[${timestamp}] [sqlite.ts] loadFolderItemList ERROR:`, error);
+      console.error(`[${timestamp}] [sqlite.ts] Error stack:`, error.stack);
+
+      return {
+        success: false,
+        msg: error instanceof Error ? error.message : String(error),
+        data: []
+      };
     }
   }
 
@@ -605,52 +663,56 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async syncRssPostList(rssId: string, postInfoItemList: PostInfoItem[]): Promise<ErrorMsg> {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sqlite.ts] syncRssPostList called`);
+    console.log(`[${timestamp}] [sqlite.ts] rssId:`, rssId);
+    console.log(`[${timestamp}] [sqlite.ts] postInfoItemList count:`, postInfoItemList.length);
+
     const rssInfoResult = await this.queryRssByRssId(rssId)
     if (!rssInfoResult.success) {
       throw new Error(rssInfoResult.msg)
     }
-    
+
     try {
+      console.log(`[${timestamp}] [sqlite.ts] Getting existing article guids...`);
       // 获取现有文章的guid列表，用于增量更新判断
-      const existingGuids = await new Promise<string[]>((resolve, reject) => {
-        const querySql = `SELECT guid FROM post_info WHERE rss_id = ?`
-        this.db?.all(querySql, [rssId], (err, rows: any[]) => {
-          if (err) {
-            reject(err)
-          } else {
-            // 提取guid值，创建一个Set用于快速查找
-            const guids = rows.map(row => row.guid)
-            resolve(guids)
-          }
-        })
-      })
-      
+      const existingRows = await this.dbHelper.all<{guid: string}>(`SELECT guid FROM post_info WHERE rss_id = ?`, [rssId]);
+      const existingGuids = existingRows.map(row => row.guid);
+      console.log(`[${timestamp}] [sqlite.ts] Existing guids count:`, existingGuids.length);
+
       // 使用Set提高查找效率
       const existingGuidSet = new Set(existingGuids)
       let newArticleCount = 0
-      
+      console.log(`[${timestamp}] [sqlite.ts] Processing ${postInfoItemList.length} articles...`);
+
       // 只插入新的文章（guid不存在于现有列表中）
-      for (const item of postInfoItemList) {
+      for (let i = 0; i < postInfoItemList.length; i++) {
+        const item = postInfoItemList[i];
         // 检查是否已存在相同guid的文章
         if (!existingGuidSet.has(item.guid)) {
+          console.log(`[${timestamp}] [sqlite.ts] Inserting new article: ${item.title}`);
           const result = await this.insertPostInfo(rssId, item.title, item.author, item.link, item.desc, item.guid, item.updateTime)
           if (!result.success) {
-            console.error(`插入新文章失败: ${result.msg}`)
+            console.error(`[${timestamp}] [sqlite.ts] Insert failed: ${result.msg}`)
             // 继续处理其他文章，不中断整个同步过程
             continue
           }
           newArticleCount++
+        } else {
+          console.log(`[${timestamp}] [sqlite.ts] Article already exists, skipping: ${item.title}`);
         }
       }
-      
-      console.log(`同步完成: RSS源 ${rssId} 添加了 ${newArticleCount} 篇新文章`)
+
+      console.log(`[${timestamp}] [sqlite.ts] Sync completed: RSS源 ${rssId} 添加了 ${newArticleCount} 篇新文章`);
+      return {
+        success: true,
+        msg: ''
+      };
     } catch (error) {
-      console.error(`增量同步RSS文章列表失败: ${error instanceof Error ? error.message : String(error)}`)
-      // 即使出错也继续执行，返回错误信息但不中断
-    }
-    return {
-      success: true,
-      msg: ''
+      console.error(`[${timestamp}] [sqlite.ts] Sync failed:`, error);
+      console.error(`[${timestamp}] [sqlite.ts] Error stack:`, error.stack);
+      // 重新抛出错误，让上层处理
+      throw error;
     }
   }
 }

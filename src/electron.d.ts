@@ -42,11 +42,11 @@ export interface electronAPI {
   removeFeed: (id: string) => Promise<void>,
   syncFeed: (id: string) => Promise<void>,
 
-  // Folder operations
+  // Folder operations (new API v2)
   getFolders: () => Promise<Folder[]>,
   getFolder: (name: string) => Promise<Folder | null>,
-  addFolder: (name: string) => Promise<void>,
-  removeFolder: (name: string) => Promise<void>,
+  addFolderV2: (name: string) => Promise<void>,
+  removeFolderV2: (name: string) => Promise<void>,
   renameFolder: (oldName: string, newName: string) => Promise<void>,
 
   // Favorite operations (legacy support)

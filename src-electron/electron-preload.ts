@@ -73,7 +73,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return await ipcRenderer.invoke('rss:getRssInfoListFromDb')
   },
   queryPostIndexByRssId: async (rssId: string): Promise<PostIndexItem[]> => {
-    return await ipcRenderer.invoke('rss:queryPostIndexByRssId', rssId)
+    console.log('[electron-preload] queryPostIndexByRssId called with rssId:', rssId);
+    try {
+      const result = await ipcRenderer.invoke('rss:queryPostIndexByRssId', rssId);
+      console.log('[electron-preload] queryPostIndexByRssId result received:', result);
+      console.log('[electron-preload] Result length:', result.length);
+      return result;
+    } catch (error) {
+      console.error('[electron-preload] queryPostIndexByRssId error:', error);
+      throw error;
+    }
   },
   queryPostContentByGuid: async (guid: string): Promise<ContentInfo> => {
     console.log('[electron-preload] queryPostContentByGuid called with guid:', guid);
@@ -131,17 +140,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return await ipcRenderer.invoke('feed:syncFeed', id)
   },
 
-  // Folder operations
+  // Folder operations (new API v2)
   getFolders: async (): Promise<any[]> => {
     return await ipcRenderer.invoke('folder:getFolders')
   },
   getFolder: async (name: string): Promise<any> => {
     return await ipcRenderer.invoke('folder:getFolder', name)
   },
-  addFolder: async (name: string): Promise<void> => {
+  addFolderV2: async (name: string): Promise<void> => {
     return await ipcRenderer.invoke('folder:addFolder', name)
   },
-  removeFolder: async (name: string): Promise<void> => {
+  removeFolderV2: async (name: string): Promise<void> => {
     return await ipcRenderer.invoke('folder:removeFolder', name)
   },
   renameFolder: async (oldName: string, newName: string): Promise<void> => {

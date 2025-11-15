@@ -332,9 +332,39 @@ export class SourceManage {
   }
 
   async loadFromDb() {
-    const storageUtil: StorageUtil = SqliteUtil.getInstance()
-    const folderInfoList = (await storageUtil.loadFolderItemList()).data
-    this.loadFolderInfoList(folderInfoList)
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sourceManage.ts] SourceManage.loadFromDb called`);
+    console.log(`[${timestamp}] [sourceManage.ts] FolderMap before load:`, this.folderMap);
+
+    try {
+      console.log(`[${timestamp}] [sourceManage.ts] Getting SqliteUtil instance...`);
+      const storageUtil: StorageUtil = SqliteUtil.getInstance();
+      console.log(`[${timestamp}] [sourceManage.ts] StorageUtil instance:`, storageUtil);
+
+      console.log(`[${timestamp}] [sourceManage.ts] Calling loadFolderItemList...`);
+      const loadResult = await storageUtil.loadFolderItemList();
+      console.log(`[${timestamp}] [sourceManage.ts] Load result:`, loadResult);
+
+      if (!loadResult.success) {
+        console.error(`[${timestamp}] [sourceManage.ts] Load failed:`, loadResult.msg);
+        throw new Error(loadResult.msg);
+      }
+
+      console.log(`[${timestamp}] [sourceManage.ts] Folder info list from DB:`, loadResult.data);
+      const folderInfoList = loadResult.data;
+      console.log(`[${timestamp}] [sourceManage.ts] Folder count:`, folderInfoList.length);
+
+      console.log(`[${timestamp}] [sourceManage.ts] Calling loadFolderInfoList...`);
+      this.loadFolderInfoList(folderInfoList);
+      console.log(`[${timestamp}] [sourceManage.ts] loadFolderInfoList completed`);
+
+      console.log(`[${timestamp}] [sourceManage.ts] FolderMap after load:`, this.folderMap);
+      console.log(`[${timestamp}] [sourceManage.ts] SourceManage.loadFromDb completed successfully`);
+    } catch (error) {
+      console.error(`[${timestamp}] [sourceManage.ts] SourceManage.loadFromDb ERROR:`, error);
+      console.error(`[${timestamp}] [sourceManage.ts] Error stack:`, error.stack);
+      throw error;
+    }
   }
 
   getSourceByRssId(rssId: string): Source | null {
