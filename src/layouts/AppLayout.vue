@@ -19,7 +19,7 @@ import {TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src
 import {useRoute} from "vue-router";
 
 const route = useRoute();
-const leftDrawerOpen = ref(false)
+const leftDrawerOpen = ref(true) // 默认打开抽屉
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }

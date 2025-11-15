@@ -195,6 +195,42 @@ export class SqliteHelper {
     for (const table of tables) {
       await this.run('CREATE TABLE IF NOT EXISTS ' + table.name + ' ' + table.sql.split('CREATE TABLE IF NOT EXISTS ' + table.name)[1]);
     }
+
+    // 创建全文搜索FTS5表
+    await this.createFtsTable()
+  }
+
+  /**
+   * 创建全文搜索FTS表
+   */
+  private async createFtsTable(): Promise<void> {
+    try {
+      // 检查是否已存在FTS表
+      const ftsExists = await this.get('SELECT name FROM sqlite_master WHERE type="table" AND name="post_info_fts"')
+
+      if (!ftsExists || ftsExists.length === 0) {
+        console.log('[sqlite.ts] Creating FTS5 virtual table...')
+
+        // 创建FTS5虚拟表
+        await this.run(`
+          CREATE VIRTUAL TABLE post_info_fts USING fts5(
+            title,
+            content,
+            author,
+            rss_id,
+            update_time,
+            content='post_info',
+            content_rowid='id',
+            tokenize='porter'
+          )
+        `)
+
+        console.log('[sqlite.ts] FTS5 table created successfully')
+      }
+    } catch (error) {
+      console.error('[sqlite.ts] Failed to create FTS table:', error)
+      // FTS表创建失败不影响主功能，但需要记录日志
+    }
   }
 
   // Promise化的run方法

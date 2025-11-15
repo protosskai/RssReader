@@ -177,6 +177,17 @@ export class SqliteUtil implements StorageUtil {
   }
 
   /**
+   * 确保FTS表存在（如果不存在则创建）
+   */
+  private async ensureFtsTable(): Promise<void> {
+    if (!await this.checkTableExist('post_info_fts')) {
+      console.log('[sqlite.ts] FTS table not found, creating it...')
+      await this.createFtsTable()
+      console.log('[sqlite.ts] FTS table created successfully')
+    }
+  }
+
+  /**
    * 创建数据库索引以优化查询性能
    * 包括：rss_id、folder_id、guid、update_time等常用查询字段的索引
    */
@@ -876,6 +887,9 @@ export class SqliteUtil implements StorageUtil {
     console.log(`[${timestamp}] [sqlite.ts] searchPosts called with query:`, query)
 
     try {
+      // 检查并创建FTS表（如果不存在）
+      await this.ensureFtsTable()
+
       const { folderId, dateFrom, dateTo, limit = 100 } = options || {}
 
       // 构建FTS查询

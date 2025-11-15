@@ -1,28 +1,21 @@
 <template>
-  <q-drawer v-model="leftDrawerOpen" side="left" elevated overlay>
+  <q-drawer :model-value="leftDrawerOpen" side="left" elevated overlay @update:model-value="updateDrawer">
     <q-toolbar class="bg-grey-2">
       <q-input
+        ref="searchInputRef"
         rounded
         outlined
         dense
-        class="WAL__field full-width"
+        class="full-width"
         bg-color="white"
         v-model="searchQuery"
         placeholder="搜索订阅源或文章"
         @update:model-value="handleSearch"
+        autofocus
+        clearable
       >
         <template v-slot:prepend>
           <q-icon name="search"/>
-        </template>
-        <template v-slot:append>
-          <q-btn
-            v-if="searchQuery"
-            flat
-            dense
-            round
-            icon="clear"
-            @click="clearSearch"
-          />
         </template>
       </q-input>
     </q-toolbar>
@@ -86,21 +79,45 @@
 
 <script setup lang="ts">
 import {computed, inject, onMounted, provide, Ref, ref} from "vue";
-import {RSS_FOLDER_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
+import {RSS_FOLDER_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
 import SubscriptionList from "components/SubscriptionList.vue";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import EditFolderDialog from "components/EditFolderDialog.vue";
 import { useSearchStore } from 'src/stores/searchStore';
 import type { PostIndexItem } from 'src/electron/storage/common';
 
+interface Props {
+  leftDrawerOpen?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  leftDrawerOpen: true
+})
+
 const store = useRssInfoStore()
 const searchStore = useSearchStore()
 const searchQuery = ref('')
 const searchResults = ref<PostIndexItem[]>([])
 const isSearching = ref(false)
-const leftDrawerOpen = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
+const searchInputRef = ref(null)
+
+const leftDrawerOpenRef = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
+const toggleLeftDrawerFunc = inject(TOGGLE_LAYOUT_LEFT_DRAWER_FUNC)
+
+// 确保始终使用最新的抽屉状态
+const leftDrawerOpen = computed(() => {
+  return leftDrawerOpenRef?.value ?? props.leftDrawerOpen
+})
 
 provide(RSS_FOLDER_LIST_REF, computed(() => store.rssFolderList))
+
+// 更新抽屉状态
+const updateDrawer = (val: boolean) => {
+  // 当用户点击遮罩层或关闭按钮时，调用父组件的方法
+  if (toggleLeftDrawerFunc) {
+    toggleLeftDrawerFunc()
+  }
+}
 
 // 处理搜索
 const handleSearch = async () => {
@@ -163,6 +180,10 @@ const viewAllResults = () => {
 </script>
 
 <style lang="scss" scoped>
+.q-toolbar {
+  pointer-events: auto !important;
+}
+
 .search-results {
   max-height: 400px;
   overflow-y: auto;
