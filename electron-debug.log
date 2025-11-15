@@ -13,51 +13,32 @@ Y88b.Y8b88P Y88b 888 888  888      X88 888  888 888
  "Y888888"   "Y88888 "Y888888  88888P' "Y888888 888
        Y8b
 
-
- App • ⚠️  ️️Setting port to closest one available: 9301
-
  App •  WAIT  • Compiling of Electron Main with Esbuild in progress...
  App •  WAIT  • Compiling of Electron Preload with Esbuild in progress...
- App •  DONE  • Electron Preload compiled with success • 19ms
+ App •  DONE  • Electron Preload compiled with success • 13ms
 
- App •  DONE  • Electron Main compiled with success • 45ms
+ App •  DONE  • Electron Main compiled with success • 27ms
 
  App • Running "D:\project\RssReader\node_modules\electron\dist\electron.exe --inspect=5858 D:\project\RssReader\.quasar\electron\electron-main.js" in D:\project\RssReader
 
 
-Starting inspector on 127.0.0.1:5858 failed: address already in use
+Debugger listening on ws://127.0.0.1:5858/caf6d8a9-a459-4b13-aefc-ddb7065df221
+For help, see: https://nodejs.org/en/docs/inspector
 [electron-main] Initializing database...
 Connection with SQLite has been established
+[2025-11-15T15:54:21.797Z] [sqlite.ts] Configuring SQLite performance pragmas...
+[2025-11-15T15:54:21.797Z] [sqlite.ts] SQLite performance pragmas configured successfully
 [electron-main] Database initialized successfully
-[electron-main] All IPC handlers registered, creating window...
-[6628:1115/224852.246:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
-[6628:1115/224852.247:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
-[6628:1115/224852.249:ERROR:disk_cache.cc(205)] Unable to create cache
-[6628:1115/224852.249:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
-[6628:1115/224852.249:ERROR:disk_cache.cc(205)] Unable to create cache
-[6628:1115/224852.249:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
+[electron-main] All IPC handlers registered, waiting for dev server...
+[electron-main] Waiting for dev server at localhost:9300...
+[electron-main] Dev server is ready! (attempt 1/30)
+[electron-main] Dev server is ready, creating window...
+[electron-main] Loading URL: http://localhost:9300
 Browserslist: caniuse-lite is outdated. Please run:
   npx update-browserslist-db@latest
   Why you should do it regularly: https://github.com/browserslist/update-db#readme
- App • Shutting down Electron process...
-
- App • Command "D:\project\RssReader\node_modules\electron\dist\electron.exe" failed with exit code: 1
- App • Running "D:\project\RssReader\node_modules\electron\dist\electron.exe --inspect=5858 D:\project\RssReader\.quasar\electron\electron-main.js" in D:\project\RssReader
-
-
-Starting inspector on 127.0.0.1:5858 failed: address already in use
-[electron-main] Initializing database...
-Connection with SQLite has been established
-[electron-main] Database initialized successfully
-[electron-main] All IPC handlers registered, creating window...
-[4000:1115/224924.220:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
-[4000:1115/224924.220:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
-[4000:1115/224924.225:ERROR:disk_cache.cc(205)] Unable to create cache
-[4000:1115/224924.225:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
-[4000:1115/224924.225:ERROR:disk_cache.cc(205)] Unable to create cache
-[4000:1115/224924.225:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
-[2025-11-15T14:49:24.740Z] [electron-main] rss:getRssInfoListFromDb called
-[2025-11-15T14:49:24.740Z] [electron-main] Event: {
+[2025-11-15T15:54:24.541Z] [electron-main] rss:getRssInfoListFromDb called
+[2025-11-15T15:54:24.541Z] [electron-main] Event: {
   preventDefault: [Function: preventDefault],
   sendReply: [Function: sendReply],
   sender: EventEmitter {
@@ -200,18 +181,18 @@ Connection with SQLite has been established
   _reply: [Function (anonymous)],
   _throw: [Function (anonymous)]
 }
-[2025-11-15T14:49:24.740Z] [electron-main] Args: []
-[2025-11-15T14:49:24.740Z] [electron-main] Starting getRssInfoListFromDb...
-[2025-11-15T14:49:24.743Z] [api.ts] getRssInfoListFromDb called
-[2025-11-15T14:49:24.743Z] [api.ts] Getting SourceManage instance...
-[2025-11-15T14:49:24.743Z] [api.ts] SourceManage instance: _SourceManage {
+[2025-11-15T15:54:24.541Z] [electron-main] Args: []
+[2025-11-15T15:54:24.541Z] [electron-main] Starting getRssInfoListFromDb...
+[2025-11-15T15:54:24.543Z] [api.ts] getRssInfoListFromDb called
+[2025-11-15T15:54:24.543Z] [api.ts] Getting SourceManage instance...
+[2025-11-15T15:54:24.543Z] [api.ts] SourceManage instance: _SourceManage {
   folderMap: { '默认': Folder { name: '默认', sourceArray: [] } }
 }
-[2025-11-15T14:49:24.743Z] [api.ts] Starting loadFromDb...
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] SourceManage.loadFromDb called
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] FolderMap before load: { '默认': Folder { name: '默认', sourceArray: [] } }
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] Getting SqliteUtil instance...
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] StorageUtil instance: _SqliteUtil {
+[2025-11-15T15:54:24.543Z] [api.ts] Starting loadFromDb...
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] SourceManage.loadFromDb called
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] FolderMap before load: { '默认': Folder { name: '默认', sourceArray: [] } }
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] Getting SqliteUtil instance...
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] StorageUtil instance: _SqliteUtil {
   dbHelper: _SqliteHelper {
     db: Database {},
     lock: ReadWriteLock {
@@ -224,12 +205,12 @@ Connection with SQLite has been established
     inTransaction: false
   }
 }
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] Calling loadFolderItemList...
-[2025-11-15T14:49:24.744Z] [sqlite.ts] SqliteUtil.loadFolderItemList called
-[2025-11-15T14:49:24.744Z] [sqlite.ts] Querying folders from database...
-[2025-11-15T14:49:24.744Z] [sqlite.ts] Folder query result: [ { id: 1, name: '默认', parent_id: null } ]
-[2025-11-15T14:49:24.744Z] [sqlite.ts] Querying RSS sources from database...
-[2025-11-15T14:49:24.744Z] [sqlite.ts] RSS query result: [
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] Calling loadFolderItemList...
+[2025-11-15T15:54:24.544Z] [sqlite.ts] SqliteUtil.loadFolderItemList called
+[2025-11-15T15:54:24.544Z] [sqlite.ts] Querying folders from database...
+[2025-11-15T15:54:24.544Z] [sqlite.ts] Folder query result: [ { id: 1, name: '默认', parent_id: null } ]
+[2025-11-15T15:54:24.544Z] [sqlite.ts] Querying RSS sources from database...
+[2025-11-15T15:54:24.544Z] [sqlite.ts] RSS query result: [
   {
     id: 1,
     rss_id: 'aa04a14e-470d-46e6-abd8-ebfd813e5343',
@@ -271,51 +252,54 @@ Connection with SQLite has been established
     update_time: ''
   }
 ]
-[2025-11-15T14:49:24.744Z] [sqlite.ts] Processing data...
-[2025-11-15T14:49:24.744Z] [sqlite.ts] loadFolderItemList completed, returning 1 folders
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] Load result: {
+[2025-11-15T15:54:24.544Z] [sqlite.ts] Processing data...
+[2025-11-15T15:54:24.544Z] [sqlite.ts] loadFolderItemList completed, returning 1 folders
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] Load result: {
   success: true,
   msg: '',
   data: [ { folderName: '默认', data: [Array], children: [] } ]
 }
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] Folder info list from DB: [
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] Folder info list from DB: [
   {
     folderName: '默认',
     data: [ [Object], [Object], [Object], [Object] ],
     children: []
   }
 ]
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] Folder count: 1
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] Calling loadFolderInfoList...
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] loadFolderInfoList completed
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] FolderMap after load: {
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] Folder count: 1
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] Calling loadFolderInfoList...
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] loadFolderInfoList completed
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] FolderMap after load: {
   '默认': Folder {
     name: '默认',
     sourceArray: [ [Source], [Source], [Source], [Source] ]
   }
 }
-[2025-11-15T14:49:24.744Z] [sourceManage.ts] SourceManage.loadFromDb completed successfully
-[2025-11-15T14:49:24.743Z] [api.ts] loadFromDb completed
-[2025-11-15T14:49:24.743Z] [api.ts] Getting folder info list...
-[2025-11-15T14:49:24.743Z] [api.ts] Folder info list: [
+[2025-11-15T15:54:24.543Z] [sourceManage.ts] SourceManage.loadFromDb completed successfully
+[2025-11-15T15:54:24.543Z] [api.ts] loadFromDb completed
+[2025-11-15T15:54:24.543Z] [api.ts] Getting folder info list...
+[2025-11-15T15:54:24.543Z] [api.ts] Folder info list: [
   {
     folderName: '默认',
     data: [ [Object], [Object], [Object], [Object] ],
     children: []
   }
 ]
-[2025-11-15T14:49:24.743Z] [api.ts] Returning result with 1 folders
-[2025-11-15T14:49:24.740Z] [electron-main] rss:getRssInfoListFromDb SUCCESS, result: [
+[2025-11-15T15:54:24.543Z] [api.ts] Returning result with 1 folders
+[2025-11-15T15:54:24.541Z] [electron-main] rss:getRssInfoListFromDb SUCCESS, result: [
   {
     folderName: '默认',
     data: [ [Object], [Object], [Object], [Object] ],
     children: []
   }
 ]
-[2025-11-15T14:49:24.740Z] [electron-main] Result type: object
-[2025-11-15T14:49:24.740Z] [electron-main] Result length: 1
+[2025-11-15T15:54:24.541Z] [electron-main] Result type: object
+[2025-11-15T15:54:24.541Z] [electron-main] Result length: 1
+[16612:1115/235445.172:ERROR:network_service_instance_impl.cc(521)] Network service crashed, restarting service.
+[16612:1115/235445.227:ERROR:gpu_process_host.cc(991)] GPU process exited unexpectedly: exit_code=143
+
+ App • Command "D:\project\RssReader\node_modules\electron\dist\electron.exe" failed with exit code: 143
 
 
-
- App • ⚠️  Electron process was killed. Exiting...
+ App • ⚠️  Electron process ended with error code: 143
 

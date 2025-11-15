@@ -705,8 +705,8 @@ onMounted(() => {
   border-bottom: 1px solid #e0e0e0;
 
   .body--dark & {
-    background: $dark-page;
-    border-bottom-color: $dark-separator;
+    background: #1e1e1e;
+    border-bottom-color: rgba(255, 255, 255, 0.12);
   }
 
   :deep(.q-tab) {
@@ -733,7 +733,7 @@ onMounted(() => {
   border-bottom: 1px solid #e0e0e0;
 
   .body--dark & {
-    border-bottom-color: $dark-separator;
+    border-bottom-color: rgba(255, 255, 255, 0.12);
   }
 
   h3 {
@@ -837,8 +837,8 @@ onMounted(() => {
   text-align: center;
 
   .body--dark & {
-    background: $dark-page;
-    border-top-color: $dark-separator;
+    background: #1e1e1e;
+    border-top-color: rgba(255, 255, 255, 0.12);
   }
 }
 

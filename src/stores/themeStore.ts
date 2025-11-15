@@ -49,7 +49,16 @@ export const useThemeStore = defineStore('theme', {
     },
 
     applyTheme() {
-      const $q = useQuasar()
+      // 检查是否在浏览器环境中
+      if (typeof window === 'undefined') return
+
+      // 尝试获取Quasar实例
+      let $q: any = null
+      try {
+        $q = useQuasar()
+      } catch (e) {
+        console.warn('[themeStore] useQuasar not available, using document class')
+      }
 
       let isDark = false
 
@@ -60,7 +69,14 @@ export const useThemeStore = defineStore('theme', {
       }
 
       this.isDark = isDark
-      $q.dark.set(isDark)
+
+      // 使用Quasar或原生方法设置暗色模式
+      if ($q && $q.dark) {
+        $q.dark.set(isDark)
+      } else {
+        // 回退到原生方法
+        document.documentElement.classList.toggle('dark', isDark)
+      }
 
       // 设置meta主题色
       this.updateMetaThemeColor(isDark)

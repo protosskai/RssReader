@@ -6,8 +6,32 @@ import {ErrorMsg} from "src/common/ErrorMsg";
 export const useRssInfoStore = defineStore('rssInfo', () => {
   const rssFolderList: Ref<RssFolderItem[]> = ref([])
   const folderNameList = computed(() => (rssFolderList.value.map(item => item.folderName)))
+
+  // 计算属性 - 统计信息
+  const totalArticleCount = computed(() => {
+    // 这里应该从数据库获取总数，现在先返回0
+    return 0
+  })
+
+  const unreadArticleCount = computed(() => {
+    // 这里应该从数据库获取未读数，现在先返回0
+    return 0
+  })
+
+  const favoriteCount = computed(() => {
+    // 这里应该从收藏表获取数量，现在先返回0
+    return 0
+  })
+
   const refresh = async () => {
     rssFolderList.value = await window.electronAPI.getRssInfoListFromDb()
+  }
+
+  // 同步所有订阅源
+  const syncAll = async () => {
+    // 这里应该调用主进程的同步方法
+    // 暂时先调用刷新
+    await refresh()
   }
   const addRssSubscription = async (feedUrl: string, title: string, folderName: string) => {
     const obj: RssInfoNew = {
@@ -55,6 +79,11 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     addFolder,
     removeFolder,
     importOpmlFile,
-    editFolder
+    editFolder,
+    refresh,
+    syncAll,
+    totalArticleCount,
+    unreadArticleCount,
+    favoriteCount
   }
 })
