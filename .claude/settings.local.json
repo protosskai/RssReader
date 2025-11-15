@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn dev:electron)",
+      "Bash(npx quasar dev -m electron)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

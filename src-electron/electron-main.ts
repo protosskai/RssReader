@@ -12,10 +12,14 @@ import {
   loadFolderFromDb, getRssInfoListFromDb, editFolder,
   queryPostIndexByRssId, queryPostContentByGuid, fetchRssIndexList, initDB
 } from "src-electron/rss/api";
+import { getArticleService } from './infrastructure/Container';
 
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
+
+// 初始化Article Service
+const articleService = getArticleService();
 
 try {
   if (platform === 'win32' && nativeTheme.shouldUseDarkColors) {
@@ -131,6 +135,116 @@ app.whenReady().then(() => {
     const [rssId] = args
     return await fetchRssIndexList(rssId)
   })
+
+  // 新API处理器（基于Article架构）
+  // Article operations
+  ipcMain.handle('article:getArticles', async (event, ...args) => {
+    const [params] = args
+    const { filter, offset, limit } = params || {}
+    return await articleService.getArticles(filter, offset, limit)
+  })
+  ipcMain.handle('article:getArticle', async (event, ...args) => {
+    const [id] = args
+    return await articleService.getArticle(id)
+  })
+  ipcMain.handle('article:toggleReadStatus', async (event, ...args) => {
+    const [id] = args
+    return await articleService.toggleReadStatus(id)
+  })
+  ipcMain.handle('article:toggleFavorite', async (event, ...args) => {
+    const [id] = args
+    return await articleService.toggleFavorite(id)
+  })
+  ipcMain.handle('article:markAllAsRead', async (event, ...args) => {
+    const [params] = args
+    return await articleService.markAllAsRead(params)
+  })
+  ipcMain.handle('article:clearAllFavorites', async () => {
+    return await articleService.clearAllFavorites()
+  })
+  ipcMain.handle('article:getStats', async () => {
+    return await articleService.getStats()
+  })
+
+  // Feed operations
+  ipcMain.handle('feed:getFeeds', async (event, ...args) => {
+    const [folderName] = args
+    return await articleService.getFeeds(folderName)
+  })
+  ipcMain.handle('feed:getFeed', async (event, ...args) => {
+    const [id] = args
+    return await articleService.getFeed(id)
+  })
+  ipcMain.handle('feed:addFeed', async (event, ...args) => {
+    const [{ feedUrl, title, folderName }] = args
+    return await articleService.addFeed(feedUrl, title, folderName)
+  })
+  ipcMain.handle('feed:removeFeed', async (event, ...args) => {
+    const [id] = args
+    return await articleService.removeFeed(id)
+  })
+  ipcMain.handle('feed:syncFeed', async (event, ...args) => {
+    const [id] = args
+    return await articleService.syncFeed(id)
+  })
+
+  // Folder operations
+  ipcMain.handle('folder:getFolders', async () => {
+    return await articleService.getFolders()
+  })
+  ipcMain.handle('folder:getFolder', async (event, ...args) => {
+    const [name] = args
+    return await articleService.getFolder(name)
+  })
+  ipcMain.handle('folder:addFolder', async (event, ...args) => {
+    const [name] = args
+    return await articleService.addFolder(name)
+  })
+  ipcMain.handle('folder:removeFolder', async (event, ...args) => {
+    const [name] = args
+    return await articleService.removeFolder(name)
+  })
+  ipcMain.handle('folder:renameFolder', async (event, ...args) => {
+    const [oldName, newName] = args
+    return await articleService.renameFolder(oldName, newName)
+  })
+
+  // Favorite operations (legacy support)
+  ipcMain.handle('article:getFavoritePosts', async () => {
+    const result = await articleService.getArticles({ favorite: true }, 0, 1000)
+    return result.articles
+  })
+  ipcMain.handle('article:addFavoritePost', async (event, ...args) => {
+    const [post] = args
+    // Convert PostIndexItem to Article and save
+    const article = {
+      id: post.guid,
+      title: post.title,
+      content: post.content,
+      description: post.desc,
+      link: post.link,
+      author: post.author,
+      publishDate: new Date(post.updateTime),
+      updateTime: new Date(post.updateTime),
+      read: post.read,
+      favorite: true,
+      feedId: post.rssId,
+      feedTitle: '',
+      feedUrl: '',
+      folderName: ''
+    }
+    return await articleService.toggleFavorite(article.id)
+  })
+  ipcMain.handle('article:removeFavoritePost', async (event, ...args) => {
+    const [guid] = args
+    return await articleService.toggleFavorite(guid)
+  })
+  ipcMain.handle('article:isPostFavorite', async (event, ...args) => {
+    const [guid] = args
+    const article = await articleService.getArticle(guid)
+    return article?.favorite || false
+  })
+
   initDB().then(() => {
     createWindow()
   })

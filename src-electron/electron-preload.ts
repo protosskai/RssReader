@@ -35,6 +35,7 @@ import {PostIndexItem} from "src-electron/storage/common";
 
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  // Legacy API (for backward compatibility)
   addRssSubscription: async (obj: RssInfoNew): Promise<void> => {
     return await ipcRenderer.invoke('rss:addRssSubscription', obj)
   },
@@ -87,5 +88,77 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   fetchRssIndexList: async (rssId: string): Promise<ErrorMsg> => {
     return await ipcRenderer.invoke('rss:fetchRssIndexList', rssId)
+  },
+
+  // New API (Article-centric architecture)
+  // Article operations
+  getArticles: async (params: { filter?: any, offset?: number, limit?: number }): Promise<{ articles: any[], total: number }> => {
+    return await ipcRenderer.invoke('article:getArticles', params)
+  },
+  getArticle: async (id: string): Promise<any> => {
+    return await ipcRenderer.invoke('article:getArticle', id)
+  },
+  toggleReadStatus: async (id: string): Promise<void> => {
+    return await ipcRenderer.invoke('article:toggleReadStatus', id)
+  },
+  toggleFavorite: async (id: string): Promise<boolean> => {
+    return await ipcRenderer.invoke('article:toggleFavorite', id)
+  },
+  markAllAsRead: async (params?: { feedId?: string, folderName?: string }): Promise<void> => {
+    return await ipcRenderer.invoke('article:markAllAsRead', params)
+  },
+  clearAllFavorites: async (): Promise<void> => {
+    return await ipcRenderer.invoke('article:clearAllFavorites')
+  },
+  getArticleStats: async (): Promise<any> => {
+    return await ipcRenderer.invoke('article:getStats')
+  },
+
+  // Feed operations
+  getFeeds: async (folderName?: string): Promise<any[]> => {
+    return await ipcRenderer.invoke('feed:getFeeds', folderName)
+  },
+  getFeed: async (id: string): Promise<any> => {
+    return await ipcRenderer.invoke('feed:getFeed', id)
+  },
+  addFeed: async (feedUrl: string, title?: string, folderName?: string): Promise<void> => {
+    return await ipcRenderer.invoke('feed:addFeed', { feedUrl, title, folderName })
+  },
+  removeFeed: async (id: string): Promise<void> => {
+    return await ipcRenderer.invoke('feed:removeFeed', id)
+  },
+  syncFeed: async (id: string): Promise<void> => {
+    return await ipcRenderer.invoke('feed:syncFeed', id)
+  },
+
+  // Folder operations
+  getFolders: async (): Promise<any[]> => {
+    return await ipcRenderer.invoke('folder:getFolders')
+  },
+  getFolder: async (name: string): Promise<any> => {
+    return await ipcRenderer.invoke('folder:getFolder', name)
+  },
+  addFolder: async (name: string): Promise<void> => {
+    return await ipcRenderer.invoke('folder:addFolder', name)
+  },
+  removeFolder: async (name: string): Promise<void> => {
+    return await ipcRenderer.invoke('folder:removeFolder', name)
+  },
+  renameFolder: async (oldName: string, newName: string): Promise<void> => {
+    return await ipcRenderer.invoke('folder:renameFolder', oldName, newName)
+  },
+
+  // Favorite operations (legacy support)
+  getFavoritePosts: async (): Promise<PostIndexItem[]> => {
+    return await ipcRenderer.invoke('article:getFavoritePosts')
+  },
+  addFavoritePost: async (post: any): Promise<void> => {
+    return await ipcRenderer.invoke('article:addFavoritePost', post)
+  },
+  removeFavoritePost: async (guid: string): Promise<void> => {
+    return await ipcRenderer.invoke('article:removeFavoritePost', guid)
+  },
+  isPostFavorite: async (guid: string): Promise<boolean> => {
+    return await ipcRenderer.invoke('article:isPostFavorite', guid)
   }
 })
