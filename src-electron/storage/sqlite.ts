@@ -376,61 +376,64 @@ export class SqliteUtil implements StorageUtil {
   }
 
   async queryPostContentByGuid(guid: string): Promise<ErrorData<ContentInfo>> {
-    const sql = `select rss_id,title,content,link,author,update_time from post_info where guid = ?`
-    return new Promise<ErrorData<any>>((resolve) => {
-      this.db?.all(sql!, [guid], (err, rows) => {
-        if (err) {
-          resolve({
-            success: false,
-            msg: err.message,
-            data: []
-          })
-        }
-        if (rows.length === 0) {
-          // Fallback: 尝试通过link查询
-          const fallbackSql = `select rss_id,title,content,link,author,update_time from post_info where link = ?`
-          this.db?.all(fallbackSql, [guid], (fallbackErr, fallbackRows) => {
-            if (fallbackErr || fallbackRows.length === 0) {
-              resolve({
-                success: false,
-                msg: `guid【${guid}】不存在!`,
-                data: ""
-              })
-            } else {
-              const [row] = fallbackRows;
-              const contentInfo: ContentInfo = {
-                title: row["title"],
-                content: parseBase64ToString(row.content),
-                link: row["link"],
-                author: row["author"],
-                updateTime: row["update_time"],
-                rssId: row["rss_id"]
-              }
-              resolve({
-                success: true,
-                msg: ``,
-                data: contentInfo
-              })
-            }
-          })
-        } else {
-          const [row] = rows;
-          const contentInfo: ContentInfo = {
-            title: row["title"],
-            content: parseBase64ToString(row.content),
-            link: row["link"],
-            author: row["author"],
-            updateTime: row["update_time"],
-            rssId: row["rss_id"]
-          }
-          resolve({
-            success: true,
-            msg: ``,
-            data: contentInfo
-          })
-        }
-      })
-    })
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [sqlite.ts] queryPostContentByGuid called with guid:`, guid);
+
+    try {
+      // 首先尝试通过guid查询
+      const sql = `select rss_id,title,content,link,author,update_time from post_info where guid = ?`;
+      console.log(`[${timestamp}] [sqlite.ts] Executing query by guid:`, sql, 'params:', [guid]);
+      let rows = await this.dbHelper.all<any>(sql, [guid]);
+      console.log(`[${timestamp}] [sqlite.ts] Query by guid result:`, rows.length, 'rows');
+
+      // 如果没有结果，尝试通过link查询（降级处理）
+      if (rows.length === 0) {
+        console.log(`[${timestamp}] [sqlite.ts] No results by guid, trying fallback query by link...`);
+        const fallbackSql = `select rss_id,title,content,link,author,update_time from post_info where link = ?`;
+        console.log(`[${timestamp}] [sqlite.ts] Executing fallback query:`, fallbackSql, 'params:', [guid]);
+        rows = await this.dbHelper.all<any>(fallbackSql, [guid]);
+        console.log(`[${timestamp}] [sqlite.ts] Fallback query result:`, rows.length, 'rows');
+      }
+
+      if (rows.length === 0) {
+        console.warn(`[${timestamp}] [sqlite.ts] No data found for guid/link:`, guid);
+        return {
+          success: false,
+          msg: `guid/link【${guid}】不存在!`,
+          data: {} as ContentInfo
+        };
+      }
+
+      const [row] = rows;
+      console.log(`[${timestamp}] [sqlite.ts] Processing row data:`, row);
+
+      const contentInfo: ContentInfo = {
+        title: row["title"],
+        content: parseBase64ToString(row.content),
+        link: row["link"],
+        author: row["author"],
+        updateTime: row["update_time"],
+        rssId: row["rss_id"]
+      };
+
+      console.log(`[${timestamp}] [sqlite.ts] Created contentInfo:`, contentInfo);
+      console.log(`[${timestamp}] [sqlite.ts] queryPostContentByGuid completed successfully`);
+
+      return {
+        success: true,
+        msg: '',
+        data: contentInfo
+      };
+    } catch (error) {
+      console.error(`[${timestamp}] [sqlite.ts] queryPostContentByGuid ERROR:`, error);
+      console.error(`[${timestamp}] [sqlite.ts] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+
+      return {
+        success: false,
+        msg: error instanceof Error ? error.message : String(error),
+        data: {} as ContentInfo
+      };
+    }
   }
 
   async cleanFolderInfoTable(): Promise<ErrorMsg> {

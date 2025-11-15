@@ -9,7 +9,10 @@
       "Bash(./\"Quasar App.exe\":*)",
       "Bash(node:*)",
       "Bash(cd:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(yarn build:electron:*)",
+      "Bash(npm run build:electron)",
+      "Bash(npm run dev:electron)"
     ],
     "deny": [],
     "ask": []

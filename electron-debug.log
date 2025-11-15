@@ -1,0 +1,321 @@
+
+> quasar-project@0.0.1 dev:electron
+> npx quasar dev -m electron
+
+
+ .d88888b.
+d88P" "Y88b
+888     888
+888     888 888  888  8888b.  .d8888b   8888b.  888d888
+888     888 888  888     "88b 88K          "88b 888P"
+888 Y8b 888 888  888 .d888888 "Y8888b. .d888888 888
+Y88b.Y8b88P Y88b 888 888  888      X88 888  888 888
+ "Y888888"   "Y88888 "Y888888  88888P' "Y888888 888
+       Y8b
+
+
+ App • ⚠️  ️️Setting port to closest one available: 9301
+
+ App •  WAIT  • Compiling of Electron Main with Esbuild in progress...
+ App •  WAIT  • Compiling of Electron Preload with Esbuild in progress...
+ App •  DONE  • Electron Preload compiled with success • 19ms
+
+ App •  DONE  • Electron Main compiled with success • 45ms
+
+ App • Running "D:\project\RssReader\node_modules\electron\dist\electron.exe --inspect=5858 D:\project\RssReader\.quasar\electron\electron-main.js" in D:\project\RssReader
+
+
+Starting inspector on 127.0.0.1:5858 failed: address already in use
+[electron-main] Initializing database...
+Connection with SQLite has been established
+[electron-main] Database initialized successfully
+[electron-main] All IPC handlers registered, creating window...
+[6628:1115/224852.246:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
+[6628:1115/224852.247:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
+[6628:1115/224852.249:ERROR:disk_cache.cc(205)] Unable to create cache
+[6628:1115/224852.249:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
+[6628:1115/224852.249:ERROR:disk_cache.cc(205)] Unable to create cache
+[6628:1115/224852.249:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ App • Shutting down Electron process...
+
+ App • Command "D:\project\RssReader\node_modules\electron\dist\electron.exe" failed with exit code: 1
+ App • Running "D:\project\RssReader\node_modules\electron\dist\electron.exe --inspect=5858 D:\project\RssReader\.quasar\electron\electron-main.js" in D:\project\RssReader
+
+
+Starting inspector on 127.0.0.1:5858 failed: address already in use
+[electron-main] Initializing database...
+Connection with SQLite has been established
+[electron-main] Database initialized successfully
+[electron-main] All IPC handlers registered, creating window...
+[4000:1115/224924.220:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
+[4000:1115/224924.220:ERROR:cache_util_win.cc(20)] Unable to move the cache: �ܾ����ʡ� (0x5)
+[4000:1115/224924.225:ERROR:disk_cache.cc(205)] Unable to create cache
+[4000:1115/224924.225:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
+[4000:1115/224924.225:ERROR:disk_cache.cc(205)] Unable to create cache
+[4000:1115/224924.225:ERROR:gpu_disk_cache.cc(673)] Gpu Cache Creation failed: -2
+[2025-11-15T14:49:24.740Z] [electron-main] rss:getRssInfoListFromDb called
+[2025-11-15T14:49:24.740Z] [electron-main] Event: {
+  preventDefault: [Function: preventDefault],
+  sendReply: [Function: sendReply],
+  sender: EventEmitter {
+    isDestroyed: [Function: isDestroyed],
+    destroy: [Function: destroy],
+    close: [Function: close],
+    getBackgroundThrottling: [Function: getBackgroundThrottling],
+    setBackgroundThrottling: [Function: setBackgroundThrottling],
+    getProcessId: [Function: getProcessId],
+    getOSProcessId: [Function: getOSProcessId],
+    equal: [Function: equal],
+    _loadURL: [Function: _loadURL],
+    reload: [Function: reload],
+    reloadIgnoringCache: [Function: reloadIgnoringCache],
+    downloadURL: [Function: downloadURL],
+    getURL: [Function: getURL],
+    getTitle: [Function: getTitle],
+    isLoading: [Function: isLoading],
+    isLoadingMainFrame: [Function: isLoadingMainFrame],
+    isWaitingForResponse: [Function: isWaitingForResponse],
+    stop: [Function: stop],
+    canGoBack: [Function: canGoBack],
+    goBack: [Function: goBack],
+    canGoForward: [Function: canGoForward],
+    goForward: [Function: goForward],
+    canGoToOffset: [Function: canGoToOffset],
+    goToOffset: [Function: goToOffset],
+    canGoToIndex: [Function: canGoToIndex],
+    goToIndex: [Function: goToIndex],
+    getActiveIndex: [Function: getActiveIndex],
+    clearHistory: [Function: clearHistory],
+    length: [Function: length],
+    isCrashed: [Function: isCrashed],
+    forcefullyCrashRenderer: [Function: forcefullyCrashRenderer],
+    setUserAgent: [Function: setUserAgent],
+    getUserAgent: [Function: getUserAgent],
+    savePage: [Function: savePage],
+    openDevTools: [Function: openDevTools],
+    closeDevTools: [Function: closeDevTools],
+    isDevToolsOpened: [Function: isDevToolsOpened],
+    isDevToolsFocused: [Function: isDevToolsFocused],
+    enableDeviceEmulation: [Function: enableDeviceEmulation],
+    disableDeviceEmulation: [Function: disableDeviceEmulation],
+    toggleDevTools: [Function: toggleDevTools],
+    inspectElement: [Function: inspectElement],
+    setIgnoreMenuShortcuts: [Function: setIgnoreMenuShortcuts],
+    setAudioMuted: [Function: setAudioMuted],
+    isAudioMuted: [Function: isAudioMuted],
+    isCurrentlyAudible: [Function: isCurrentlyAudible],
+    undo: [Function: undo],
+    redo: [Function: redo],
+    cut: [Function: cut],
+    copy: [Function: copy],
+    paste: [Function: paste],
+    pasteAndMatchStyle: [Function: pasteAndMatchStyle],
+    delete: [Function: delete],
+    selectAll: [Function: selectAll],
+    unselect: [Function: unselect],
+    replace: [Function: replace],
+    replaceMisspelling: [Function: replaceMisspelling],
+    findInPage: [Function: findInPage],
+    stopFindInPage: [Function: stopFindInPage],
+    focus: [Function: focus],
+    isFocused: [Function: isFocused],
+    sendInputEvent: [Function: sendInputEvent],
+    beginFrameSubscription: [Function: beginFrameSubscription],
+    endFrameSubscription: [Function: endFrameSubscription],
+    startDrag: [Function: startDrag],
+    attachToIframe: [Function: attachToIframe],
+    detachFromOuterFrame: [Function: detachFromOuterFrame],
+    isOffscreen: [Function: isOffscreen],
+    startPainting: [Function: startPainting],
+    stopPainting: [Function: stopPainting],
+    isPainting: [Function: isPainting],
+    setFrameRate: [Function: setFrameRate],
+    getFrameRate: [Function: getFrameRate],
+    invalidate: [Function: invalidate],
+    setZoomLevel: [Function: setZoomLevel],
+    getZoomLevel: [Function: getZoomLevel],
+    setZoomFactor: [Function: setZoomFactor],
+    getZoomFactor: [Function: getZoomFactor],
+    getType: [Function: getType],
+    _getPreloadPaths: [Function: _getPreloadPaths],
+    getLastWebPreferences: [Function: getLastWebPreferences],
+    getOwnerBrowserWindow: [Function: getOwnerBrowserWindow],
+    inspectServiceWorker: [Function: inspectServiceWorker],
+    inspectSharedWorker: [Function: inspectSharedWorker],
+    inspectSharedWorkerById: [Function: inspectSharedWorkerById],
+    getAllSharedWorkers: [Function: getAllSharedWorkers],
+    _print: [Function: _print],
+    _printToPDF: [Function: _printToPDF],
+    _setNextChildWebPreferences: [Function: _setNextChildWebPreferences],
+    addWorkSpace: [Function: addWorkSpace],
+    removeWorkSpace: [Function: removeWorkSpace],
+    showDefinitionForSelection: [Function: showDefinitionForSelection],
+    copyImageAt: [Function: copyImageAt],
+    capturePage: [Function: capturePage],
+    setEmbedder: [Function: setEmbedder],
+    setDevToolsWebContents: [Function: setDevToolsWebContents],
+    getNativeView: [Function: getNativeView],
+    incrementCapturerCount: [Function: incrementCapturerCount],
+    decrementCapturerCount: [Function: decrementCapturerCount],
+    isBeingCaptured: [Function: isBeingCaptured],
+    setWebRTCIPHandlingPolicy: [Function: setWebRTCIPHandlingPolicy],
+    getMediaSourceId: [Function: getMediaSourceId],
+    getWebRTCIPHandlingPolicy: [Function: getWebRTCIPHandlingPolicy],
+    takeHeapSnapshot: [Function: takeHeapSnapshot],
+    setImageAnimationPolicy: [Function: setImageAnimationPolicy],
+    _getProcessMemoryInfo: [Function: _getProcessMemoryInfo],
+    id: 1,
+    session: [Getter],
+    hostWebContents: [Getter],
+    devToolsWebContents: [Getter],
+    debugger: [Getter],
+    mainFrame: [Getter],
+    opener: [Getter],
+    _windowOpenHandler: [Function (anonymous)],
+    ipc: [Getter],
+    _events: [Object: null prototype] {
+      '-ipc-message': [Function (anonymous)],
+      '-ipc-invoke': [Function (anonymous)],
+      '-ipc-message-sync': [Function (anonymous)],
+      '-ipc-ports': [Function (anonymous)],
+      crashed: [Function (anonymous)],
+      'render-process-gone': [Function (anonymous)],
+      'devtools-reload-page': [Function (anonymous)],
+      '-new-window': [Function (anonymous)],
+      '-will-add-new-contents': [Function (anonymous)],
+      '-add-new-contents': [Function (anonymous)],
+      login: [Function (anonymous)],
+      'ready-to-show': [Function (anonymous)],
+      'select-bluetooth-device': [Function (anonymous)],
+      'input-event': [Function (anonymous)],
+      'will-navigate': [Function (anonymous)]
+    },
+    _eventsCount: 15
+  },
+  frameId: 1,
+  processId: 4,
+  _reply: [Function (anonymous)],
+  _throw: [Function (anonymous)]
+}
+[2025-11-15T14:49:24.740Z] [electron-main] Args: []
+[2025-11-15T14:49:24.740Z] [electron-main] Starting getRssInfoListFromDb...
+[2025-11-15T14:49:24.743Z] [api.ts] getRssInfoListFromDb called
+[2025-11-15T14:49:24.743Z] [api.ts] Getting SourceManage instance...
+[2025-11-15T14:49:24.743Z] [api.ts] SourceManage instance: _SourceManage {
+  folderMap: { '默认': Folder { name: '默认', sourceArray: [] } }
+}
+[2025-11-15T14:49:24.743Z] [api.ts] Starting loadFromDb...
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] SourceManage.loadFromDb called
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] FolderMap before load: { '默认': Folder { name: '默认', sourceArray: [] } }
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] Getting SqliteUtil instance...
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] StorageUtil instance: _SqliteUtil {
+  dbHelper: _SqliteHelper {
+    db: Database {},
+    lock: ReadWriteLock {
+      writers: [],
+      readers: [],
+      activeReaders: 0,
+      activeWriter: false
+    },
+    queue: OperationQueue { queue: [], processing: false },
+    inTransaction: false
+  }
+}
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] Calling loadFolderItemList...
+[2025-11-15T14:49:24.744Z] [sqlite.ts] SqliteUtil.loadFolderItemList called
+[2025-11-15T14:49:24.744Z] [sqlite.ts] Querying folders from database...
+[2025-11-15T14:49:24.744Z] [sqlite.ts] Folder query result: [ { id: 1, name: '默认', parent_id: null } ]
+[2025-11-15T14:49:24.744Z] [sqlite.ts] Querying RSS sources from database...
+[2025-11-15T14:49:24.744Z] [sqlite.ts] RSS query result: [
+  {
+    id: 1,
+    rss_id: 'aa04a14e-470d-46e6-abd8-ebfd813e5343',
+    folder_id: 1,
+    title: '美团技术团队',
+    html_url: 'https://tech.meituan.com/feed/',
+    feed_url: 'https://tech.meituan.com/feed/',
+    avatar: 'https://tech.meituan.com/favicon.ico',
+    update_time: ''
+  },
+  {
+    id: 2,
+    rss_id: 'a5f76dc8-9962-48a6-83e9-422323f6b7ba',
+    folder_id: 1,
+    title: '机核',
+    html_url: 'https://www.gcores.com',
+    feed_url: 'https://www.gcores.com/rss',
+    avatar: 'https://www.gcores.com/favicon.ico',
+    update_time: ''
+  },
+  {
+    id: 3,
+    rss_id: 'f758a9db-b7a1-459b-91ea-6c9a3b746b9b',
+    folder_id: 1,
+    title: '极客公园',
+    html_url: 'http://mainssl.geekpark.net/rss.rss',
+    feed_url: 'https://www.geekpark.net/rss',
+    avatar: 'http://mainssl.geekpark.net/favicon.ico',
+    update_time: ''
+  },
+  {
+    id: 4,
+    rss_id: 'f4e59dfb-f820-42dc-98f8-049e8d6fb1ea',
+    folder_id: 1,
+    title: '《联合早报》-国际-即时',
+    html_url: 'https://www.zaobao.com/realtime/world',
+    feed_url: 'https://plink.anyfeeder.com/zaobao/realtime/world',
+    avatar: 'https://www.zaobao.com/favicon.ico',
+    update_time: ''
+  }
+]
+[2025-11-15T14:49:24.744Z] [sqlite.ts] Processing data...
+[2025-11-15T14:49:24.744Z] [sqlite.ts] loadFolderItemList completed, returning 1 folders
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] Load result: {
+  success: true,
+  msg: '',
+  data: [ { folderName: '默认', data: [Array], children: [] } ]
+}
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] Folder info list from DB: [
+  {
+    folderName: '默认',
+    data: [ [Object], [Object], [Object], [Object] ],
+    children: []
+  }
+]
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] Folder count: 1
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] Calling loadFolderInfoList...
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] loadFolderInfoList completed
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] FolderMap after load: {
+  '默认': Folder {
+    name: '默认',
+    sourceArray: [ [Source], [Source], [Source], [Source] ]
+  }
+}
+[2025-11-15T14:49:24.744Z] [sourceManage.ts] SourceManage.loadFromDb completed successfully
+[2025-11-15T14:49:24.743Z] [api.ts] loadFromDb completed
+[2025-11-15T14:49:24.743Z] [api.ts] Getting folder info list...
+[2025-11-15T14:49:24.743Z] [api.ts] Folder info list: [
+  {
+    folderName: '默认',
+    data: [ [Object], [Object], [Object], [Object] ],
+    children: []
+  }
+]
+[2025-11-15T14:49:24.743Z] [api.ts] Returning result with 1 folders
+[2025-11-15T14:49:24.740Z] [electron-main] rss:getRssInfoListFromDb SUCCESS, result: [
+  {
+    folderName: '默认',
+    data: [ [Object], [Object], [Object], [Object] ],
+    children: []
+  }
+]
+[2025-11-15T14:49:24.740Z] [electron-main] Result type: object
+[2025-11-15T14:49:24.740Z] [electron-main] Result length: 1
+
+
+
+ App • ⚠️  Electron process was killed. Exiting...
+
