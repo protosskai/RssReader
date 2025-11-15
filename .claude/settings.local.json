@@ -12,7 +12,9 @@
       "Bash(sqlite3:*)",
       "Bash(yarn build:electron:*)",
       "Bash(npm run build:electron)",
-      "Bash(npm run dev:electron)"
+      "Bash(npm run dev:electron)",
+      "Bash(pkill:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []

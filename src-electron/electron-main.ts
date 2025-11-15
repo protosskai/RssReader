@@ -1,6 +1,7 @@
 import {app, BrowserWindow, ipcMain, nativeTheme, shell} from 'electron';
 import path from 'path';
 import os from 'os';
+import http from 'http';
 import {
   openLink,
   addRssSubscription,
@@ -32,6 +33,57 @@ try {
 
 let mainWindow: BrowserWindow | undefined;
 
+/**
+ * 等待dev server ready
+ * @param maxRetries 最大重试次数
+ * @param retryDelay 重试间隔（毫秒）
+ */
+async function waitForDevServer(maxRetries: number = 30, retryDelay: number = 1000): Promise<void> {
+  const appUrl = process.env.APP_URL || 'http://localhost:9000';
+  const serverUrl = new URL(appUrl);
+  const hostname = serverUrl.hostname;
+  const port = serverUrl.port || (serverUrl.protocol === 'https:' ? '443' : '80');
+
+  console.log(`[electron-main] Waiting for dev server at ${hostname}:${port}...`);
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const req = http.get({
+          hostname,
+          port,
+          path: '/',
+          timeout: 1000
+        }, (res) => {
+          if (res.statusCode && res.statusCode < 500) {
+            resolve();
+          } else {
+            reject(new Error(`Server returned status ${res.statusCode}`));
+          }
+        });
+
+        req.on('error', reject);
+        req.on('timeout', () => {
+          req.destroy();
+          reject(new Error('Request timeout'));
+        });
+
+        req.setTimeout(1000);
+      });
+
+      console.log(`[electron-main] Dev server is ready! (attempt ${i + 1}/${maxRetries})`);
+      return;
+    } catch (error) {
+      console.log(`[electron-main] Waiting for dev server... (attempt ${i + 1}/${maxRetries})`);
+      if (i < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
+    }
+  }
+
+  throw new Error(`Dev server failed to start after ${maxRetries} attempts`);
+}
+
 function createWindow() {
   /**
    * Initial window options
@@ -52,7 +104,9 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadURL(process.env.APP_URL);
+  const appUrl = process.env.APP_URL;
+  console.log(`[electron-main] Loading URL: ${appUrl}`);
+  mainWindow.loadURL(appUrl);
 
   // 开发调试期间，始终打开开发者工具以便查看调试日志
   mainWindow.webContents.openDevTools();
@@ -73,8 +127,8 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  // 首先初始化数据库
   try {
+    // 首先初始化数据库
     console.log('[electron-main] Initializing database...');
     await initDB();
     console.log('[electron-main] Database initialized successfully');
@@ -325,9 +379,18 @@ app.whenReady().then(async () => {
     return article?.favorite || false
   })
 
-  // 所有初始化完成后，创建窗口
-  console.log('[electron-main] All IPC handlers registered, creating window...');
-  createWindow()
+  // 所有IPC处理器注册完成后，等待dev server ready再创建窗口
+  console.log('[electron-main] All IPC handlers registered, waiting for dev server...');
+  try {
+    await waitForDevServer();
+    console.log('[electron-main] Dev server is ready, creating window...');
+    createWindow();
+  } catch (error) {
+    console.error('[electron-main] Failed to wait for dev server:', error);
+    console.error('[electron-main] Please check if dev server is running on the correct port');
+    console.error('[electron-main] App will not start without dev server');
+    app.quit();
+  }
 });
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {

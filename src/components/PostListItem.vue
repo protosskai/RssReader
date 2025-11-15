@@ -32,24 +32,26 @@
           </q-item-section>
         </q-item>
       </q-card-section>
-      <q-card-section class="action-buttons">
-        <q-btn label="阅读" color="primary" @click="openContentPage" unelevated/>
-        <q-btn 
-          :label="postInfo.read ? '标为未读' : '标为已读'" 
-          color="primary" 
-          flat 
-          class="q-ml-sm"
-          @click.stop="toggleReadStatus"
-        />
-        <q-btn 
-          icon="open_in_new" 
-          color="primary" 
-          flat 
-          class="q-ml-sm"
-          @click.stop="openInBrowser"
-        >
-          <q-tooltip>在浏览器中打开</q-tooltip>
-        </q-btn>
+      <q-card-section>
+        <div class="action-buttons">
+          <q-btn label="阅读" color="primary" @click="openContentPage" unelevated size="md"/>
+          <q-btn
+            :label="postInfo.read ? '标为未读' : '标为已读'"
+            color="primary"
+            flat
+            @click.stop="toggleReadStatus"
+            size="md"
+          />
+          <q-btn
+            icon="open_in_new"
+            color="primary"
+            flat
+            @click.stop="openInBrowser"
+            size="md"
+          >
+            <q-tooltip>在浏览器中打开</q-tooltip>
+          </q-btn>
+        </div>
       </q-card-section>
 
     </q-card>
@@ -117,11 +119,23 @@ const openContentPage = () => {
 <style scoped lang="scss">
 .post-item {
   width: 100%;
+  padding: 8px 0;
 }
 
 .unread-icon {
   position: absolute;
   left: -10px;
   top: 12px
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+
+  .q-btn {
+    flex-shrink: 0;
+  }
 }
 </style>

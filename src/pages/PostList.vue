@@ -1,5 +1,5 @@
 <template>
-  <q-page class="row items-center justify-evenly" style="width: 100%">
+  <q-page class="column items-start" style="width: 100%; padding: 16px;">
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <q-spinner-dots size="50px" color="primary"/>
@@ -44,10 +44,9 @@
     </div>
     
     <!-- 文章列表容器 -->
-    <div v-else class="post-list-container">
-      <q-list class="row items-center justify-evenly post-list">
-        <post-list-item class="post-list-item" v-for="(item,index) in PostInfoList" :post-info="item" :key="index"
-                        :rss-id="rssId"/>
+    <div v-else class="post-list-container" style="width: 100%;">
+      <q-list separator class="post-list">
+        <post-list-item v-for="(item,index) in PostInfoList" :post-info="item" :key="index" :rss-id="rssId"/>
       </q-list>
 
       <!-- 滚动到顶部按钮 -->
@@ -171,11 +170,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-.post-list-item {
+.post-list {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.post-list {
+.post-list-item {
   width: 100%;
 }
 
@@ -193,5 +195,11 @@ onUnmounted(() => {
 .error-card {
   max-width: 400px;
   width: 100%;
+}
+
+.post-list-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 </style>
