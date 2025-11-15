@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import type { PostIndex } from 'src/common/ContentInfo'
+import type { PostIndexItem } from 'app/src-electron/storage/common'
 import { ref, computed } from 'vue'
 
 export const useSearchStore = defineStore('search', () => {
   // 状态
   const searchQuery = ref('')
-  const searchResults = ref<PostIndex[]>([])
+  const searchResults = ref<PostIndexItem[]>([])
   const isSearching = ref(false)
   const searchError = ref<string | null>(null)
   const searchHistory = ref<string[]>([])
@@ -20,9 +20,19 @@ export const useSearchStore = defineStore('search', () => {
   /**
    * 执行搜索
    * @param query 搜索关键词
-   * @param posts 要搜索的文章列表
+   * @param posts 要搜索的文章列表（用于本地搜索）
+   * @param options 搜索选项（用于全局搜索）
    */
-  const search = async (query: string, posts: PostIndex[] = []) => {
+  const search = async (
+    query: string,
+    posts: PostIndexItem[] = [],
+    options?: {
+      folderId?: string
+      dateFrom?: string
+      dateTo?: string
+      limit?: number
+    }
+  ) => {
     if (!query.trim()) {
       searchResults.value = []
       return
@@ -38,7 +48,7 @@ export const useSearchStore = defineStore('search', () => {
         performLocalSearch(query, posts)
       } else {
         // 否则调用electronAPI进行全局搜索
-        await performGlobalSearch(query)
+        await performGlobalSearch(query, options)
       }
 
       // 保存到搜索历史
@@ -55,9 +65,9 @@ export const useSearchStore = defineStore('search', () => {
   /**
    * 本地搜索（用于前端过滤）
    */
-  const performLocalSearch = (query: string, posts: PostIndex[]) => {
+  const performLocalSearch = (query: string, posts: PostIndexItem[]) => {
     const lowerQuery = query.toLowerCase()
-    searchResults.value = posts.filter(post => 
+    searchResults.value = posts.filter(post =>
       post.title.toLowerCase().includes(lowerQuery) ||
       post.author.toLowerCase().includes(lowerQuery) ||
       (post.desc && post.desc.toLowerCase().includes(lowerQuery))
@@ -65,13 +75,22 @@ export const useSearchStore = defineStore('search', () => {
   }
 
   /**
-   * 全局搜索（调用后端API）
+   * 全局搜索（调用后端API，使用FTS5全文索引）
    */
-  const performGlobalSearch = async (query: string) => {
+  const performGlobalSearch = async (
+    query: string,
+    options?: {
+      folderId?: string
+      dateFrom?: string
+      dateTo?: string
+      limit?: number
+    }
+  ) => {
     try {
-      // 调用electronAPI进行全局搜索
-      const results = await window.electronAPI.searchPosts(query)
+      // 调用electronAPI进行全局搜索（使用SQLite FTS5全文索引）
+      const results = await window.electronAPI.searchPosts(query, options)
       searchResults.value = results
+      console.log('全局搜索完成，结果数量:', results.length)
     } catch (error) {
       console.error('全局搜索失败:', error)
       throw error
@@ -154,9 +173,18 @@ export const useSearchStore = defineStore('search', () => {
   /**
    * 从历史记录中执行搜索
    */
-  const searchFromHistory = (query: string, posts: PostIndex[] = []) => {
+  const searchFromHistory = (
+    query: string,
+    posts: PostIndexItem[] = [],
+    options?: {
+      folderId?: string
+      dateFrom?: string
+      dateTo?: string
+      limit?: number
+    }
+  ) => {
     searchQuery.value = query
-    search(query, posts)
+    search(query, posts, options)
   }
 
   // 初始化时加载搜索历史

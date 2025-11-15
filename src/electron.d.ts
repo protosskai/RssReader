@@ -53,7 +53,23 @@ export interface electronAPI {
   getFavoritePosts: () => Promise<PostIndexItem[]>,
   addFavoritePost: (post: any) => Promise<void>,
   removeFavoritePost: (guid: string) => Promise<void>,
-  isPostFavorite: (guid: string) => Promise<boolean>
+  isPostFavorite: (guid: string) => Promise<boolean>,
+
+  // Sync management
+  syncGetConfig: () => Promise<any>,
+  syncUpdateConfig: (config: any) => Promise<any>,
+  syncStart: () => Promise<any>,
+  syncGetStatus: () => Promise<any>,
+  syncStartAuto: () => Promise<any>,
+  syncStopAuto: () => Promise<any>,
+
+  // Search functionality
+  searchPosts: (query: string, options?: {
+    folderId?: string
+    dateFrom?: string
+    dateTo?: string
+    limit?: number
+  }) => Promise<PostIndexItem[]>
 }
 
 declare  global {

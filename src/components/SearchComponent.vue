@@ -133,7 +133,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useSearchStore } from 'src/stores/searchStore'
 import { useFavoriteStore } from 'src/stores/favoriteStore'
 import { useRouter } from 'vue-router'
-import type { PostIndex } from 'src/common/ContentInfo'
+import type { PostIndexItem } from 'app/src-electron/storage/common'
 import { useQuasar } from 'quasar'
 
 const searchStore = useSearchStore()
@@ -153,7 +153,7 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits
 const emit = defineEmits<{
   search: [query: string]
-  resultClick: [post: PostIndex]
+  resultClick: [post: PostIndexItem]
 }>()
 
 // Local state
@@ -260,7 +260,7 @@ const confirmClearHistory = () => {
   })
 }
 
-const handleResultClick = (post: PostIndex) => {
+const handleResultClick = (post: PostIndexItem) => {
   // 添加点击动画效果
   const event = window.event as MouseEvent
   const target = event.target as HTMLElement
@@ -282,7 +282,7 @@ const handleResultClick = (post: PostIndex) => {
   })
 }
 
-const handleFavoriteToggle = async (post: PostIndex) => {
+const handleFavoriteToggle = async (post: PostIndexItem) => {
   try {
     await favoriteStore.toggleFavorite(post)
     // 更新本地状态以立即反映UI变化

@@ -99,12 +99,12 @@ import {ref, onMounted} from "vue";
 import {useQuasar} from "quasar";
 import {switchPage, extractTextFromHtml} from "src/common/util";
 import {useFavoriteStore} from "src/stores/favoriteStore";
-import type {PostIndex} from "src/common/ContentInfo";
+import type {PostIndexItem} from "app/src-electron/storage/common";
 
 const $q = useQuasar();
 const favoriteStore = useFavoriteStore();
 
-const favoritePosts = ref<PostIndex[]>([]);
+const favoritePosts = ref<PostIndexItem[]>([]);
 const loading = ref(true);
 const error = ref('');
 
@@ -128,7 +128,7 @@ const loadFavoritePosts = async () => {
 };
 
 // 取消收藏
-const unfavoritePost = async (post: PostIndex) => {
+const unfavoritePost = async (post: PostIndexItem) => {
   try {
     // 先在UI上移除，提升用户体验
     const index = favoritePosts.value.findIndex(p => p.guid === post.guid);
@@ -159,7 +159,7 @@ const unfavoritePost = async (post: PostIndex) => {
 };
 
 // 打开文章内容页面
-const openContentPage = (post: PostIndex) => {
+const openContentPage = (post: PostIndexItem) => {
   try {
     // 自动标记为已读
     if (!post.read) {
@@ -181,7 +181,7 @@ const openContentPage = (post: PostIndex) => {
 };
 
 // 在浏览器中打开
-const openInBrowser = (post: PostIndex) => {
+const openInBrowser = (post: PostIndexItem) => {
   if (post.link) {
     window.electronAPI.openLink(post.link);
     

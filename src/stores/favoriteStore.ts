@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { PostIndex } from 'src/common/ContentInfo';
+import type { PostIndexItem } from 'app/src-electron/storage/common';
 import { useQuasar } from 'quasar';
 
 export const useFavoriteStore = defineStore('favorite', () => {
   // 状态
-  const favoritePosts = ref<PostIndex[]>([]);
+  const favoritePosts = ref<PostIndexItem[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const $q = useQuasar();
@@ -14,7 +14,7 @@ export const useFavoriteStore = defineStore('favorite', () => {
   const loadFavoritePosts = async () => {
     isLoading.value = true;
     error.value = null;
-    
+
     try {
       // 从数据库加载收藏文章
       const posts = await window.electronAPI.getFavoritePosts();
@@ -30,9 +30,9 @@ export const useFavoriteStore = defineStore('favorite', () => {
   };
 
   // 切换收藏状态
-  const toggleFavorite = async (post: PostIndex) => {
+  const toggleFavorite = async (post: PostIndexItem) => {
     const isCurrentlyFavorite = await isFavorite(post);
-    
+
     try {
       if (isCurrentlyFavorite) {
         // 取消收藏
@@ -69,7 +69,7 @@ export const useFavoriteStore = defineStore('favorite', () => {
   };
 
   // 检查文章是否已收藏
-  const isFavorite = async (post: PostIndex): Promise<boolean> => {
+  const isFavorite = async (post: PostIndexItem): Promise<boolean> => {
     try {
       // 调用electronAPI检查实际收藏状态
       return await window.electronAPI.isPostFavorite(post.guid);

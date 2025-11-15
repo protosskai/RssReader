@@ -169,5 +169,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   isPostFavorite: async (guid: string): Promise<boolean> => {
     return await ipcRenderer.invoke('article:isPostFavorite', guid)
+  },
+
+  // 同步管理API
+  syncGetConfig: async (): Promise<any> => {
+    return await ipcRenderer.invoke('sync:getConfig')
+  },
+  syncUpdateConfig: async (config: any): Promise<any> => {
+    return await ipcRenderer.invoke('sync:updateConfig', config)
+  },
+  syncStart: async (): Promise<any> => {
+    return await ipcRenderer.invoke('sync:start')
+  },
+  syncGetStatus: async (): Promise<any> => {
+    return await ipcRenderer.invoke('sync:getStatus')
+  },
+  syncStartAuto: async (): Promise<any> => {
+    return await ipcRenderer.invoke('sync:startAuto')
+  },
+  syncStopAuto: async (): Promise<any> => {
+    return await ipcRenderer.invoke('sync:stopAuto')
+  },
+
+  // 搜索功能API
+  searchPosts: async (query: string, options?: {
+    folderId?: string
+    dateFrom?: string
+    dateTo?: string
+    limit?: number
+  }): Promise<any[]> => {
+    return await ipcRenderer.invoke('search:searchPosts', query, options)
   }
 })

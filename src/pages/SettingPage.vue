@@ -101,11 +101,12 @@
                     <div class="setting-description">选择浅色或深色主题</div>
                   </div>
                   <q-btn-toggle
-                    v-model="settings.theme"
+                    :model-value="themeStore.currentMode"
+                    @update:model-value="(val) => themeStore.setMode(val as ThemeMode)"
                     :options="[
                       {label: '浅色', value: 'light'},
                       {label: '深色', value: 'dark'},
-                      {label: '跟随系统', value: 'auto'}
+                      {label: '跟随系统', value: 'system'}
                     ]"
                     rounded
                     unelevated
@@ -113,6 +114,15 @@
                     text-color="white"
                     class="setting-control"
                   />
+                  <div class="theme-preview">
+                    <q-chip
+                      :color="themeStore.isDarkMode ? 'primary' : 'grey-3'"
+                      :text-color="themeStore.isDarkMode ? 'white' : 'dark'"
+                      size="sm"
+                    >
+                      {{ themeStore.isDarkMode ? '当前：深色' : '当前：浅色' }}
+                    </q-chip>
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
@@ -178,7 +188,8 @@
                     <div class="setting-description">自动从RSS源获取最新文章</div>
                   </div>
                   <q-toggle
-                    v-model="settings.autoSync"
+                    v-model="syncConfig.enabled"
+                    @update:model-value="updateSyncConfig"
                     color="primary"
                     class="setting-control"
                   />
@@ -194,14 +205,15 @@
                     <div class="setting-description">设置自动同步的间隔时间</div>
                   </div>
                   <q-select
-                    v-model="settings.syncInterval"
+                    v-model="syncConfig.interval"
+                    @update:model-value="updateSyncConfig"
                     :options="syncIntervalOptions"
                     outlined
                     dense
                     emit-value
                     map-options
                     class="setting-control"
-                    :disable="!settings.autoSync"
+                    :disable="!syncConfig.enabled"
                   />
                 </div>
               </q-card-section>
@@ -211,14 +223,51 @@
               <q-card-section>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-title">同步在后台运行</div>
-                    <div class="setting-description">即使应用在后台也能同步RSS源</div>
+                    <div class="setting-title">后台同步</div>
+                    <div class="setting-description">应用在后台时也能同步RSS源</div>
                   </div>
                   <q-toggle
-                    v-model="settings.backgroundSync"
+                    v-model="syncConfig.backgroundSync"
+                    @update:model-value="updateSyncConfig"
                     color="primary"
                     class="setting-control"
-                    :disable="!settings.autoSync"
+                    :disable="!syncConfig.enabled"
+                  />
+                </div>
+              </q-card-section>
+            </q-card>
+
+            <q-card flat bordered class="setting-card">
+              <q-card-section>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-title">新文章通知</div>
+                    <div class="setting-description">有新文章时显示桌面通知</div>
+                  </div>
+                  <q-toggle
+                    v-model="syncConfig.notification"
+                    @update:model-value="updateSyncConfig"
+                    color="primary"
+                    class="setting-control"
+                    :disable="!syncConfig.enabled"
+                  />
+                </div>
+              </q-card-section>
+            </q-card>
+
+            <q-card flat bordered class="setting-card">
+              <q-card-section>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-title">启动时同步</div>
+                    <div class="setting-description">应用启动时自动同步一次</div>
+                  </div>
+                  <q-toggle
+                    v-model="syncConfig.syncOnStartup"
+                    @update:model-value="updateSyncConfig"
+                    color="primary"
+                    class="setting-control"
+                    :disable="!syncConfig.enabled"
                   />
                 </div>
               </q-card-section>
@@ -226,6 +275,14 @@
 
             <q-card flat bordered class="setting-card">
               <q-card-section class="text-center">
+                <div class="sync-status" v-if="syncStatus">
+                  <q-chip :color="syncStatus.isRunning ? 'positive' : 'grey'">
+                    {{ syncStatus.isRunning ? '自动同步运行中' : '自动同步已停止' }}
+                  </q-chip>
+                  <q-chip v-if="syncStatus.isSyncing" color="primary" class="q-ml-sm">
+                    同步中...
+                  </q-chip>
+                </div>
                 <q-btn
                   color="primary"
                   label="立即同步所有RSS源"
@@ -233,6 +290,7 @@
                   @click="syncAllFeeds"
                   :loading="syncing"
                   unelevated
+                  class="q-mt-md"
                 />
               </q-card-section>
             </q-card>
@@ -388,10 +446,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { useThemeStore, type ThemeMode } from 'stores/themeStore';
 
 const $q = useQuasar();
+const themeStore = useThemeStore();
 
 // 标签页
 const tab = ref('general');
@@ -425,12 +485,8 @@ const settings = reactive({
   language: 'zh-CN',
   autoStart: false,
   minimizeToTray: true,
-  theme: 'light',
   fontSize: 14,
   listDensity: 'comfortable',
-  autoSync: true,
-  syncInterval: 30,
-  backgroundSync: true,
   desktopNotifications: true,
   soundNotifications: false,
   notificationsOnlyWhenHidden: true,
@@ -438,18 +494,76 @@ const settings = reactive({
   developerMode: false
 });
 
+// 同步配置
+const syncConfig = reactive({
+  enabled: false,
+  interval: 30,
+  backgroundSync: true,
+  systemTray: true,
+  syncOnStartup: true,
+  notification: true
+})
+
+// 同步状态
+const syncStatus = ref<any>(null)
+
 // 加载设置
 const loadSettings = async () => {
-  // TODO: 从本地存储或配置文件加载设置
-  // 这里暂时使用默认值
+  try {
+    const saved = localStorage.getItem('appSettings');
+    if (saved) {
+      const parsedSettings = JSON.parse(saved);
+      Object.assign(settings, parsedSettings);
+    }
+
+    // 加载同步配置
+    const syncResult = await window.electronAPI.syncGetConfig()
+    if (syncResult) {
+      Object.assign(syncConfig, syncResult)
+    }
+
+    // 获取同步状态
+    await refreshSyncStatus()
+  } catch (error) {
+    console.error('加载设置失败:', error);
+  }
 };
+
+// 更新同步配置
+const updateSyncConfig = async () => {
+  try {
+    await window.electronAPI.syncUpdateConfig(syncConfig)
+    await refreshSyncStatus()
+    $q.notify({
+      type: 'positive',
+      message: '同步设置已保存',
+      position: 'top'
+    })
+  } catch (error) {
+    console.error('保存同步设置失败:', error)
+    $q.notify({
+      type: 'negative',
+      message: '保存同步设置失败',
+      position: 'top'
+    })
+  }
+}
+
+// 刷新同步状态
+const refreshSyncStatus = async () => {
+  try {
+    syncStatus.value = await window.electronAPI.syncGetStatus()
+  } catch (error) {
+    console.error('获取同步状态失败:', error)
+  }
+}
 
 // 保存设置
 const saveSettings = async () => {
   saving.value = true;
   try {
-    // TODO: 保存设置到本地存储或配置文件
-    await new Promise(resolve => setTimeout(resolve, 500)); // 模拟保存
+    // 保存到localStorage
+    localStorage.setItem('appSettings', JSON.stringify(settings));
 
     $q.notify({
       type: 'positive',
@@ -471,18 +585,25 @@ const saveSettings = async () => {
 const syncAllFeeds = async () => {
   syncing.value = true;
   try {
-    // TODO: 调用同步API
-    await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟同步
+    const result = await window.electronAPI.syncStart()
 
-    $q.notify({
-      type: 'positive',
-      message: '同步完成',
-      position: 'top'
-    });
+    if (result.success) {
+      const { stats } = result
+      $q.notify({
+        type: 'positive',
+        message: `同步完成！成功: ${stats.successCount}, 失败: ${stats.failureCount}`,
+        position: 'top',
+        timeout: 3000
+      });
+      await refreshSyncStatus()
+    } else {
+      throw new Error(result.error || '同步失败')
+    }
   } catch (error) {
+    console.error('同步失败:', error)
     $q.notify({
       type: 'negative',
-      message: '同步失败',
+      message: `同步失败: ${error instanceof Error ? error.message : String(error)}`,
       position: 'top'
     });
   } finally {
@@ -529,14 +650,22 @@ const confirmResetSettings = () => {
 // 初始化
 onMounted(() => {
   loadSettings();
+  // 监听主题变化
+  watch(() => themeStore.currentMode, (newMode) => {
+    console.log('主题模式已切换为:', newMode);
+  });
 });
 </script>
 
 <style lang="scss" scoped>
 .settings-page {
-  background: #f5f5f5;
+  background: $grey-3;
   min-height: 100vh;
   padding: 20px;
+
+  .body--dark & {
+    background: $dark;
+  }
 }
 
 .settings-container {
@@ -546,6 +675,11 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+
+  .body--dark & {
+    background: $dark-page;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .settings-header {
@@ -570,9 +704,18 @@ onMounted(() => {
   background: #fafafa;
   border-bottom: 1px solid #e0e0e0;
 
+  .body--dark & {
+    background: $dark-page;
+    border-bottom-color: $dark-separator;
+  }
+
   :deep(.q-tab) {
     min-height: 56px;
     font-weight: 500;
+
+    .body--dark & {
+      color: $grey-5;
+    }
   }
 }
 
@@ -589,16 +732,28 @@ onMounted(() => {
   padding-bottom: 12px;
   border-bottom: 1px solid #e0e0e0;
 
+  .body--dark & {
+    border-bottom-color: $dark-separator;
+  }
+
   h3 {
     margin: 0 0 8px;
     font-size: 20px;
     color: #333;
+
+    .body--dark & {
+      color: $grey-2;
+    }
   }
 
   p {
     margin: 0;
     color: #666;
     font-size: 14px;
+
+    .body--dark & {
+      color: $grey-6;
+    }
   }
 }
 
@@ -628,15 +783,27 @@ onMounted(() => {
   font-weight: 500;
   color: #333;
   margin-bottom: 4px;
+
+  .body--dark & {
+    color: $grey-2;
+  }
 }
 
 .setting-description {
   font-size: 13px;
   color: #666;
+
+  .body--dark & {
+    color: $grey-6;
+  }
 }
 
 .setting-control {
   min-width: 200px;
+}
+
+.theme-preview {
+  margin-left: 12px;
 }
 
 .danger-zone {
@@ -668,6 +835,19 @@ onMounted(() => {
   background: #fafafa;
   border-top: 1px solid #e0e0e0;
   text-align: center;
+
+  .body--dark & {
+    background: $dark-page;
+    border-top-color: $dark-separator;
+  }
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 // 响应式设计

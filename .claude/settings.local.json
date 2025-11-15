@@ -14,7 +14,10 @@
       "Bash(npm run build:electron)",
       "Bash(npm run dev:electron)",
       "Bash(pkill:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(npx tsc --noEmit --skipLibCheck src/composables/useKeyboard.ts)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout 15 npx quasar dev:*)"
     ],
     "deny": [],
     "ask": []

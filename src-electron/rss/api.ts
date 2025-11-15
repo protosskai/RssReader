@@ -323,6 +323,46 @@ export const loadFolderFromDb = async (): Promise<string> => {
   return JSON.stringify(folderInfoList)
 }
 
+/**
+ * 全文搜索文章
+ * @param query 搜索关键词
+ * @param options 搜索选项（文件夹ID、日期范围、结果限制等）
+ */
+export const searchPosts = async (
+  query: string,
+  options?: {
+    folderId?: string
+    dateFrom?: string
+    dateTo?: string
+    limit?: number
+  }
+): Promise<PostIndexItem[]> => {
+  const timestamp = new Date().toISOString()
+  console.log(`[${timestamp}] [api.ts] searchPosts called`)
+  console.log(`[${timestamp}] [api.ts] query:`, query)
+  console.log(`[${timestamp}] [api.ts] options:`, options)
+
+  try {
+    const storageUtil: StorageUtil = SqliteUtil.getInstance()
+    console.log(`[${timestamp}] [api.ts] Calling storageUtil.searchPosts...`)
+
+    const result = await storageUtil.searchPosts(query, options)
+    console.log(`[${timestamp}] [api.ts] Search result:`, result)
+
+    if (!result.success) {
+      console.error(`[${timestamp}] [api.ts] Search failed:`, result.msg)
+      throw new Error(result.msg)
+    }
+
+    console.log(`[${timestamp}] [api.ts] Returning ${result.data.length} search results`)
+    return result.data
+  } catch (error) {
+    console.error(`[${timestamp}] [api.ts] searchPosts ERROR:`, error)
+    console.error(`[${timestamp}] [api.ts] Error stack:`, error.stack)
+    throw error
+  }
+}
+
 export const initDB = async (): Promise<void> => {
   const storageUtil: StorageUtil = SqliteUtil.getInstance()
   await storageUtil.init()

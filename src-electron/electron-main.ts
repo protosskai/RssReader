@@ -11,9 +11,10 @@ import {
   importOpmlFile,
   dumpFolderToDb,
   loadFolderFromDb, getRssInfoListFromDb, editFolder,
-  queryPostIndexByRssId, queryPostContentByGuid, fetchRssIndexList, initDB
+  queryPostIndexByRssId, queryPostContentByGuid, fetchRssIndexList, initDB, searchPosts
 } from "src-electron/rss/api";
 import { getArticleService } from './infrastructure/Container';
+import { SyncManager } from './services/SyncManager';
 
 
 // needed in case process is undefined under Linux
@@ -21,6 +22,9 @@ const platform = process.platform || os.platform();
 
 // 初始化Article Service
 const articleService = getArticleService();
+
+// 初始化Sync Manager
+const syncManager = SyncManager.getInstance();
 
 try {
   if (platform === 'win32' && nativeTheme.shouldUseDarkColors) {
@@ -377,6 +381,46 @@ app.whenReady().then(async () => {
     const [guid] = args
     const article = await articleService.getArticle(guid)
     return article?.favorite || false
+  })
+
+  // 同步管理相关IPC处理器
+  ipcMain.handle('sync:getConfig', async () => {
+    return syncManager.getConfig()
+  })
+
+  ipcMain.handle('sync:updateConfig', async (event, config) => {
+    syncManager.updateConfig(config)
+    return { success: true }
+  })
+
+  ipcMain.handle('sync:start', async () => {
+    try {
+      const stats = await syncManager.syncAll()
+      return { success: true, stats }
+    } catch (error) {
+      console.error('[electron-main] Manual sync failed:', error)
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  ipcMain.handle('sync:getStatus', async () => {
+    return syncManager.getStatus()
+  })
+
+  ipcMain.handle('sync:startAuto', async () => {
+    syncManager.startAutoSync()
+    return { success: true }
+  })
+
+  ipcMain.handle('sync:stopAuto', async () => {
+    syncManager.stopAutoSync()
+    return { success: true }
+  })
+
+  // 搜索相关IPC处理器
+  ipcMain.handle('search:searchPosts', async (event, ...args) => {
+    const [query, options] = args
+    return await searchPosts(query, options)
   })
 
   // 所有IPC处理器注册完成后，等待dev server ready再创建窗口
