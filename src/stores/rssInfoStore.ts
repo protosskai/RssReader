@@ -1,78 +1,74 @@
-import {defineStore} from 'pinia';
-import {computed, ref, Ref} from "vue";
-import {RssFolderItem, RssInfoItem, RssInfoNew} from "src/common/RssInfoItem";
-import {ErrorMsg} from "src/common/ErrorMsg";
+import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
+import type { Ref } from 'vue';
+import { ErrorMsg } from 'src/common/ErrorMsg';
+import { RssFolderItem, RssInfoItem, RssInfoNew } from 'src/common/RssInfoItem';
+import { electronClient } from 'src/services/electronClient';
 
 export const useRssInfoStore = defineStore('rssInfo', () => {
-  const rssFolderList: Ref<RssFolderItem[]> = ref([])
-  const folderNameList = computed(() => (rssFolderList.value.map(item => item.folderName)))
+  const rssFolderList: Ref<RssFolderItem[]> = ref([]);
+  const isLoading = ref(false);
+  const error = ref<string | null>(null);
 
-  // 计算属性 - 统计信息
-  const totalArticleCount = computed(() => {
-    // 这里应该从数据库获取总数，现在先返回0
-    return 0
-  })
+  const folderNameList = computed(() => rssFolderList.value.map((item) => item.folderName));
+  const totalArticleCount = computed(() => 0);
+  const unreadArticleCount = computed(() => 0);
+  const favoriteCount = computed(() => 0);
 
-  const unreadArticleCount = computed(() => {
-    // 这里应该从数据库获取未读数，现在先返回0
-    return 0
-  })
-
-  const favoriteCount = computed(() => {
-    // 这里应该从收藏表获取数量，现在先返回0
-    return 0
-  })
+  const executeAndRefresh = async <T>(action: () => Promise<T>): Promise<T> => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const result = await action();
+      rssFolderList.value = await electronClient.getRssInfoListFromDb();
+      return result;
+    } catch (rawError) {
+      error.value = rawError instanceof Error ? rawError.message : 'RSS数据操作失败';
+      throw rawError;
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
   const refresh = async () => {
-    rssFolderList.value = await window.electronAPI.getRssInfoListFromDb()
-  }
+    await executeAndRefresh(async () => undefined);
+  };
 
-  // 同步所有订阅源
   const syncAll = async () => {
-    // 这里应该调用主进程的同步方法
-    // 暂时先调用刷新
-    await refresh()
-  }
+    await refresh();
+  };
+
   const addRssSubscription = async (feedUrl: string, title: string, folderName: string) => {
-    const obj: RssInfoNew = {
-      feedUrl,
-      title,
-      folderName
-    }
-    await window.electronAPI.addRssSubscription(obj)
-    await refresh()
-  }
+    const payload: RssInfoNew = { feedUrl, title, folderName };
+    await executeAndRefresh(() => electronClient.addRssSubscription(payload));
+  };
+
   const removeRssSubscription = async (folderName: string, rssInfoItem: RssInfoItem): Promise<ErrorMsg> => {
-    const errMsg = await window.electronAPI.removeRssSubscription(folderName, rssInfoItem.feedUrl)
-    await refresh()
-    return errMsg
-  }
+    return executeAndRefresh(() => electronClient.removeRssSubscription(folderName, rssInfoItem.feedUrl));
+  };
+
   const addFolder = async (folderName: string): Promise<ErrorMsg> => {
-    const errMsg = await window.electronAPI.addFolder(folderName)
-    await refresh()
-    return errMsg
-  }
+    return executeAndRefresh(() => electronClient.addFolder(folderName));
+  };
+
   const editFolder = async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
-    const errMsg = await window.electronAPI.editFolder(oldFolderName, newFolderName)
-    await refresh()
-    return errMsg
-  }
+    return executeAndRefresh(() => electronClient.editFolder(oldFolderName, newFolderName));
+  };
+
   const removeFolder = async (folderName: string): Promise<ErrorMsg> => {
-    const errMsg = await window.electronAPI.removeFolder(folderName)
-    await refresh()
-    return errMsg
-  }
+    return executeAndRefresh(() => electronClient.removeFolder(folderName));
+  };
+
   const importOpmlFile = async (): Promise<ErrorMsg> => {
-    const errMsg = await window.electronAPI.importOpmlFile()
-    await refresh()
-    return errMsg
-  }
-  // 初始化RSS菜单数据
-  window.electronAPI.getRssInfoListFromDb().then(data => {
-    rssFolderList.value = data
-  })
+    return executeAndRefresh(() => electronClient.importOpmlFile());
+  };
+
+  void refresh();
+
   return {
     rssFolderList,
+    isLoading,
+    error,
     addRssSubscription,
     removeRssSubscription,
     folderNameList,
@@ -84,6 +80,6 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     syncAll,
     totalArticleCount,
     unreadArticleCount,
-    favoriteCount
-  }
-})
+    favoriteCount,
+  };
+});
