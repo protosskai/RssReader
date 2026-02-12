@@ -1,203 +1,69 @@
-/**
- * This file is used specifically for security reasons.
- * Here you can access Nodejs stuff and inject functionality into
- * the renderer thread (accessible there through the "window" object)
- *
- * WARNING!
- * If you import anything from node_modules, then make sure that the package is specified
- * in package.json > dependencies and NOT in devDependencies
- *
- * Example (injects window.myAPI.doAThing() into renderer thread):
- *
- *   import { contextBridge } from 'electron'
- *
- *   contextBridge.exposeInMainWorld('myAPI', {
- *     doAThing: () => {}
- *   })
- *
- * WARNING!
- * If accessing Node functionality (like importing @electron/remote) then in your
- * electron-main.ts you will need to set the following when you instantiate BrowserWindow:
- *
- * mainWindow = new BrowserWindow({
- *   // ...
- *   webPreferences: {
- *     // ...
- *     sandbox: false // <-- to be able to import @electron/remote in preload script
- *   }
- * }
- */
-import {contextBridge, ipcRenderer} from 'electron'
-import {RssInfoNew} from "src/common/RssInfoItem";
-import {ContentInfo} from "src/common/ContentInfo";
-import {ErrorMsg} from "src/common/ErrorMsg";
-import {PostIndexItem} from "src-electron/storage/common";
+import { contextBridge, ipcRenderer } from 'electron';
+import { ContentInfo } from 'src/common/ContentInfo';
+import type { ElectronContract } from 'src/common/electronContract';
+import { ErrorMsg } from 'src/common/ErrorMsg';
+import { RssInfoNew } from 'src/common/RssInfoItem';
+import { PostIndexItem } from 'src-electron/storage/common';
 
+const invoke = <T>(channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args) as Promise<T>;
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  // Legacy API (for backward compatibility)
-  addRssSubscription: async (obj: RssInfoNew): Promise<void> => {
-    return await ipcRenderer.invoke('rss:addRssSubscription', obj)
+const electronAPI: ElectronContract = {
+  addRssSubscription: (obj: RssInfoNew) => invoke<void>('rss:addRssSubscription', obj),
+  removeRssSubscription: (folderName: string, rssUrl: string) =>
+    invoke<ErrorMsg>('rss:removeRssSubscription', folderName, rssUrl),
+  openLink: (url: string) => invoke<void>('openLink', url),
+  close: () => {
+    void invoke('close');
   },
-  removeRssSubscription: async (folderName: string, rssUrl: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('rss:removeRssSubscription', folderName, rssUrl)
+  minimize: () => {
+    void invoke('minimize');
   },
-  openLink: async (url: string): Promise<void> => {
-    return await ipcRenderer.invoke('openLink', url)
-  },
-  close() {
-    return ipcRenderer.invoke('close')
-  },
-  minimize() {
-    return ipcRenderer.invoke('minimize')
-  },
-  addFolder: async (folderName: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('addFolder', folderName)
-  },
-  editFolder: async (oldFolderName: string, newFolderName: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('editFolder', oldFolderName, newFolderName)
-  },
-  removeFolder: async (folderName: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('removeFolder', folderName);
-  },
-  importOpmlFile: async (): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('rss:importOpmlFile')
-  },
-  dumpFolderToDb: async (folderInfoListJson: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('rss:dumpFolderToDb', folderInfoListJson)
-  },
-  loadFolderFromDb: async (): Promise<string> => {
-    return await ipcRenderer.invoke('rss:loadFolderFromDb')
-  },
-  getRssInfoListFromDb: async (): Promise<any[]> => {
-    return await ipcRenderer.invoke('rss:getRssInfoListFromDb')
-  },
-  queryPostIndexByRssId: async (rssId: string): Promise<PostIndexItem[]> => {
-    console.log('[electron-preload] queryPostIndexByRssId called with rssId:', rssId);
-    try {
-      const result = await ipcRenderer.invoke('rss:queryPostIndexByRssId', rssId);
-      console.log('[electron-preload] queryPostIndexByRssId result received:', result);
-      console.log('[electron-preload] Result length:', result.length);
-      return result;
-    } catch (error) {
-      console.error('[electron-preload] queryPostIndexByRssId error:', error);
-      throw error;
-    }
-  },
-  queryPostContentByGuid: async (guid: string): Promise<ContentInfo> => {
-    console.log('[electron-preload] queryPostContentByGuid called with guid:', guid);
-    try {
-      const result = await ipcRenderer.invoke('rss:queryPostContentByGuid', guid);
-      console.log('[electron-preload] queryPostContentByGuid result received:', result);
-      return result;
-    } catch (error) {
-      console.error('[electron-preload] queryPostContentByGuid error:', error);
-      throw error;
-    }
-  },
-  fetchRssIndexList: async (rssId: string): Promise<ErrorMsg> => {
-    return await ipcRenderer.invoke('rss:fetchRssIndexList', rssId)
-  },
+  addFolder: (folderName: string) => invoke<ErrorMsg>('addFolder', folderName),
+  editFolder: (oldFolderName: string, newFolderName: string) =>
+    invoke<ErrorMsg>('editFolder', oldFolderName, newFolderName),
+  removeFolder: (folderName: string) => invoke<ErrorMsg>('removeFolder', folderName),
+  importOpmlFile: () => invoke<ErrorMsg>('rss:importOpmlFile'),
+  dumpFolderToDb: (folderInfoListJson: string) => invoke<ErrorMsg>('rss:dumpFolderToDb', folderInfoListJson),
+  loadFolderFromDb: () => invoke<string>('rss:loadFolderFromDb'),
+  getRssInfoListFromDb: () => invoke('rss:getRssInfoListFromDb'),
+  queryPostIndexByRssId: (rssId: string) => invoke<PostIndexItem[]>('rss:queryPostIndexByRssId', rssId),
+  queryPostContentByGuid: (guid: string) => invoke<ContentInfo>('rss:queryPostContentByGuid', guid),
+  fetchRssIndexList: (rssId: string) => invoke<ErrorMsg>('rss:fetchRssIndexList', rssId),
 
-  // New API (Article-centric architecture)
-  // Article operations
-  getArticles: async (params: { filter?: any, offset?: number, limit?: number }): Promise<{ articles: any[], total: number }> => {
-    return await ipcRenderer.invoke('article:getArticles', params)
-  },
-  getArticle: async (id: string): Promise<any> => {
-    return await ipcRenderer.invoke('article:getArticle', id)
-  },
-  toggleReadStatus: async (id: string): Promise<void> => {
-    return await ipcRenderer.invoke('article:toggleReadStatus', id)
-  },
-  toggleFavorite: async (id: string): Promise<boolean> => {
-    return await ipcRenderer.invoke('article:toggleFavorite', id)
-  },
-  markAllAsRead: async (params?: { feedId?: string, folderName?: string }): Promise<void> => {
-    return await ipcRenderer.invoke('article:markAllAsRead', params)
-  },
-  clearAllFavorites: async (): Promise<void> => {
-    return await ipcRenderer.invoke('article:clearAllFavorites')
-  },
-  getArticleStats: async (): Promise<any> => {
-    return await ipcRenderer.invoke('article:getStats')
-  },
+  getArticles: (params) => invoke('article:getArticles', params),
+  getArticle: (id: string) => invoke('article:getArticle', id),
+  toggleReadStatus: (id: string) => invoke<void>('article:toggleReadStatus', id),
+  toggleFavorite: (id: string) => invoke<boolean>('article:toggleFavorite', id),
+  markAllAsRead: (params) => invoke<void>('article:markAllAsRead', params),
+  clearAllFavorites: () => invoke<void>('article:clearAllFavorites'),
+  getArticleStats: () => invoke('article:getStats'),
 
-  // Feed operations
-  getFeeds: async (folderName?: string): Promise<any[]> => {
-    return await ipcRenderer.invoke('feed:getFeeds', folderName)
-  },
-  getFeed: async (id: string): Promise<any> => {
-    return await ipcRenderer.invoke('feed:getFeed', id)
-  },
-  addFeed: async (feedUrl: string, title?: string, folderName?: string): Promise<void> => {
-    return await ipcRenderer.invoke('feed:addFeed', { feedUrl, title, folderName })
-  },
-  removeFeed: async (id: string): Promise<void> => {
-    return await ipcRenderer.invoke('feed:removeFeed', id)
-  },
-  syncFeed: async (id: string): Promise<void> => {
-    return await ipcRenderer.invoke('feed:syncFeed', id)
-  },
+  getFeeds: (folderName?: string) => invoke('feed:getFeeds', folderName),
+  getFeed: (id: string) => invoke('feed:getFeed', id),
+  addFeed: (feedUrl: string, title?: string, folderName?: string) =>
+    invoke<void>('feed:addFeed', { feedUrl, title, folderName }),
+  removeFeed: (id: string) => invoke<void>('feed:removeFeed', id),
+  syncFeed: (id: string) => invoke<void>('feed:syncFeed', id),
 
-  // Folder operations (new API v2)
-  getFolders: async (): Promise<any[]> => {
-    return await ipcRenderer.invoke('folder:getFolders')
-  },
-  getFolder: async (name: string): Promise<any> => {
-    return await ipcRenderer.invoke('folder:getFolder', name)
-  },
-  addFolderV2: async (name: string): Promise<void> => {
-    return await ipcRenderer.invoke('folder:addFolder', name)
-  },
-  removeFolderV2: async (name: string): Promise<void> => {
-    return await ipcRenderer.invoke('folder:removeFolder', name)
-  },
-  renameFolder: async (oldName: string, newName: string): Promise<void> => {
-    return await ipcRenderer.invoke('folder:renameFolder', oldName, newName)
-  },
+  getFolders: () => invoke('folder:getFolders'),
+  getFolder: (name: string) => invoke('folder:getFolder', name),
+  addFolderV2: (name: string) => invoke<void>('folder:addFolder', name),
+  removeFolderV2: (name: string) => invoke<void>('folder:removeFolder', name),
+  renameFolder: (oldName: string, newName: string) => invoke<void>('folder:renameFolder', oldName, newName),
 
-  // Favorite operations (legacy support)
-  getFavoritePosts: async (): Promise<PostIndexItem[]> => {
-    return await ipcRenderer.invoke('article:getFavoritePosts')
-  },
-  addFavoritePost: async (post: any): Promise<void> => {
-    return await ipcRenderer.invoke('article:addFavoritePost', post)
-  },
-  removeFavoritePost: async (guid: string): Promise<void> => {
-    return await ipcRenderer.invoke('article:removeFavoritePost', guid)
-  },
-  isPostFavorite: async (guid: string): Promise<boolean> => {
-    return await ipcRenderer.invoke('article:isPostFavorite', guid)
-  },
+  getFavoritePosts: () => invoke('article:getFavoritePosts'),
+  addFavoritePost: (post: unknown) => invoke<void>('article:addFavoritePost', post),
+  removeFavoritePost: (guid: string) => invoke<void>('article:removeFavoritePost', guid),
+  isPostFavorite: (guid: string) => invoke<boolean>('article:isPostFavorite', guid),
 
-  // 同步管理API
-  syncGetConfig: async (): Promise<any> => {
-    return await ipcRenderer.invoke('sync:getConfig')
-  },
-  syncUpdateConfig: async (config: any): Promise<any> => {
-    return await ipcRenderer.invoke('sync:updateConfig', config)
-  },
-  syncStart: async (): Promise<any> => {
-    return await ipcRenderer.invoke('sync:start')
-  },
-  syncGetStatus: async (): Promise<any> => {
-    return await ipcRenderer.invoke('sync:getStatus')
-  },
-  syncStartAuto: async (): Promise<any> => {
-    return await ipcRenderer.invoke('sync:startAuto')
-  },
-  syncStopAuto: async (): Promise<any> => {
-    return await ipcRenderer.invoke('sync:stopAuto')
-  },
+  syncGetConfig: () => invoke('sync:getConfig'),
+  syncUpdateConfig: (config: unknown) => invoke('sync:updateConfig', config),
+  syncStart: () => invoke('sync:start'),
+  syncGetStatus: () => invoke('sync:getStatus'),
+  syncStartAuto: () => invoke('sync:startAuto'),
+  syncStopAuto: () => invoke('sync:stopAuto'),
 
-  // 搜索功能API
-  searchPosts: async (query: string, options?: {
-    folderId?: string
-    dateFrom?: string
-    dateTo?: string
-    limit?: number
-  }): Promise<any[]> => {
-    return await ipcRenderer.invoke('search:searchPosts', query, options)
-  }
-})
+  searchPosts: (query: string, options) => invoke('search:searchPosts', query, options),
+};
+
+contextBridge.exposeInMainWorld('electronAPI', electronAPI);
