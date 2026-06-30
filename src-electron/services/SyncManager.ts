@@ -53,6 +53,14 @@ export class SyncManager {
   }
 
   private constructor() {
+    // Config loading deferred to init() — avoids blocking I/O at module load
+  }
+
+  /**
+   * Initialize the SyncManager: load saved config from disk.
+   * Must be called once before any sync operations.
+   */
+  init(): void {
     this.loadConfig()
   }
 
@@ -70,7 +78,7 @@ export class SyncManager {
     return path.join(userDataPath, 'sync-config.json')
   }
 
-  private loadConfig() {
+  private loadConfig(): void {
     try {
       const configPath = this.getConfigPath()
       if (fs.existsSync(configPath)) {

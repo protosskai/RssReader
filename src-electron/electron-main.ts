@@ -217,7 +217,7 @@ const platform = process.platform || os.platform();
 // Initialize Article Service
 const articleService = getArticleService();
 
-// Initialize Sync Manager
+// SyncManager instance — init() called in app.whenReady() after DB is ready
 const syncManager = SyncManager.getInstance();
 
 try {
@@ -380,6 +380,9 @@ app.whenReady().then(async () => {
 		console.log("[electron-main] Initializing database…");
 		await initDB();
 		console.log("[electron-main] Database initialized successfully");
+
+		// Initialize SyncManager (load saved config from disk, now safe after DB init)
+		syncManager.init();
 	} catch (error) {
 		console.error("[electron-main] Failed to initialize database:", error);
 		throw error;
