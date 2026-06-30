@@ -34,3 +34,6 @@ yarn-error.log*
 
 # Superpowers brainstorm prototypes
 .superpowers/
+
+# Git worktree isolation
+.worktrees/
