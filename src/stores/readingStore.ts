@@ -9,6 +9,7 @@ export interface ReadingProgress {
   readingTime: number // 秒
   wordCount: number
   estimatedReadingTime: number // 估算阅读时间（秒）
+  markedAsRead: boolean
 }
 
 export const useReadingStore = defineStore('reading', () => {
@@ -57,7 +58,8 @@ export const useReadingStore = defineStore('reading', () => {
         lastReadAt: new Date(),
         readingTime: 0,
         wordCount,
-        estimatedReadingTime: estimatedTime
+        estimatedReadingTime: estimatedTime,
+        markedAsRead: false
       })
     }
   }

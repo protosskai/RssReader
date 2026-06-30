@@ -10,6 +10,7 @@
           dense
           v-close-popup
           class="close-btn"
+          aria-label="关闭快捷键帮助"
         />
       </q-card-section>
 

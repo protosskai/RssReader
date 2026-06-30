@@ -69,7 +69,7 @@ import {useSystemDialogStore} from "stores/systemDialogStore";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {storeToRefs} from "pinia";
 import {useQuasar} from "quasar";
-import {RssInfoNew} from "src/common/RssInfoItem";
+import {RssInfoNew} from "src/common/models";
 
 const $q = useQuasar();
 const isLoading = ref(false);
@@ -124,7 +124,11 @@ const onSubmit = async () => {
   isLoading.value = true;
   
   try {
-    await addRssSubscription(rssInfoRef);
+    await addRssSubscription(
+      rssInfoRef.feedUrl,
+      rssInfoRef.title,
+      rssInfoRef.folderName
+    );
     $q.notify({
       message: '订阅添加成功',
       color: 'positive',

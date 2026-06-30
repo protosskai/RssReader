@@ -20,5 +20,15 @@ quasar dev
 quasar build
 ```
 
+### Type check
+```bash
+npm run typecheck
+```
+
+### Run real RSS end-to-end check
+```bash
+npm run test:real-rss
+```
+
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).

@@ -24,6 +24,11 @@ const routes: RouteRecordRaw[] = [
         path: '/setting',
         name: 'Setting',
         component: () => import('pages/SettingPage.vue')
+      },
+      {
+        path: '/favorite',
+        name: 'Favorite',
+        component: () => import('pages/FavoritePage.vue')
       }
     ],
   },

@@ -1,0 +1,375 @@
+{
+  "audit": "Frontend UX & Integration Audit",
+  "project": "RssReader (Quasar Vue 3 + Electron)",
+  "files_reviewed": 26,
+  "uxIssues": [
+    {
+      "component": "Content.vue",
+      "severity": "critical",
+      "category": "dark_mode",
+      "current_state": "Hardcoded CSS colors (#444 text, #f5f5f5 backgrounds) in .content-area styles. Code blocks, headings, and links use fixed colors with no dark mode overrides. Only uses :deep() with hardcoded $primary variable.",
+      "desired_state": "Use CSS custom properties or .body--dark selectors for all text, background, and border colors. Replace hardcoded #444/#f5f5f5 with theme-aware values.",
+      "implementation_notes": "Add &.body--dark sections or use Quasar's built-in dark prop on q-page. Check all :deep() rules — pre, code, h1-h6, a tags all need dark variants."
+    },
+    {
+      "component": "Content.vue",
+      "severity": "high",
+      "category": "states",
+      "current_state": "Shows loading spinner at bottom of page (`<q-spinner-dots v-if=\"loading\" class=\"q-ma-auto\">`) rather than replacing the content area. This means spinner, error card, and content can overlap visually at different render times.",
+      "desired_state": "Mutually exclusive display: when loading → full-page centered spinner; when error → full error card; when data → content. Loading should replace the content area, not overlay partially.",
+      "implementation_notes": "Wrap content in a container div with v-if/else-if chain for loading→error→data, similar to PostList.vue pattern."
+    },
+    {
+      "component": "Content.vue",
+      "severity": "high",
+      "category": "security",
+      "current_state": "Uses `v-html=\"curContentInfo.content\"` to render article HTML with no sanitization. This is an XSS vulnerability — malicious RSS feed content with `<script>` tags or event handlers would execute in the Electron renderer context.",
+      "desired_state": "Sanitize HTML content with DOMPurify before rendering. Strip script tags, event handlers, and dangerous attributes.",
+      "implementation_notes": "Install 'dompurify' package. Add a computed property: sanitizedContent = DOMPurify.sanitize(props.content). Apply sanitization in Content.vue and also in ContentReader.vue which also uses v-html."
+    },
+    {
+      "component": "ContentReader.vue & Content.vue",
+      "severity": "high",
+      "category": "architecture",
+      "current_state": "Two separate article reading components exist: Content.vue (used by router, directly renders content) and ContentReader.vue (standalone component with rich reading features). ContentReader.vue has reading progress bar, font controls, bookmark, share, estimated reading time, dark mode, responsive design. Content.vue has basic font size controls and lacks dark mode. They appear to be parallel implementations rather than Content.vue delegating to ContentReader.vue.",
+      "desired_state": "Single reading component. Content.vue should delegate rendering to ContentReader.vue (or ContentReader should be the route's primary component).",
+      "implementation_notes": "Either make Content.vue wrap ContentReader.vue and pass props, or refactor Content.vue into a thin wrapper that imports ContentReader. Eliminate code duplication."
+    },
+    {
+      "component": "Content.vue",
+      "severity": "medium",
+      "category": "responsive",
+      "current_state": "Image max-width is set to 80% (`:deep(img) { max-width: 80% }`). On mobile viewports, images are unnecessarily constrained. No responsive breakpoints defined.",
+      "desired_state": "Set `img { max-width: 100%; height: auto; }`. Add at least one responsive breakpoint for padding/margins on small screens.",
+      "implementation_notes": "Change max-width: 80% to max-width: 100%. Respect the reading experience on narrow screens by reducing side padding."
+    },
+    {
+      "component": "Content.vue",
+      "severity": "medium",
+      "category": "performance",
+      "current_state": "Images inside v-html content do not have lazy loading. All images load immediately on page render.",
+      "desired_state": "Add loading=\"lazy\" attribute to all `<img>` tags in the rendered content.",
+      "implementation_notes": "Use a regex in onMounted or a computed to replace `<img` with `<img loading=\"lazy\"`. ContentReader.vue already does this via `processedContent` — port that logic to Content.vue."
+    },
+    {
+      "component": "Content.vue",
+      "severity": "low",
+      "category": "accessibility",
+      "current_state": "Content area has no ARIA landmark roles. Font size buttons lack aria-labels. The v-html rendered content may contain non-semantic HTML. No focus management when navigating to this page.",
+      "desired_state": "Add role=\"main\" or role=\"article\" to content area. Add aria-labels to toolbar buttons. Return focus to first focusable element on page load.",
+      "implementation_notes": "Add `aria-label=\"减小字体\"`, `aria-label=\"增大字体\"`, `aria-label=\"在浏览器中打开\"` to toolbar buttons."
+    },
+    {
+      "component": "HomePage.vue",
+      "severity": "high",
+      "category": "states",
+      "current_state": "No loading state while stats are computed. No empty state when no subscriptions exist. No error state if store data fails to load. Stats rely on computed properties from rssInfoStore which may be empty initially. The page always renders regardless of data availability.",
+      "desired_state": "Add loading skeleton/spinner while stats are initializing. Show an onboarding empty state when no subscriptions exist (e.g., '添加你的第一个RSS订阅源'). Handle and display store errors.",
+      "implementation_notes": "Add `v-if=\"loading\"` skeleton state. Add `v-else-if=\"!hasSubscriptions\"` onboarding empty state with a CTA to add first subscription. Add `v-else-if=\"error\"` error state. Only show stats when data is loaded."
+    },
+    {
+      "component": "HomePage.vue",
+      "severity": "medium",
+      "category": "responsive",
+      "current_state": "Button bars use `flex-direction: row` with fixed 8px horizontal margins. No responsive breakpoints. On narrow screens, buttons may overflow or wrap oddly. No media queries at all.",
+      "desired_state": "Add responsive behavior: on screens < 600px, stack action groups vertically or use a grid with 2 columns. Reduce margins and padding.",
+      "implementation_notes": "Add `@media (max-width: 600px) { .btn-bar { flex-wrap: wrap; gap: 8px; } .q-btn { margin: 4px; } .stats-cards { grid-template-columns: repeat(2, 1fr); } }`"
+    },
+    {
+      "component": "HomePage.vue",
+      "severity": "medium",
+      "category": "accessibility",
+      "current_state": "Theme toggle button, settings button, and keyboard shortcuts button use q-tooltip for text labels but lack aria-labels. Keyboard navigation relies on Quasar defaults.",
+      "desired_state": "Add aria-label attributes to all icon-only buttons. Ensure focus order follows visual layout.",
+      "implementation_notes": "Add `aria-label=\"切换主题\"` on theme button, `aria-label=\"键盘快捷键\"` on keyboard button, `aria-label=\"打开设置\"` on settings button."
+    },
+    {
+      "component": "HomePage.vue",
+      "severity": "low",
+      "category": "visual_polish",
+      "current_state": "No entrance animations or transitions on page load. Buttons have no hover state transforms beyond Quasar defaults. Stats cards render instantly.",
+      "desired_state": "Add staggered fade-in animation for stats cards and buttons. Add subtle hover scale effects on stat cards.",
+      "implementation_notes": "Use `<transition-group>` for stats cards with staggered delays. Add `transition: transform 0.2s` on stat cards with `:hover { transform: translateY(-2px) }`."
+    },
+    {
+      "component": "PostList.vue",
+      "severity": "high",
+      "category": "performance",
+      "current_state": "Renders all PostInfoList items in a flat v-for with no virtual scrolling. For RSS feeds with hundreds or thousands of articles, this creates massive DOM trees and degrades performance (scroll jank, slow mount).",
+      "desired_state": "Implement virtual scrolling (e.g., vue-virtual-scroller or q-virtual-scroll) to only render visible items. Load initial batch and lazy-load more as user scrolls.",
+      "implementation_notes": "Wrap `<q-list>` with `<q-virtual-scroll>` or install `vue-virtual-scroller` and use `<RecycleScroller>`. Configure item size estimation for smooth scrolling."
+    },
+    {
+      "component": "PostList.vue",
+      "severity": "medium",
+      "category": "responsive",
+      "current_state": "No responsive breakpoints. Post list has `max-width: 1200px; margin: 0 auto` which works for desktop but doesn't adjust padding for mobile. The post-list items (cards) have fixed layout.",
+      "desired_state": "Reduce padding on small screens. Adjust card layout for narrow viewports. Add responsive breakpoint.",
+      "implementation_notes": "Add `@media (max-width: 600px) { .post-list-container { padding: 8px; } .q-item-section { padding: 8px } }`"
+    },
+    {
+      "component": "PostList.vue",
+      "severity": "low",
+      "category": "accessibility",
+      "current_state": "Scroll-to-top button has aria-label. Otherwise no ARIA landmarks, live regions, or focus management. When navigating to this page, focus is not set on any element.",
+      "desired_state": "Add `role=\"feed\"` to the list container. Use `aria-live=\"polite\"` when loading changes. Auto-focus the first post item or the page title.",
+      "implementation_notes": "Add `role=\"feed\"` on `<q-list>`. Use `aria-live=\"polite\"` on the loading container."
+    },
+    {
+      "component": "PostList.vue & PostListItem.vue",
+      "severity": "medium",
+      "category": "visual_polish",
+      "current_state": "No transitions for list item appearance. Items pop in instantly. No hover state animations on cards.",
+      "desired_state": "Add stagger animation for items entering the list. Add subtle hover effect on post cards.",
+      "implementation_notes": "Wrap `<post-list-item>` in `<transition-group>` with a CSS `list-enter-active` animation. Add `transition: transform 0.2s, box-shadow 0.2s` to cards."
+    },
+    {
+      "component": "PostListItem.vue",
+      "severity": "medium",
+      "category": "accessibility",
+      "current_state": "The '阅读', '标为已读/未读', and browser-open buttons lack accessible names beyond their visible text. No keyboard shortcut hints. The entire card is clickable? Unclear — click handler is only on the '阅读' button.",
+      "desired_state": "Ensure all buttons are reachable and activatable via keyboard. Consider making the entire card clickable with a proper role. Add aria-attributes for the unread indicator icon.",
+      "implementation_notes": "Ensure `fiber_manual_record` icon (unread indicator) has `aria-label=\"未读\"`. Add `tabindex=\"0\"` and keyboard handler on card if making it clickable."
+    },
+    {
+      "component": "PostListItem.vue",
+      "severity": "medium",
+      "category": "error_feedback",
+      "current_state": "toggleReadStatus is a no-op (TODO placeholder). It calls `$q.notify` with success message but never actually makes an IPC call or store action. User gets false positive feedback.",
+      "desired_state": "Implement actual mark-as-read/mark-as-unread functionality, or remove the button if not ready. Never give success feedback for a no-op.",
+      "implementation_notes": "Add `window.electronAPI.markPostRead(postInfo.guid, !postInfo.read)` or similar IPC call, then update local state. Or hide the button behind a feature flag."
+    },
+    {
+      "component": "SubscribeDialog.vue",
+      "severity": "high",
+      "category": "error_feedback",
+      "current_state": "No loading state during submission. No error handling — `onSubmit` calls `addRssSubscription` and immediately closes the dialog with no try/catch. If the URL is invalid or network fails, user sees no error.",
+      "desired_state": "Add loading state on submit button. Wrap API call in try/catch. Show error notification on failure. Keep dialog open on error so user can correct input.",
+      "implementation_notes": "Add `ref isLoading`. Set true before API call, false after. Move `toggleSubscriptionDialog()` into try block after success. Add catch block with `$q.notify({ type: 'negative', message: error.message })`"
+    },
+    {
+      "component": "SubscribeDialog.vue",
+      "severity": "medium",
+      "category": "states",
+      "current_state": "No validation rules on the name or folder select fields. The add/confirm button has no disabled state while submitting.",
+      "desired_state": "Add `:disable=\"isLoading\"` on the confirm button. Add validation rules for at minimum the URL field.",
+      "implementation_notes": "Add `:disable=\"isLoading\"` to submit button. Rules already exist on URL field but not on the button's disabled state."
+    },
+    {
+      "component": "AddSubscriptionDialog.vue",
+      "severity": "medium",
+      "category": "states",
+      "current_state": "Has loading state and error handling via notify. However, on successful add, it resets and closes the dialog — if the URL was invalid, the dialog closes before user can see what went wrong.",
+      "desired_state": "Keep dialog open on error. Close only on successful submission.",
+      "implementation_notes": "Current code already does this — toggleAddSubscriptionDialog() is inside try block after success. Good."
+    },
+    {
+      "component": "AddFolderDialog.vue",
+      "severity": "high",
+      "category": "states",
+      "current_state": "No loading state. Calls `addFolder` which may be async, but no `await` is shown — the `onSubmit` is not async and has no try/catch. On API failure, `$q.notify` shows error but the dialog already closed.",
+      "desired_state": "Make onSubmit async. Add loading state. Add try/catch. Don't close dialog on failure.",
+      "implementation_notes": "Current code does call `toggleAddFolderDialog()` before the API call: wrong order. Move `toggleAddFolderDialog()` after the await. Add `isLoading` ref."
+    },
+    {
+      "component": "EditFolderDialog.vue",
+      "severity": "high",
+      "category": "states",
+      "current_state": "Same issue as AddFolderDialog: `toggleEditFolderDialog()` is called BEFORE the async API call. Dialog closes immediately, and the API call runs in background. No loading state.",
+      "desired_state": "Move toggleEditFolderDialog() after successful API response. Add loading state. Handle errors before closing.",
+      "implementation_notes": "Swap: call API first, then close dialog on success. Add `isLoading` ref and try/catch."
+    },
+    {
+      "component": "SubscribeDialog.vue",
+      "severity": "medium",
+      "category": "feed_management",
+      "current_state": "The dialog at `AppHeader.vue` uses `<subscribe-dialog/>` which maps to SubscribeDialog.vue. AddSubscriptionDialog.vue is also referenced in AppHeader. SubscribeDialog appears redundant with AddSubscriptionDialog — both add RSS subscriptions with similar fields.",
+      "desired_state": "Consolidate into a single AddSubscriptionDialog. Remove SubscribeDialog or have it delegate.",
+      "implementation_notes": "Compare both components: SubscribeDialog doesn't show the add-new-folder button inside folder select. AddSubscriptionDialog does. The AddSubscriptionDialog is more feature-complete."
+    },
+    {
+      "component": "SubSubscriptionItemContextMenu.vue",
+      "severity": "medium",
+      "category": "feed_management",
+      "current_state": "Menus have placeholder actions: `onMarkRead` is empty, `onOpenEditDialog` is empty, `onRename` is empty. Users can click these and nothing visible happens.",
+      "desired_state": "Implement all context menu actions or disable/hide unimplemented items. Empty click handlers create dead interactions.",
+      "implementation_notes": "Implement mark-as-read via IPC. Implement open edit dialog (connect to EditSubscriptionDialog). Remove or comment out unimplemented actions."
+    },
+    {
+      "component": "FolderContextMenu.vue",
+      "severity": "medium",
+      "category": "feed_management",
+      "current_state": "'标记为已读' action is an empty function (`onMarkedRead`) — clicking it does nothing.",
+      "desired_state": "Hide or implement the '标记为已读' menu item for folders. Implement folder-level mark-all-read via IPC.",
+      "implementation_notes": "Either add `window.electronAPI.markFolderAsRead(props.folderName)` or remove the menu item."
+    },
+    {
+      "component": "MoveFolderDialog.vue",
+      "severity": "medium",
+      "category": "states",
+      "current_state": "No loading state during the move operation. The confirm button doesn't disable during submission. If the API call takes time, user can click confirm multiple times.",
+      "desired_state": "Add `isLoading` ref, disable confirm button when loading, prevent double-submission.",
+      "implementation_notes": "Add `:disable=\"isLoading\"` to confirm button. Set isLoading before/after API call."
+    },
+    {
+      "component": "AppHeader.vue",
+      "severity": "medium",
+      "category": "system_integration",
+      "current_state": "The 'refresh' button in the header has no click handler — it only shows a tooltip '刷新订阅'. No action bound.",
+      "desired_state": "Bind click handler to trigger refresh/sync. Or remove the button if feature not ready.",
+      "implementation_notes": "Add `@click=\"syncAllFeeds\"` or remove the button. Consider consolidating with HomePage's sync/refresh buttons."
+    },
+    {
+      "component": "AppHeader.vue",
+      "severity": "medium",
+      "category": "accessibility",
+      "current_state": "Close and minimize buttons lack aria-labels. The menu button, add button, refresh button, and home button in the toolbar have no aria-label attributes. Window control buttons rely on icon-only presentation.",
+      "desired_state": "Add aria-label to all icon-only buttons in the header. This is especially important for window controls (minimize/close).",
+      "implementation_notes": "Add `aria-label=\"最小化\"` on minimize button, `aria-label=\"关闭\"` on close button, `aria-label=\"添加\"` on add button, `aria-label=\"刷新\"` on refresh button."
+    },
+    {
+      "component": "AppDrawer.vue",
+      "severity": "high",
+      "category": "performance",
+      "current_state": "Search fires on every keystroke (`@update:model-value=\"handleSearch\"`) with no debounce. Each keystroke triggers a full IPC call to `searchStore.search()`. For long queries, this creates N rapid searches.",
+      "desired_state": "Debounce search input by 300-500ms. Use a timer to batch keystrokes and only search when user pauses typing.",
+      "implementation_notes": "Replace direct `handleSearch` call with a debounced wrapper: `let debounceTimer; const handleSearch = () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(async () => { ... }, 300) }`"
+    },
+    {
+      "component": "AppDrawer.vue",
+      "severity": "medium",
+      "category": "responsive",
+      "current_state": "The q-drawer is configured with `overlay` mode, which works. However search results container has fixed `max-height: 400px` with overflow. On mobile with smaller screens, this may be too tall for the drawer.",
+      "desired_state": "Make search results max-height responsive: use vh units or a percentage of the drawer height.",
+      "implementation_notes": "Change `max-height: 400px` to `max-height: 60vh` or calculate based on available space."
+    },
+    {
+      "component": "SubscriptionList.vue",
+      "severity": "high",
+      "category": "states",
+      "current_state": "No loading, empty, or error states. Assumes `RssFolderList` is always populated. If the store has no data yet, the tree renders as empty with no message. The `q-tree` component renders nothing but doesn't tell the user why.",
+      "desired_state": "Add empty state message when no subscriptions exist (e.g., '暂无订阅，点击上方+号添加'). Consider adding loading skeleton while initial data loads.",
+      "implementation_notes": "Add `v-if=\"nodes.length > 0\"` for the tree, `v-else` with an empty state placeholder. Wrap in a parent container."
+    },
+    {
+      "component": "SubscriptionList.vue",
+      "severity": "medium",
+      "category": "responsive",
+      "current_state": "The rss-info list uses absolute positioning for the unread icon (`position: absolute; left: -10px; top: 12px`). This may overlap or clip on different screen sizes.",
+      "desired_state": "Use relative positioning or Quasar's built-in spacing for the unread indicator.",
+      "implementation_notes": "Consider using Quasar's `q-badge` or `q-chip` for the unread count instead of absolute positioning."
+    },
+    {
+      "component": "AppLayout.vue",
+      "severity": "medium",
+      "category": "responsive",
+      "current_state": "Uses `router-view :key=\"route.fullPath\"` inside a `q-page-container` with `row items-center justify-evenly` classes. This center-justifies all pages, which may not be ideal for content-heavy pages like PostList or Content (they should be left-aligned, full-width). The 'row' class gives a horizontal flex layout which may cause unexpected horizontal centering.",
+      "desired_state": "Remove `row items-center justify-evenly` from page container — pages should be full-width by default and handle their own layout. The Quasar page container should stretch to fill width.",
+      "implementation_notes": "Change `q-page-container` classes to `class=\"q-pa-none\"` or remove the flex classes. Let individual pages control their alignment."
+    },
+    {
+      "component": "FavoritePage.vue",
+      "severity": "low",
+      "category": "performance",
+      "current_state": "Card grid uses `grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))`. Works well but could benefit from a max-columns limit on very wide screens (cards become too wide).",
+      "desired_state": "Consider adding `max-width: 1400px` to the container and capping grid columns at 3-4 on ultra-wide screens.",
+      "implementation_notes": "Optional enhancement. Low priority."
+    },
+    {
+      "component": "AppDrawer.vue",
+      "severity": "medium",
+      "category": "feed_management",
+      "current_state": "When a user clicks a search result, `searchQuery` is set to '' which clears the search results before the navigation completes. This causes a flash: results disappear then page loads.",
+      "desired_state": "Clear search after navigation completes, not before. Use router's navigation guard or delay clearing.",
+      "implementation_notes": "Move `searchQuery.value = ''` after switchPage completes or use `nextTick` / router after hook."
+    },
+    {
+      "component": "SettingPage.vue",
+      "severity": "medium",
+      "category": "system_integration",
+      "current_state": "Settings like auto-start, minimize-to-tray, desktop notifications, sound notifications, and cache limit are saved only to localStorage. They have no actual Electron main-process implementation. The sync config does communicate with main process via IPC. Danger zone buttons ('清空所有数据', '重置所有设置') show confirmation dialogs but are TODO — no actual data clearing or reset logic.",
+      "desired_state": "Implement main-process IPC handlers for each setting that requires native Electron capability (auto-start, tray, notifications, cache). Implement the danger-zone operations or remove them.",
+      "implementation_notes": "Add IPC channels for each native setting. For cache: `window.electronAPI.clearCache()`. For auto-start: `app.setLoginItemSettings()`. For tray: `window.electronAPI.setTrayVisibility()`. Implement reset by clearing localStorage + SQLite data."
+    },
+    {
+      "component": "KeyboardShortcutsDialog.vue",
+      "severity": "medium",
+      "category": "system_integration",
+      "current_state": "The dialog shows keyboard shortcuts from `keyboardStore.enabledShortcuts`, but the keyboardStore's `executeShortcut` method is never connected to any keyboard event listener in `AppLayout.vue` or globally. Shortcuts are registered but never dispatched.",
+      "desired_state": "Add a global keyboard event listener (e.g., in AppLayout.vue onMounted) that calls `keyboardStore.executeShortcut(event)`. Register actual shortcuts for common actions (sync, search, help).",
+      "implementation_notes": "Add `document.addEventListener('keydown', keyboardStore.executeShortcut)` in AppLayout.vue onMounted, remove onUnmounted. Register shortcuts in HomePage.vue or AppLayout for sync, search, help."
+    },
+    {
+      "component": "KeyboardShortcutsDialog.vue",
+      "severity": "low",
+      "category": "visual_polish",
+      "current_state": "Icon-only close button in dialog header has no aria-label. Dialog title '键盘快捷键' is visually clear but lacks ARIA announcement context.",
+      "desired_state": "Add aria-label to close button. Add role=\"dialog\" with appropriate aria-labelledby.",
+      "implementation_notes": "Use q-dialog's built-in aria properties. Add `aria-label=\"关闭\"` on the close button."
+    },
+    {
+      "component": "LoadingOverlay.vue",
+      "severity": "low",
+      "category": "accessibility",
+      "current_state": "The overlay uses `pointer-events: none` on the outer container and `pointer-events: auto` on the content. This is unconventional and may cause focus trapping issues. Loading content has no role or aria-label.",
+      "desired_state": "Use role=\"alertdialog\" or role=\"progressbar\" with appropriate aria properties. Remove the pointer-events hack.",
+      "implementation_notes": "Add `role=\"progressbar\"` with `aria-label` and `aria-valuenow` attributes. Use Quasar's `$q.loading` instead of custom overlay for consistency."
+    },
+    {
+      "component": "ContentReader.vue (composable useReadingExperience)",
+      "severity": "medium",
+      "category": "states",
+      "current_state": "The useReadingExperience composable is referenced but its import path `../composables/useReadingExperience` may not exist — the project structure shows no composables/ directory. ContentReader and ReadingProgressBar reference stores that may be initialized but never connected to actual content data.",
+      "desired_state": "Either create the composable files and wire them up, or refactor ContentReader.vue to work with the existing Content.vue/reading data flow.",
+      "implementation_notes": "Check if `src/composables/useReadingExperience.ts` exists. If not, this component references non-existent imports. The readingStore is well-implemented but may not be connected to actual article reading."
+    },
+    {
+      "component": "PostList.vue",
+      "severity": "high",
+      "category": "feed_management",
+      "current_state": "The sync timeout is set to 60 seconds (`setTimeout(() => reject(new Error('同步RSS源超时')), 60000)`). If sync fails or times out, the loading state shows for up to 60 seconds with minimal feedback (just '正在同步RSS源，请稍候（最多60秒）'). No cancel/abort mechanism.",
+      "desired_state": "Consider reducing timeout to 30s. Add a cancel button during loading. Show progressive status updates during sync (e.g., '正在获取第 2/10 篇文章').",
+      "implementation_notes": "Refactor the sync promise to support cancellation via AbortController. Add a cancel button in the loading state."
+    },
+    {
+      "component": "SearchComponent.vue",
+      "severity": "low",
+      "category": "visual_polish",
+      "current_state": "Search uses absolute positioning for results dropdown. This works well. Has nice animations (slideDown, favoritePop). CSS is well-structured with dark mode and responsive styles.",
+      "desired_state": "This component is already a good reference point for polishing other components. No major changes needed.",
+      "implementation_notes": "Use SearchComponent.vue's pattern (states, animations, dark mode, responsive) as a template for improving other components."
+    },
+    {
+      "component": "RssItemContextMenu.vue",
+      "severity": "low",
+      "category": "accessibility",
+      "current_state": "Context menu items have no keyboard shortcuts indicated. The context menu is right-click only with no keyboard alternative.",
+      "desired_state": "Add keyboard activation (e.g., Shift+F10 or menu key) for context menus. Indicate available keyboard shortcuts.",
+      "implementation_notes": "Consider adding a long-press handler or a dedicated 'more' button as a keyboard-accessible alternative to right-click context menus."
+    },
+    {
+      "component": "global (all components)",
+      "severity": "medium",
+      "category": "error_feedback",
+      "current_state": "Error handling is inconsistent across components. Some use inline error states with retry buttons (PostList, FavoritePage, SearchComponent), others use only transient $q.notify toasts (AddFolderDialog, EditFolderDialog, SubscribeDialog, context menus). Toasts auto-dismiss in 1-3 seconds and can be missed.",
+      "desired_state": "Establish a consistent error handling strategy: transient errors (network timeouts) → inline retry states. Validation errors → inline field validation. For dialogs, prefer inline error display over toasts.",
+      "implementation_notes": "Define a pattern: in-page components use error state (v-if=\"error\"), dialog components show inline error banner inside the dialog instead of closing with a toast."
+    },
+    {
+      "component": "RssIcon.vue",
+      "severity": "low",
+      "category": "accessibility",
+      "current_state": "The generated letter avatar (first letter of title) has no aria-label. Images inside q-img have no alt text.",
+      "desired_state": "Add role=\"img\" and aria-label to the icon container. Use the RSS title as alt text for images.",
+      "implementation_notes": "Add `:aria-label=\"title || 'RSS 图标'\"` and `role=\"img\"` on the outer div."
+    },
+    {
+      "component": "SettingPage.vue",
+      "severity": "low",
+      "category": "visual_polish",
+      "current_state": "The settings header uses a gradient background (`linear-gradient(135deg, #667eea 0%, #764ba2 100%)`) which is visually appealing but inconsistent with the rest of the app's primary-color-based design.",
+      "desired_state": "Consider using the app's primary color for the settings header to maintain visual consistency, or keep the gradient as a unique accent page.",
+      "implementation_notes": "Minor design preference. The gradient adds variety — could keep as a distinctive touch for the settings page."
+    }
+  ]
+}

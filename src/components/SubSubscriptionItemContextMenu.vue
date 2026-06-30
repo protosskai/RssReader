@@ -5,7 +5,7 @@
   >
     <q-list dense style="min-width: 100px">
       <q-item clickable v-close-popup v-for="(item, index) in contextMenuInfo"
-              :key="index"
+              :key="item.title"
               @click="item.clickHandler"
       >
         <q-item-section>{{ item.title }}</q-item-section>
@@ -18,11 +18,13 @@
   </q-menu>
 </template>
 <script setup lang="ts">
-import {RssInfoItem} from "src/common/RssInfoItem";
+import {RssInfoItem} from "src/common/models";
 import {useClipboard} from '@vueuse/core'
 import {ref} from "vue";
 import {useQuasar} from 'quasar'
 import {useRssInfoStore} from "stores/rssInfoStore";
+
+const $q = useQuasar()
 
 const feedUrl = ref('')
 const {copy, isSupported} = useClipboard({source: feedUrl})
@@ -35,7 +37,7 @@ const props = defineProps<{
 const rssInfoStore = useRssInfoStore()
 const {removeRssSubscription} = rssInfoStore
 
-export interface ContextMenuItem {
+interface ContextMenuItem {
   title: string,
   icon?: string,
   clickHandler?: () => void,
@@ -43,19 +45,11 @@ export interface ContextMenuItem {
 }
 
 const onOpenHomePage = () => {
-  const htmlUrl = props.rssInfo.htmlUrl
-  window.electronAPI.openLink(htmlUrl)
-}
-const onMarkRead = () => {
-
-}
-const onOpenEditDialog = () => {
-
+  window.electronAPI.openLink(props.rssInfo.htmlUrl)
 }
 const onCopyFeedUrl = () => {
-  const $q = useQuasar()
   feedUrl.value = props.rssInfo.feedUrl
-  if (isSupported) {
+  if (isSupported.value) {
     copy(feedUrl.value)
     $q.notify({
       message: '复制成功!'
@@ -67,12 +61,8 @@ const onCopyFeedUrl = () => {
     })
   }
 }
-const onRename = () => {
-
-}
 const onDeleted = async () => {
-  const $q = useQuasar()
-  const errMsg = await removeRssSubscription(props.folderName, props.rssInfo)
+  const errMsg = await removeRssSubscription(props.rssInfo.id)
   if (!errMsg.success) {
     $q.notify({
       message: errMsg.msg,
@@ -86,20 +76,8 @@ const contextMenuInfo: ContextMenuItem[] = [
     clickHandler: onOpenHomePage
   },
   {
-    title: '标为已读',
-    clickHandler: onMarkRead
-  },
-  {
     title: '复制订阅链接',
     clickHandler: onCopyFeedUrl
-  },
-  {
-    title: '编辑',
-    clickHandler: onOpenEditDialog
-  },
-  {
-    title: '重命名',
-    clickHandler: onRename
   },
   {
     title: '删除',

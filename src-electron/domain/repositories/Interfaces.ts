@@ -3,7 +3,7 @@
  * 数据访问层抽象 - 隔离业务逻辑与数据存储
  */
 
-import { Article, FeedSource, Folder, ArticleFilter, ArticleStats } from './Article';
+import { Article, FeedSource, Folder, ArticleFilter, ArticleStats } from '../models/Article';
 
 export interface ArticleRepository {
   // Article操作
@@ -19,6 +19,9 @@ export interface ArticleRepository {
   getFavoriteArticles(): Promise<Article[]>;
   markAllAsRead(feedId?: string, folderName?: string): Promise<void>;
   clearAllFavorites(): Promise<void>;
+
+  // 同步一组文章（批量保存，只插入不存在的文章）
+  syncArticles(feedId: string, posts: import('../../infrastructure/persistence/common').PostInfoItem[]): Promise<void>;
 
   // 统计信息
   getArticleStats(): Promise<ArticleStats>;

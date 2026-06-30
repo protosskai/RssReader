@@ -1,0 +1,1301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="https://martinfowler.com/feed.atom" rel="self"/>
+  <link href="https://martinfowler.com"/>
+  <id>https://martinfowler.com/feed.atom</id>
+  <title>Martin Fowler</title>
+  <subtitle>Master feed of news and updates from martinfowler.com</subtitle>
+  <author>
+    <name>Martin Fowler</name>
+    <email>martin@martinfowler.com</email>
+    <uri>https://martinfowler.com</uri>
+  </author>
+  <updated>2026-02-13T10:45:00-05:00</updated>
+<entry>
+    <title>Fragments: February 13</title>
+    <link href="https://martinfowler.com/fragments/2026-02-13.html"/>
+    <updated>2026-02-13T10:45:00-05:00</updated>
+    <id>https://martinfowler.com/fragments/2026-02-13.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;I’ve been busy traveling this week, visiting some clients in the Bay Area and attending The Pragmatic Summit. So I’ve not had as much time as I’d hoped to share more thoughts from the &lt;a href="https://martinfowler.com/bliki/FutureOfSoftwareDevelopment.html"&gt;Thoughtworks Future of Software Development Retreat&lt;/a&gt;. I’m still working through my notes and posting fragments - here are some more:&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;What role do senior developers play as LLMs become established? As befits a gathering of many senior developers, we felt we still have a bright future, focusing more on architectural issues than the messy details of syntax and coding. In some cases, folks who haven’t done much programming in the last decade have found LLMs allow them to get back to that, and managing LLM agents has a lot of similarities to managing junior developers.&lt;/p&gt;
+
+&lt;p&gt;One attendee reported that although their senior developers were very resistant to using LLMs, when those senior developers were involved in an exercise that forced them to do some hands-on work with LLMs, a third of them were instantly converted to being very pro-LLM. That suggests that practical experience is important to give senior folks credible information to judge the value, particularly since there’s been striking improvements to models in just the last couple of months. As was quipped, some negative opinions of LLM capabilities “are so January”.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;There’s been much angst posted in recent months about the fate for junior developers, as people are worried that they will be replaced by untiring agents. This group was more sanguine about this, feeling that junior developers will still be needed, if nothing else because they are open-minded about LLMs and familiar with using them. It’s the mid-level developers who face the greatest challenges. They formed their career without LLMs, but haven’t gained the level of experience yet to fully drive them effectively in the way that senior developers do.&lt;/p&gt;
+
+&lt;p&gt;LLMs could be helpful to junior developers by providing a always-available mentor, capable of teaching them better programming. Juniors should, of course, have a certain skepticism of their AI mentors, but they should be skeptical of fleshy mentors too. Not all of us are as brilliant as I like to think that I am.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Attendee Margaret-Anne Storey has published a longer post on the problem of &lt;a href="https://margaretstorey.com/blog/2026/02/09/cognitive-debt/"&gt;cognitive debt&lt;/a&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I saw this dynamic play out vividly in an entrepreneurship course I taught recently. Student teams were building software products over the semester, moving quickly to ship features and meet milestones. But by weeks 7 or 8, one team hit a wall. They could no longer make even simple changes without breaking something unexpected. When I met with them, the team initially blamed technical debt: messy code, poor architecture, hurried implementations. But as we dug deeper, the real problem emerged: no one on the team could explain why certain design decisions had been made or how different parts of the system were supposed to work together. The code might have been messy, but the bigger issue was that the theory of the system, their shared understanding, had fragmented or disappeared entirely. They had accumulated cognitive debt faster than technical debt, and it paralyzed them.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I think this is a worthwhile topic to think about, but as I ponder it, I look at it in a similar way to how I look at &lt;a href="https://martinfowler.com/bliki/TechnicalDebt.html"&gt;Technical Debt&lt;/a&gt;. Many people focus on technical debt as the bad stuff that accumulates in a sloppy code base - poor module boundaries, bad naming etc. The term I use for bad stuff like that is &lt;em&gt;cruft&lt;/em&gt;, I use the technical debt metaphor as a way to think about how to deal with the costs that the cruft imposes. Either we pay the interest -  making each further change to the code base a bit harder, or we pay down the principal - doing explicit restructuring and refactoring to make the code easier to change.&lt;/p&gt;
+
+&lt;p&gt;What is this separation of the cruft and the debt metaphor in the cognitive realm? I think the equivalent of cruft is ignorance - both of the code and the domain the code is supporting. The debt metaphor then still applies, either it costs more to add new capabilities, or we have to make an explicit investment to gain knowledge. The debt metaphor reminds us that which we do depends on the relative costs between them. With cognitive issues, those costs apply on both the humans and &lt;a href="https://martinfowler.com/articles/who-is-llm.html"&gt;The Genie&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Many of us have long been advocating for initiatives to improve Developer Experience (DevEx) to &lt;a href="https://martinfowler.com/articles/developer-effectiveness.html"&gt;improve the effectiveness&lt;/a&gt; of software development teams. &lt;a href="https://lauratacho.com/"&gt;Laura Tacho&lt;/a&gt; commented:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The Venn Diagram of Developer Experience and Agent Experience is a circle&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Many of the things we advocate for developers also enable LLMs to work more effectively too. Smooth tooling, clear information about the development environment, helps LLMs figure out how create code quickly and correctly. While there is a possibility that The Genie’s Galaxy Brain can comprehend a confusing code base, there’s growing evidence that good modularity and descriptive naming is as good for the transformer as it is for more squishy neural networks. This is getting recognized by software development management, leading to efforts to smooth the path for the LLM. But as Laura observed, it’s sad the this implies that the execs won’t make the effort for humans that they are making for the robots.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;IDEs still have a future, but need to incorporate LLMs into their working. One way is to use LLMs to support things that cannot be done with deterministic methods, such as generating code from natural language documents. But there’s plenty of tasks where you don’t want to use an LLM - they are a horribly inefficient way to rename a function, for example. Another role for LLMs is to help users use them effectively - after all modern IDEs are complex tools, and few users know how to get the most out of them. (As a long-time Emacs user, I sympathize.) An IDE can help the user select when to use an LLM for a task, when to use the deterministic IDE features, and when to choreograph a mix of the two.&lt;/p&gt;
+
+&lt;p&gt;Say I have “person” in my domain and I want to change it to “contact”. It appears in function names, field names, documentation, test cases. A simple search-replace isn’t enough. But rather than have the LLM operate on the entire code base, maybe the LLM chooses to use the IDE’s refactoring capabilities on all the places it sees - essentially orchestrating the IDE’s features. An attendee noted that analysis of renames in an IDE indicated that they occur in clusters like this, so it would be a useful capability.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Will two-pizza teams shrink to one-pizza teams because LLMs don’t eat pizza - or will we have the same size teams that do much more? I’m inclined to the latter, there’s something about the two-pizza team size that effectively balances the benefits of human collaboration with the costs of coordination.&lt;/p&gt;
+
+&lt;p&gt;That also raises a question about the shape of pair programming, a question that came up during the panel I had with Gergely Orosz and Kent Beck at The Pragmatic Summit. There seems to be a common notion that the best way to work is to have one programmer driving a few (or many) LLM agents. But I wonder if two humans driving a bunch of agents would be better, combining the benefits of pairing with the greater code-generative ability of The Genies.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Aruna Ranganathan and Xingqi Maggie Ye &lt;a href="https://hbr.org/2026/02/ai-doesnt-reduce-work-it-intensifies-it"&gt;write in the Harvard Business Review&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In an eight-month study of how generative AI changed work habits at a U.S.-based technology company with about 200 employees, we found that employees worked at a faster pace, took on a broader scope of tasks, and extended work into more hours of the day, often without being asked to do so.&lt;/p&gt;
+
+  &lt;p&gt;&lt;em&gt;…&lt;/em&gt;&lt;/p&gt;
+
+  &lt;p&gt;While this may sound like a dream come true for leaders, the changes brought about by enthusiastic AI adoption can be unsustainable, causing problems down the line. Once the excitement of experimenting fades, workers can find that their workload has quietly grown and feel stretched from juggling everything that’s suddenly on their plate. That workload creep can in turn lead to cognitive fatigue, burnout, and weakened decision-making. The productivity surge enjoyed at the beginning can give way to lower quality work, turnover, and other problems.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://bsky.app/profile/skamille.themanagerswrath.com/post/3mekddb6f4k27"&gt;Camille Fournier&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The part of “everyone becomes a manager” in AI that I didn’t really think about until now was the mental fatigue of context switching and keeping many tasks going at once, which of course is one of the hardest parts of being a manager and now you all get to enjoy it too&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;There’s an increasing feeling that there’s a shift coming our profession where folks will turn from programmers engaged with the code to supervisory programmers herding a bunch of agents. I do think that supervisory or not, programmers will still be accountable for the code generated under their watch, and it’s an open question whether increasing context-switching will undermine the effectiveness of driving many agents. This would lead to practices that seek to harvest the parallelism of agents while minimizing the context-switching.&lt;/p&gt;
+
+&lt;p&gt;Whatever route we go down, I expect a lot of activity in exploring what makes an effective workflow for supervisory programming in the coming months.&lt;/p&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Fragments: February  9</title>
+    <link href="https://martinfowler.com/fragments/2026-02-09.html"/>
+    <updated>2026-02-09T11:32:00-08:00</updated>
+    <id>https://martinfowler.com/fragments/2026-02-09.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;Some more thoughts from last week’s open space gathering on the future of software development in the age of AI. I haven’t attributed any comments since we were operating under the &lt;a href="https://www.chathamhouse.org/about-us/chatham-house-rule"&gt;Chatham House Rule&lt;/a&gt;, but should the sources recognize themselves and would like to be attributed, then get in touch and I’ll edit this post.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;During the opening of the gathering, I commented that I was naturally skeptical of the value of LLMs. After all, the decades have thrown up many tools that have claimed to totally change the nature of software development. Most of these have been little better than snake oil.&lt;/p&gt;
+
+&lt;p&gt;But I am a &lt;em&gt;total, absolute skeptic&lt;/em&gt; - which means I also have to be skeptical of my own skepticism.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;One of our sessions focused on the problem of “cognitive debt”. Usually, as we build a software system, the developers of that system gain an understanding both the underlying domain and the software they are building to support it. But once so much work is sent off to LLMs, does this mean the team no longer learns as much? And if so, what are the consequences of this? Can we rely on &lt;a href="https://martinfowler.com/articles/who-is-llm.html"&gt;The Genie&lt;/a&gt; to keep track of everything, or should we take active measures to ensure the team understands more of what’s being built and why?&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html"&gt;TDD cycle&lt;/a&gt; involves a key (and often under-used) step to refactor the code. This is where the developers consolidate their understanding and embed it into the codebase. Do we need some similar step to ensure we understand what the LLMs are up to?&lt;/p&gt;
+
+&lt;p&gt;When the LLM writes some complex code, ask it to explain how it works. Maybe get it do so in a funky way, such as asking it to explain the code’s behavior in the form of a fairy tale.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;OH:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;LLMs are drug dealers, they give us stuff, but don’t care about the resulting system or the humans that develop and use it.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Who cares about the long-term health of the system when the LLM renews its context with every cycle?&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Programmers are wary of LLMs not just because folks are worried for their jobs, but also because we’re scared that LLMs will remove much of the fun from programming. As I think about this, I consider what I enjoy about programming. One aspect is delivering useful features - which I only see improving as LLMs become more capable.&lt;/p&gt;
+
+&lt;p&gt;But, for me, programming is more than that. Another aspect I enjoy about programming is model building. I enjoy the process of coming up with abstractions that help me reason about the domain the code is supporting - and I am concerned that LLMs will cause me to spend less attention on this model building. It may be, however, that model-building becomes an important part of working effectively with LLMs, a topic &lt;a href="https://martinfowler.com/articles/convo-llm-abstractions.html"&gt;Unmesh Joshi and I explored&lt;/a&gt; a couple of months ago.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;In the age of LLMs, will there still be such a things as “source code”, and if so, what will it look like? Prompts, and other forms of natural language context can elicit a lot of behavior, and cause a rise in the level of abstraction, but also a &lt;a href="https://martinfowler.com/articles/2025-nature-abstraction.html"&gt;sideways move into non-determinism&lt;/a&gt;. In all this is there still a role for a persistent statement of non-deterministic behavior?&lt;/p&gt;
+
+&lt;p&gt;Almost a couple of decades ago, I became interested in a class of tools called &lt;a href="https://martinfowler.com/articles/languageWorkbench.html"&gt;Language Workbenches&lt;/a&gt;. They didn’t have a significant impact on software development, but maybe the rise of LLMs will reintroduce some ideas from them. These tools rely on a &lt;a href="https://martinfowler.com/articles/languageWorkbench.html#workbench.gif"&gt;semantic model&lt;/a&gt; that the tool persists in some kind of storage medium, that isn’t necessarily textual or comprehensible to humans directly. Instead, for humans to understand it, the tools include projectional editors that create human-readable projections of the model.&lt;/p&gt;
+
+&lt;p&gt;Could this notion of a non-human deterministic representation  become the future source code? One that’s designed to maximize expression with minimal tokens?&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;OH:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Scala was the first example of a lab-leak in software. A language designed for dangerous experiments in type theory escaped into the general developer population.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;elsewhere on the web&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Angie Jones on &lt;a href="https://angiejones.tech/stop-closing-the-door-fix-the-house/"&gt;tips for open source maintainers to handle AI contributions&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I’ve been seeing more and more open source maintainers throwing up their hands over AI generated pull requests. Going so far as to stop accepting PRs from external contributors.&lt;/p&gt;
+
+  &lt;p&gt;&lt;em&gt;[snip]&lt;/em&gt;&lt;/p&gt;
+
+  &lt;p&gt;But yo, what are we doing?! Closing the door on contributors isn’t the answer. Open source maintainers don’t want to hear this, but this is the way people code now, and you need to do your part to prepare your repo for AI coding assistants.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Matthias Kainer has written a cool &lt;a href="https://matthias-kainer.de/blog/posts/so-whats-the-next-word-then-/"&gt;explanation of how transformers work with interactive examples&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Last Tuesday my kid came back from school, sat down and asked: “How does ChatGPT actually know what word comes next?” And I thought - great question. Terrible timing, because dinner was almost ready, but great question.&lt;/p&gt;
+
+  &lt;p&gt;So I tried to explain it. And failed. Not because it is impossibly hard, but because the usual explanations are either “it is just matrix multiplication” (true but useless) or “it uses attention mechanisms” (cool name, zero information). Neither of those helps a 12-year-old. Or, honestly, most adults. Also, even getting to start my explanation was taking longer than a tiktok, so my kid lost attention span before I could even say “matrix multiplication”. I needed something more visual. More interactive. More fun.&lt;/p&gt;
+
+  &lt;p&gt;So here is the version I wish I had at dinner. With drawings. And things you can click on. Because when everything seems abstract, playing with the actual numbers can bring some light.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A helpful guide for any 12-year-old, or a 62-year-old that fears they’re regressing.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;In my &lt;a href="https://martinfowler.com/fragments/2026-02-04.html"&gt;last fragments&lt;/a&gt;, I included some concerns about how advertising could interplay with chatbots. Anthropic have now made some &lt;a href="https://mashable.com/article/anthropic-super-bowl-ad-mocks-chatgpt-ads"&gt;adverts about concerns about adverts&lt;/a&gt; - both funny and creepy. &lt;a href="https://www.theguardian.com/technology/2026/feb/07/ai-chatbots-anthropic-openai-claude-chatgpt"&gt;Sam Altman is amused and annoyed.&lt;/a&gt;&lt;/p&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Context Engineering for Coding Agents</title>
+    <link href="https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html"/>
+    <updated>2026-02-05T07:36:00-08:00</updated>
+    <id>tag:martinfowler.com,2026-02-05:Context-Engineering-for-Coding-Agents</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html'&gt;&lt;img src = 'https://martinfowler.com/articles/exploring-gen-ai/donkey-card.png' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;The number of options we have to configure and enrich a coding agent&amp;#x2019;s
+      context has exploded over the past few months. Claude Code is leading the
+      charge with innovations in this space, but other coding assistants are
+      quickly following suit. Powerful context engineering is becoming a huge
+      part of the developer experience of these tools. &lt;b class = 'author'&gt;Birgitta
+      B&amp;#xF6;ckeler&lt;/b&gt; explains the current state of
+      context configuration features, using Claude Code as an example.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/exploring-gen-ai/context-engineering-coding-agents.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Fragments: February  4</title>
+    <link href="https://martinfowler.com/fragments/2026-02-04.html"/>
+    <updated>2026-02-04T09:56:00-08:00</updated>
+    <id>https://martinfowler.com/fragments/2026-02-04.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">
+&lt;p&gt;I’ve spent a couple of days at a Thoughtworks-organized event in Deer Valley Utah. It was my favorite kind of event, a really great set of attendees in an &lt;a href="https://martinfowler.com/bliki/OpenSpace.html"&gt;Open Space&lt;/a&gt; format. These kinds of events are full of ideas, which I do want to share, but I can’t truthfully form them into a coherent narrative for an article about the event. However this fragment format suits them perfectly, so I’ll post a bunch of fragmentary thoughts from the event, both in this post, and in  posts in the next few days.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;We talked about the worry that using AI can cause humans to have less understanding of the systems they are creating. In this discussion one person pointed out that one of the values of &lt;a href="https://martinfowler.com/bliki/PairProgramming.html"&gt;Pair Programming&lt;/a&gt; is that you have to regularly explain things to your pair. This is an important part of learning - &lt;em&gt;for the person doing the explaining&lt;/em&gt;. After all one of the best ways to learn something is to try to teach it.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;One attendee is an SRE for a Very (Very) Large Code Base. He was less worried about people not understanding the code an LLM writes because he already can’t understand the VVLCB he’s responsible for. What he values is that the LLM helps him understand the what the code is doing, and he regularly uses it to navigate to the crucial parts of the code.&lt;/p&gt;
+
+&lt;p&gt;There’s a general point here:&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Fully trusting the answer an LLM gives you is foolishness, but it’s wise to use an LLM to help navigate the way to the answer.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Elsewhere on the internet, Drew Breunig wonders if software &lt;a href="https://www.dbreunig.com/2026/01/08/a-software-library-with-no-code.html"&gt;libraries of the future might be only specs and no code&lt;/a&gt;. To explore this idea he built a simple library to convert timestamps into phrases like “3 hours ago”. He used the spec to build implementations in seven languages. The spec is a markdown document of 500 lines and a set of tests in 500 lines of YAML.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;“What does software engineering look like when coding is free?”&lt;/p&gt;
+
+  &lt;p&gt;I’ve chewed on this question a bit, but this “software library without code” is a tangible thought experiment that helped firm up a few questions and thoughts.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://www.schneier.com/blog/archives/2026/01/could-chatgpt-convince-you-to-buy-something.html"&gt;Bruce Schneier&lt;/a&gt; on the role advertising may play while chatting with LLMs&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Imagine you’re conversing with your AI agent about an upcoming vacation. Did it recommend a particular airline or hotel chain because they really are best for you, or does the company get a kickback for every mention?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Recently I heard an ex-Googler explain that advertising was a gilded cage for Google, and they tried very hard to find another business model. The trouble is that it’s very lucrative but also ties you to the advertisers, who are likely to pull out whenever there is an economic downturn. Furthermore they also gain power to influence content - many controversies over “censorship” start with demands from advertisers.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;The news from Minnesota continues to be depressing. The brutality from the masked paramilitaries is getting worse, and their political masters are not just accepting this, but seem eager to let things escalate. Those people with the power to prevent this escalation are either encouraging it, or doing nothing.&lt;/p&gt;
+
+&lt;p&gt;One hopeful sign from all this is the actions of the people of Minnesota. They have resisted peacefully so far, their principal weapons being blowing whistles and filming videos. They demonstrate the neighborliness and support of freedom and law that made America great. I can only hope their spirit inspires others to turn away from the path that we’re currently on. I enjoyed this portrayal of them from &lt;a href="https://www.theatlantic.com/ideas/2026/01/the-neighbors-defending-minnesota-from-ice/685769/?gift=zGsHlQiVhVhk3cFVqv--g-tjT7KILRRhUyucHYy86rw&amp;amp;utm_source=copy-link&amp;amp;utm_medium=social&amp;amp;utm_campaign=share"&gt;Adam Serwer&lt;/a&gt; (gift link)&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In Minnesota, all of the ideological cornerstones of MAGA have been proved false at once. Minnesotans, not the armed thugs of ICE and the Border Patrol, are brave. Minnesotans have shown that their community is socially cohesive—because of its diversity and not in spite of it. Minnesotans have found and loved one another in a world atomized by social media, where empty men have tried to fill their lonely soul with lies about their own inherent superiority. Minnesotans have preserved everything worthwhile about “Western civilization,” while armed brutes try to tear it down by force.&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Bliki: Excessive Bold</title>
+    <link href="https://martinfowler.com/bliki/ExcessiveBold.html"/>
+    <updated>2026-01-28T09:20:00-05:00</updated>
+    <id>https://martinfowler.com/bliki/ExcessiveBold.html</id>
+    <category term="bliki"/>
+    <content type="html">
+&lt;p&gt;I'm increasingly seeing a lot of technical and business writing make heavy
+  use of bold font weights, in an attempt to emphasize what the writers think is
+  important. LLMs seem to have picked up and spread this practice widely. But
+  most of this is self-defeating, the more a writer uses typographical emphasis,
+  the less power it has, quickly reaching the point where it loses all its
+  benefits.&lt;/p&gt;
+
+&lt;p&gt;There are various typographical tools that are used to emphasize words and
+  phrases, such as: bold, italic, capitals, and underlines. I find that bold is the one
+  that's getting most of the over-use. Using a lot of capitals is rightly
+  reviled as shouting, and when we see it used widely, it raises our doubts on
+  the quality of the underlying thinking.
+  Underlines have become the signal for hyperlinks, so I rarely see this for
+  emphasis any more. Both capitals and underlines have also been seen as rather
+  cheap forms of highlight, since we could do them with typewriters and
+  handwriting, while bold and italics were only possible after the rise of
+  word-processors. (Although I realize most of my readers are too young to
+  remember when word-processors were novel.)&lt;/p&gt;
+
+&lt;p&gt;Italics are the subtler form of emphasis. When I use them in a paragraph,
+  they don't leap out to the eye. This allows me to use them in long flows of text when
+  I want to set it apart, and when I use it to emphasize a phrase it only makes
+  its presence felt when I'm fully reading the text. For this reason, I prefer
+  to use italics for emphasis, but I only use it rarely, suggesting it's
+  &lt;i&gt;really&lt;/i&gt; important to put stress on
+  the word should I be speaking the paragraph (and I always try to write in the
+  &lt;a href="/bliki/SayYourWriting.html"&gt;way that I speak&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;The greatest value of bold is that draws the eye to the bold text even if the
+  reader isn't reading, but glancing over the page. This is an important
+  property, but one that only works if it's used sparingly. Headings are often
+  done in bold, because the it's important to help the reader navigate a longer
+  document by skimming and looking for headings to find the section I want to read.&lt;/p&gt;
+
+&lt;p&gt;I rarely use bold within a prose paragraph, because of my desire to be
+  parsimonious with bold. One use I do like is to highlight unfamiliar words at
+  the point where I explain them. I got this idea from &lt;a href="https://www.amazon.com/gp/product/0534981283/ref=as_li_tl?ie=UTF8&amp;amp;camp=1789&amp;amp;creative=9325&amp;amp;creativeASIN=0534981283&amp;amp;linkCode=as2&amp;amp;tag=martinfowlerc-20"&gt;Giarratano and Riley&lt;/a&gt;. I noticed that when the
+  unfamiliar term reappeared, I was often unsure what it meant, but glancing
+  back and finding the bold quickly reminded me. The trick here is to place the
+  bold at point of explanation, which is often, but not always, at its first
+  use. 
+&lt;sup&gt;1&lt;/sup&gt;
+&lt;/p&gt;
+
+&lt;p&gt;A common idea is to take an important sentence and bold that, so it leaps
+  out while skimming the article. That can be worthwhile, but as ever with this
+  kind of emphasize, its effectiveness is inversely proportional to how often
+  it's used. It's also usually not the best tool for the job. Callouts usually
+  work better. They do a superior job of drawing the eye, and furthermore they don't
+  need to use the same words as in the prose text. This allows me to word the
+  callout better than it could be if it also had to fit in the flow of the
+  prose.&lt;/p&gt;
+
+&lt;p&gt;A marginal case is where I see bold used in first clause of each item in a
+  bulleted list. In some ways this is acting like a heading for the text in the
+  list. But we don't need a heading for every paragraph, and the presence of the
+  bullets does enough to draw the eye to the items. And bullet-lists are over
+  used too - I always try to write such things as a prose paragraph instead, as
+  prose flows much better than bullets and is thus more pleasant to read. It's
+  important to write in such a way to make it an enjoyable experience for the
+  reader - even, indeed especially, when I'm also trying to explain things for them.&lt;/p&gt;
+
+&lt;p&gt;While writing this, I was &lt;b&gt;tempted to illustrate my point&lt;/b&gt; by using &lt;b&gt;excessive
+  bold&lt;/b&gt; in a paragraph, &lt;b&gt;showing the problem&lt;/b&gt; and hopefully demonstrating
+  &lt;b&gt;why lots of bold loses the power to emphasize&lt;/b&gt; and &lt;b&gt;attract the skimming eye&lt;/b&gt;.
+  But I also wanted to &lt;b&gt;explain my position clearly&lt;/b&gt;, and I felt that &lt;b&gt;illustrating
+  the problem&lt;/b&gt; would thus &lt;b&gt;undermine my attempt&lt;/b&gt;. So I've &lt;b&gt;confined the example&lt;/b&gt; to a
+  &lt;b&gt;final flourish&lt;/b&gt;. (And, yes, I &lt;b&gt;have seen text&lt;/b&gt; with as much bold as this.)&lt;/p&gt;
+
+&lt;div class="footnote-list"&gt;
+&lt;h2&gt;Notes&lt;/h2&gt;
+
+&lt;div class="footnote-list-item" id="footnote-first-use"&gt;
+&lt;p&gt;&lt;span class="num"&gt;1: &lt;/span&gt;
+      For example, sometimes a new term will appear first in a list. Eg “We carry out this
+      process in three steps: frobning, gibbling, and eorchisting”. In this case
+      we don't bold the words as they appear in the list but later on when we
+      explain what on earth they mean.
+    &lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Assessing internal quality while coding with an agent</title>
+    <link href="https://martinfowler.com/articles/exploring-gen-ai/ccmenu-quality.html"/>
+    <updated>2026-01-27T10:50:00-05:00</updated>
+    <id>tag:martinfowler.com,2026-01-27:Assessing-internal-quality-while-coding-with-an-agent</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/exploring-gen-ai/ccmenu-quality.html'&gt;&lt;img src = 'https://martinfowler.com/articles/exploring-gen-ai/donkey-card.png' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;b class = 'author'&gt;Erik Doernenburg&lt;/b&gt; is the maintainer of CCMenu: a Mac
+      application that shows the status of CI/CD builds in the Mac menu bar. He
+      assesses how using a coding agent affects internal code quality by adding
+      a feature using the agent, and seeing what happens to the code.
+      &lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/exploring-gen-ai/ccmenu-quality.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Fragments: January 22</title>
+    <link href="https://martinfowler.com/fragments/2026-01-22.html"/>
+    <updated>2026-01-22T09:30:00-05:00</updated>
+    <id>https://martinfowler.com/fragments/2026-01-22.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;My colleagues here at Thoughtworks have announced &lt;a href="https://www.thoughtworks.com/ai/works"&gt;AI/works™&lt;/a&gt;, a platform for our work using AI-enabled software development. The platform is in its early days, and is currently intended to support Thoughtworks consultants in their client work. I’m looking forward to sharing what we learn from using and further developing the platform in future months.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Simon Couch &lt;a href="https://www.simonpcouch.com/blog/2026-01-20-cc-impact/"&gt;examines the electricity consumption&lt;/a&gt; of using AI. He’s a heavy user: “usually programming for a few hours, and driving 2 or 3 Claude Code instances at a time”. He finds his usage of electricity is orders of magnitude more than typical estimates based on the “typical query”.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;On a median day, I estimate I consume 1,300 Wh through Claude Code—4,400 “typical queries” worth.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;But it’s still not a massive amount of power - similar to that of running a dishwasher.&lt;/p&gt;
+
+&lt;p&gt;A caveat to this is that this is “napkin math” because we don’t have decent data about how these models use resources. I agree with him that we ought to.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;My namesake Chad Fowler (no relation) considers that the movement to agentic coding creates a similar &lt;a href="https://aicoding.leaflet.pub/3mbrvhyye4k2e"&gt;shift in rigor and discipline&lt;/a&gt; as appeared in Extreme Programming, dynamic languages, and continuous deployment.&lt;/p&gt;
+
+&lt;p&gt;In Extreme Programming’s case, this meant a lot of discipline around testing, continuous integration, and keeping the code-base healthy. My current view is that with AI-enabled development we need to be rigorous about evaluating the software, both for its observable behavior and its internal quality.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The engineers who thrive in this environment will be the ones who relocate discipline rather than abandon it. They’ll treat generation as a capability that demands more precision in specification, not less. They’ll build evaluation systems that are harder to fool than the ones they replaced. They’ll refuse the temptation to mistake velocity for progress.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;There’s been much written about the dreadful events in Minnesota, and I’ve not felt I’ve had anything useful to add to them. But I do want to pass on an excellent post from &lt;a href="https://www.noahpinion.blog/p/why-are-federal-agents-gunning-down"&gt;Noah Smith&lt;/a&gt; that captures many of my thoughts. He points out that there is a “consistent record of brutality, aggression, dubious legality, and unprofessionalism” from ICE (and CBP) who seem to be turning into MAGA’s &lt;a href="https://en.wikipedia.org/wiki/Sturmabteilung"&gt;SD&lt;/a&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Is this America now? A country where unaccountable and poorly trained government agents go door to door, arresting and beating people on pure suspicion, and shooting people who don’t obey their every order or who try to get away? “When a federal officer gives you instructions, you abide by them and then you get to keep your life” is a perfect description of an authoritarian police state. None of this is Constitutional, every bit of it is deeply antithetical to the American values we grew up taking for granted.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;My worries about these kinds of developments were what animated me to urge against voting for Trump in the &lt;a href="https://martinfowler.com/articles/vote-against-trump.html"&gt;2016 election&lt;/a&gt;. Mostly those worries didn’t come to fruition because enough constitutional Republicans were in a position to stop them from happening, so even when Trump attempted a coup in 2020, he wasn’t able to get very far. But now those constitutional Republicans are absent or quiescent. I fear that what we’ve seen in Minneapolis will be a harbinger of worse to come.&lt;/p&gt;
+
+&lt;p&gt;I also second John Gruber’s &lt;a href="https://daringfireball.net/2026/01/lets_call_a_murder_a_murder"&gt;praise of bystander Caitlin Callenson&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;But then, after the murderous agent fired three shots — just 30 or 40 feet in front of Callenson — Callenson had the courage and conviction to stay with the scene and keep filming. Not to run away, but instead to follow the scene. To keep filming. To continue documenting with as best clarity as she could, what was unfolding.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The recent activity in  Venezuala reminds me that I’ve long felt that Trump is a Hugo Chávez figure - a charismatic populist who’s keen on wrecking institutions and norms. Trump is old, so won’t be with us for that much longer - but the question is: “who is Trump’s Maduro?”&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;With all the drama at home, we shouldn’t ignore the terrible things that happened in Iran. The people there again suffered again the consequences of an entrenched authoritarian police state.&lt;/p&gt;
+
+</content>
+  </entry>
+
+<entry>
+    <title>Conversation: LLMs and the what/how loop</title>
+    <link href="https://martinfowler.com/articles/convo-what-how.html"/>
+    <updated>2026-01-21T09:40:00-05:00</updated>
+    <id>tag:martinfowler.com,2026-01-21:Conversation--LLMs-and-the-what-how-loop</id>
+    <content type="html">
+&lt;p&gt;A conversation between &lt;b class = 'author'&gt;Unmesh Joshi&lt;/b&gt;, &lt;b class = 'author'&gt;Rebecca
+      Parsons&lt;/b&gt;, and &lt;b class = 'author'&gt;Martin Fowler&lt;/b&gt; on how LLMs help us
+      shape the abstractions in our software. We view our challenge as building
+      systems that survive change, requiring us to manage our cognitive load. We
+      can do this by mapping the &amp;#x201C;what&amp;#x201D; of we want our software to do into the
+      &amp;#x201C;how&amp;#x201D; of programming languages. This &amp;#x201C;what&amp;#x201D; and &amp;#x201C;how&amp;#x201D; are built up in a
+      feedback loop. TDD helps us operationalize that loop, and LLMs allow us to
+      explore that loop in an informal and more fluid manner.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/convo-what-how.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Stop Picking Sides: Manage the Tension Between Adaptation and                Optimization</title>
+    <link href="https://martinfowler.com/articles/stop-picking-sides.html"/>
+    <updated>2026-01-13T14:59:00+00:00</updated>
+    <id>tag:martinfowler.com,2026-01-13:Stop-Picking-Sides--Manage-the-Tension-Between-Adaptation-and----------------Optimization</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/stop-picking-sides.html'&gt;&lt;img src = 'https://martinfowler.com/articles/stop-picking-sides/infograph.jpg' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;b class = 'author'&gt;Jim Highsmith&lt;/b&gt; notes that many teams have turned into
+      tribes wedded to exclusively adaptation or optimization. But he feels this
+      misses the point that both of these are important, and we need to manage
+      the tension between them. We can do this by thinking of two operating
+      modes: explore (adaptation-dominant) and exploit (optimization dominant).
+      We tailor a team's operating model to a particular blend of the two -
+      considering uncertainty, risk, cost of change, and an evidence threshold.
+      We should be particularly careful at the points where there is a handoff
+      between the two modes&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/stop-picking-sides.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>My favorite musical discoveries of 2025</title>
+    <link href="https://martinfowler.com/articles/2025-music.html"/>
+    <updated>2026-01-08T08:55:00-05:00</updated>
+    <id>tag:martinfowler.com,2026-01-08:My-favorite-musical-discoveries-of-2025</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/2025-music.html'&gt;&lt;img src = 'https://martinfowler.com/articles/2025-music/card.png' width = '350px'&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;My favorite albums from last year. Balkan brass, an
+      acoustic favorite of 80s returns, Ethio-jazz, Guatemalan singer-guitarist,
+      jazz-rock/Indian classical fusion, and a unique male vocalist.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/2025-music.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Fragments: January  8</title>
+    <link href="https://martinfowler.com/fragments/2026-01-08.html"/>
+    <updated>2026-01-08T08:29:00-05:00</updated>
+    <id>https://martinfowler.com/fragments/2026-01-08.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;Anthropic report on &lt;a href="https://www.anthropic.com/research/how-ai-is-transforming-work-at-anthropic"&gt;how their AI is changing their own software development practice&lt;/a&gt;.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Most usage is for debugging and helping understand existing code&lt;/li&gt;
+  &lt;li&gt;Notable increase in using it for implementing new features&lt;/li&gt;
+  &lt;li&gt;Developers using it for 59% of their work and getting 50% productivity increase&lt;/li&gt;
+  &lt;li&gt;14% of developers are “power users” reporting much greater gains&lt;/li&gt;
+  &lt;li&gt;Claude helps developers to work outside their core area&lt;/li&gt;
+  &lt;li&gt;Concerns about changes to the profession, career evolution, and social dynamics&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Much of the discussion about using LLMs for software development lacks details on workflow. Rather than just hear people gush about how wonderful it is, I want to understand the gritty details. What kinds of interactions occur with the LLM? What decisions do the humans make? When reviewing LLM outputs, what kinds of things are the humans looking for, what corrections do they make?&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://obie.medium.com/what-used-to-take-months-now-takes-days-cc8883cc21e9"&gt;Obie Fernandez&lt;/a&gt; has written a post that goes into these kinds of details. Over the Christmas / New Year period he used Claude to build a knowledge distillation application, that takes transcripts from Claude Code sessions, slack discussion, github PR threads etc, turns them into an RDF graph database, and provides a web app with natural language ways to query them.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Not a proof of concept. Not a demo. The first cut of Nexus, a production-ready system with authentication, semantic search, an MCP server for agent access, webhook integrations for our primary SaaS platforms, comprehensive test coverage, deployed, integrated and ready for full-scale adoption at my company this coming Monday. Nearly 13,000 lines of code.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The article is long, but worth the time to read it.&lt;/p&gt;
+
+&lt;p&gt;An important feature of his workflow is relying on &lt;a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html"&gt;Test-Driven Development&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Here’s what made this sustainable rather than chaotic: TDD. Test-driven development. For most of the features, I insisted that Claude Code follow the red-green-refactor cycle with me. Write a failing test first. Make it pass with the simplest implementation. Then refactor while keeping tests green.&lt;/p&gt;
+
+  &lt;p&gt;This wasn’t just methodology purism. TDD served a critical function in AI-assisted development: it kept me in the loop. When you’re directing thousands of lines of code generation, you need a forcing function that makes you actually understand what’s being built. Tests are that forcing function. You can’t write a meaningful test for something you don’t understand. And you can’t verify that a test correctly captures intent without understanding the intent yourself.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The account includes a major refactoring, and much evolution of the initial version of the tool. It’s also an interesting glimpse of how AI tooling may finally make RDF useful.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;When thinking about requirements for software, most discussions focus on prioritization. Some folks talk about buckets such as the &lt;a href="https://en.wikipedia.org/wiki/MoSCoW_method"&gt;MoSCoW set&lt;/a&gt;: Must, Should, Could, and Want. (The old joke being that, in MoSCoW, the cow is silent, because hardly any requirements end up in those buckets.) &lt;a href="https://world.hey.com/jason/the-obvious-the-easy-and-the-possible-2e11a3fb"&gt;Jason Fried&lt;/a&gt; has a different set of buckets for interface design: &lt;strong&gt;Obvious, Easy, and Possible&lt;/strong&gt;. This immediately resonates with me: a good way of think about how to allocate the cognitive costs for those who use a tool.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://www.platformer.news/fake-uber-eats-whisleblower-hoax-debunked/"&gt;Casey Newton&lt;/a&gt; explains how he followed up on an interesting story of dark patterns in food delivery, and found it to be a fake story, buttressed by AI image and document creation. On one hand, it clarifies the important role reporters play in exposing lies that get traction on the internet. But time taken to do this is time not spent on investigating real stories&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For most of my career up until this point, the document shared with me by the whistleblower would have seemed highly credible in large part because it would have taken so long to put together. Who would take the time to put together a detailed, 18-page technical document about market dynamics just to troll a reporter? Who would go to the trouble of creating a fake badge?&lt;/p&gt;
+
+  &lt;p&gt;Today, though, the report can be generated within minutes, and the badge within seconds. And while no good reporter would ever have published a story based on a single document and an unknown source, plenty would take the time to investigate the document’s contents and see whether human sources would back it up.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The internet has always been full of slop, and we have always needed to be wary of what we read there. AI now makes it easy to manufacture convincing looking evidence, and this is never more dangerous than when it confirms strongly held beliefs and fears.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://www.linkedin.com/feed/update/urn:li:activity:7413956151144542208/"&gt;Kent Beck&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The descriptions of Spec-Driven development that I have seen emphasize writing the whole specification before implementation. This encodes the (to me bizarre) assumption that you aren’t going to learn anything during implementation that would change the specification.
+I’ve heard this story so many times told so many ways by well-meaning folks–if only we could get the specification “right”, the rest of this would be easy.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Like him, that story has been the constant background siren to my career in tech. But the &lt;a href="https://martinfowler.com/articles/llm-learning-loop.html"&gt;learning loop&lt;/a&gt; of experimentation is essential to the model building that’s at the heart of any kind of worthwhile specification. As &lt;a href="https://martinfowler.com/articles/llm-learning-loop.html"&gt;Unmesh puts it:&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Large Language Models give us great leverage—but they only work if we focus on learning and understanding. They make it easier to explore ideas, to set things up, to translate intent into code across many specialized languages. But the real capability—our ability to respond to change—comes not from how fast we can produce code, but from how deeply we understand the system we are shaping.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;When Kent defined Extreme Programming, he made &lt;em&gt;feedback&lt;/em&gt; one of its four core values. It strikes me that the key to making the full use of AI in software development is how to use it to accelerate the feedback loops.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;As I listen to people who are serious with AI-assisted programming, the crucial thing I hear is managing context. Programming-oriented tools are geting more sophisticated for that, but there’s also efforts at providing simpler tools, that allow customization. &lt;a href="https://lixo.org"&gt;Carlos Villela&lt;/a&gt; recently recommended Pi, and its developer, &lt;a href="https://mariozechner.at/posts/2025-11-30-pi-coding-agent/"&gt;Mario Zechner, has an interesting blog&lt;/a&gt; on its development.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;So what’s an old guy yelling at Claudes going to do? He’s going to write his own coding agent harness and give it a name that’s entirely un-Google-able, so there will never be any users. Which means there will also never be any issues on the GitHub issue tracker. How hard can it be?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;If I ever get the time to sit and really play with these tools, then something like Pi would be something I’d like to try out. Although as an addict to The One True Editor, I’m interested in some of libraries that work with that, such as &lt;a href="https://github.com/karthink/gptel"&gt;gptel&lt;/a&gt;. That would enable me to use Emacs’s inherent programability to create my own command set to drive the interaction with LLMs.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Outside of my professional work, I’ve &lt;a href="https://boardgamegeek.com/blog/13064/martins-7th-decade"&gt;posting regularly about my boardgaming&lt;/a&gt; on the specialist site BoardGameGeek. However its blogging environment doesn’t do a good job of providing an index to my posts, so I’ve created &lt;a href="https://martinfowler.com/boardgames/"&gt;a list of my BGG posts &lt;/a&gt; on my own site. If you’re interested in my regular posts on boardgaming, and you’re on BGG you can subscribe to me there. If you’re not on BGG you can  subscribe to the blog’s &lt;a href="https://boardgamegeek.com/rss/blog/13064"&gt;RSS feed&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I’ve also created a list of &lt;a href="https://martinfowler.com/boardgames/fav-games.html"&gt;my favorite board games&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://martinfowler.com/boardgames/index/game-grid.png" alt=""&gt;&lt;/p&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Fragments: December 16</title>
+    <link href="https://martinfowler.com/fragments/2025-12-16.html"/>
+    <updated>2025-12-16T10:14:00-05:00</updated>
+    <id>https://martinfowler.com/fragments/2025-12-16.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">
+&lt;p&gt;&lt;a href="https://www.linkedin.com/in/gitanjalivenkatraman/"&gt;Gitanjali Venkatraman&lt;/a&gt; does wonderful illustrations of complex subjects (which is why I was so happy to work with her on our &lt;a href="https://martinfowler.com/articles/expert-generalist.html"&gt;Expert Generalists&lt;/a&gt; article). She has now published the latest in her series of illustrated guides: tackling the complex topic of &lt;a href="https://www.thoughtworks.com/content/dam/thoughtworks/documents/blog/mainframe_modernisation_illustrated_guide_2025.pdf"&gt;Mainframe Modernization&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://www.thoughtworks.com/content/dam/thoughtworks/documents/blog/mainframe_modernisation_illustrated_guide_2025.pdf"&gt;&lt;img src="https://martinfowler.com/fragments/2025/gitanjali-mainframe.png" alt=""&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;In it she illustrates the history and value of mainframes, why modernization is so tricky, and how to tackle the problem by breaking it down into tractable pieces. I love the clarity of her explanations, and smile frequently at her way of enhancing her words with her quirky pictures.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Gergely Orosz on &lt;a href="https://bsky.app/profile/gergely.pragmaticengineer.com/post/3m7xd33hi5c2d"&gt;social media&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Unpopular opinion:&lt;/p&gt;
+
+  &lt;p&gt;Current code review tools just don’t make much sense for AI-generated code&lt;/p&gt;
+
+  &lt;p&gt;When reviewing code I really want to know:&lt;/p&gt;
+
+  &lt;ul&gt;
+    &lt;li&gt;The prompt made by the dev&lt;/li&gt;
+    &lt;li&gt;What corrections the other dev made to the code&lt;/li&gt;
+    &lt;li&gt;Clear marking of code AI-generated not changed by a human&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Some people pushed back saying they don’t (and shouldn’t care) whether it was written by a human, generated by an LLM, or copy-pasted from Stack Overflow.&lt;/p&gt;
+
+&lt;p&gt;In my view it matters &lt;em&gt;a lot&lt;/em&gt; - because of the second vital purpose of code review.&lt;/p&gt;
+
+&lt;p&gt;When asked why do code reviews, most people will answer the first vital purpose - quality control. We want to ensure bad code gets blocked before it hits &lt;a href="https://martinfowler.com/articles/branching-patterns.html#mainline"&gt;mainline&lt;/a&gt;. We do this to avoid bugs and to avoid other quality issues, in particular comprehensibility and ease of change.&lt;/p&gt;
+
+&lt;p&gt;But I hear the second vital purpose less often: code review is a mechanism to communicate and educate. If I’m submitting some sub-standard code, and it gets rejected, I want to know why so that I can improve my programming. Maybe I’m unaware of some library features, or maybe there’s some project-specific standards I haven’t run into yet, or maybe my naming isn’t as clear as I thought it was. Whatever the reasons, I need to know in order to learn. And my employer needs me to learn, so I can be more effective.&lt;/p&gt;
+
+&lt;p&gt;We need to know the writer of the code we review both so we can communicate our better practice to them, but also to know how to improve things. With a human, its a conversation, and perhaps some documentation if we realize we’ve needed to explain things repeatedly. But with an LLM it’s about how to modify its context, as well as humans learning how to better drive the LLM.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Wondering why I’ve been making a lot of posts like this recently? &lt;a href="https://martinfowler.com/articles/writing-fragments.html"&gt;I explain why&lt;/a&gt; I’ve been reviving the link blog.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://simonwillison.net/2025/Dec/10/html-tools/"&gt;Simon Willison&lt;/a&gt; describes how he uses LLMs to build disposable but useful web apps&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;These are the characteristics I have found to be most productive in building tools of this nature:&lt;/p&gt;
+
+  &lt;ol&gt;
+    &lt;li&gt;A single file: inline JavaScript and CSS in a single HTML file means the least hassle in hosting or distributing them, and crucially means you can copy and paste them out of an LLM response.&lt;/li&gt;
+    &lt;li&gt;Avoid React, or anything with a build step. The problem with React is that JSX requires a build step, which makes everything massively less convenient. I prompt “no react” and skip that whole rabbit hole entirely.&lt;/li&gt;
+    &lt;li&gt;Load dependencies from a CDN. The fewer dependencies the better, but if there’s a well known library that helps solve a problem I’m happy to load it from CDNjs or jsdelivr or similar.&lt;/li&gt;
+    &lt;li&gt;Keep them small. A few hundred lines means the maintainability of the code doesn’t matter too much: any good LLM can read them and understand what they’re doing, and rewriting them from scratch with help from an LLM takes just a few minutes.&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;His repository includes all these tools, together with transcripts of the chats that got the LLMs to build them.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://obie.medium.com/what-happens-when-the-coding-becomes-the-least-interesting-part-of-the-work-ab10c213c660"&gt;Obie Fernandez&lt;/a&gt;: while many engineers are underwhelmed by AI tools, some senior engineers are finding them really valuable. He feels that senior engineers have an oft-unspoken mindset, which in conjunction with an LLM, enables the LLM to be much more valuable.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Levels of abstraction and generalization problems get talked about a lot because they’re easy to name. But they’re far from the whole story.&lt;/p&gt;
+
+  &lt;p&gt;Other tools show up just as often in real work:&lt;/p&gt;
+
+  &lt;ul&gt;
+    &lt;li&gt;A sense for blast radius. Knowing which changes are safe to make loudly and which should be quiet and contained.&lt;/li&gt;
+    &lt;li&gt;A feel for sequencing. Knowing when a technically correct change is still wrong because the system or the team isn’t ready for it yet.&lt;/li&gt;
+    &lt;li&gt;An instinct for reversibility. Preferring moves that keep options open, even if they look less elegant in the moment.&lt;/li&gt;
+    &lt;li&gt;An awareness of social cost. Recognizing when a clever solution will confuse more people than it helps.&lt;/li&gt;
+    &lt;li&gt;An allergy to false confidence. Spotting places where tests are green but the model is wrong.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://friendlybit.com/python/writing-justhtml-with-coding-agents/"&gt;Emil Stenström&lt;/a&gt; built an HTML5 parser in python using coding agents, using Github Copilot in Agent mode with Claude Sonnet 3.7. He automatically approved most commands. It took him “a couple of months on off-hours”, including at least one restart from scratch. The parser now passes all the tests in html5lib test suite.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;After writing the parser, I still don’t know HTML5 properly. The agent wrote it for me. I guided it when it came to API design and corrected bad decisions at the high level, but it did ALL of the gruntwork and wrote all of the code.&lt;/p&gt;
+
+  &lt;p&gt;I handled all git commits myself, reviewing code as it went in. I didn’t understand all the algorithmic choices, but I understood when it didn’t do the right thing.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Although he gives an overview of what happens, there’s not very much information on his workflow and how he interacted with the LLM. There’s certainly not enough detail here to try to replicate his approach. This is contrast to Simon Willison (above) who has detailed links to his chat transcripts - although they are much smaller tools and I haven’t looked at them properly to see how useful they are.&lt;/p&gt;
+
+&lt;p&gt;One thing that is clear, however, is the vital need for a comprehensive test suite. Much of his work is driven by having that suite as a clear guide for him and the LLM agents.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;JustHTML is about 3,000 lines of Python with 8,500+ tests passing. I couldn’t have written it this quickly without the agent.&lt;/p&gt;
+
+  &lt;p&gt;But “quickly” doesn’t mean “without thinking.” I spent a lot of time reviewing code, making design decisions, and steering the agent in the right direction. The agent did the typing; I did the thinking.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;                                  ❄                                  ❄    &lt;/p&gt;
+
+&lt;p&gt;Then Simon Willison &lt;a href="https://simonwillison.net/2025/Dec/15/porting-justhtml/"&gt;ported the library to JavaScript&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Time elapsed from project idea to finished library: about 4 hours, during which I also bought and decorated a Christmas tree with family and watched the latest Knives Out movie.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;One of his lessons:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If you can reduce a problem to a robust test suite you can set a coding agent loop loose on it with a high degree of confidence that it will eventually succeed. I called this &lt;a href="https://simonwillison.net/2025/Sep/30/designing-agentic-loops/"&gt;designing the agentic loop&lt;/a&gt; a few months ago. I think it’s the key skill to unlocking the potential of LLMs for complex tasks.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Our experience at Thoughtworks backs this up. We’ve been doing a fair bit of work recently in legacy modernization (mainframe and otherwise) using AI to migrate substantial software systems. Having a robust test suite is necessary (but not sufficient) to making this work. I hope to share my colleagues’ experiences on this in the coming months.&lt;/p&gt;
+
+&lt;p&gt;But before I leave Willison’s post, I should highlight his final open questions on the legalities, ethics, and effectiveness of all this - they are well-worth contemplating.&lt;/p&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Writing Fragments</title>
+    <link href="https://martinfowler.com/articles/writing-fragments.html"/>
+    <updated>2025-12-16T10:06:00-05:00</updated>
+    <id>https://martinfowler.com/articles/writing-fragments.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;If you’re a regular reader of my site, you’ll have noticed that in the
+last few months I’ve been making a &lt;a href="https://martinfowler.com/articles/20251204-frags.html"&gt;number&lt;/a&gt; of “fragments” &lt;a href="https://martinfowler.com/articles/2025-11-19-frags.html"&gt;posts&lt;/a&gt;. Such a post
+is a short post with a bunch of little, unconnected segments. These are
+usually a reference to something I’ve found on the web, sometimes a small
+thought of my own.&lt;/p&gt;
+
+&lt;p&gt;A few years ago, I wouldn’t have covered these topics with posts on my
+own site. Instead I would use Twitter, either retweeting someone else’s
+point, or just highlighting something I’d found. But since the Muskover,
+Twitter has effectively died. I’m not saying that due to any technical
+issues with the site, which has mostly just been fine, nor directly due to
+any of the policy changes there. The point is that lots of people have left, so that
+the audience I would have reached with Twitter is now fragmented. Some
+remain on X, but I see more activity on LinkedIn. There’s also Fediverse/Mastodon
+and Bluesky.&lt;/p&gt;
+
+&lt;p&gt;What this means for short posts is that I can no longer just post in one
+place. When I announce new articles on martinfowler.com, I announce now on
+four social media sites (X, LinkedIn, Fediverse, and Bluesky). It makes
+sense to do this, but I don’t want to go through all this hassle for the
+kind of micro-post that Twitter served so well.&lt;/p&gt;
+
+&lt;p&gt;So I’ve started to batch them up. When I see something interesting, I
+make a note. When I have enough notes, I post a fragments post. Initially I
+did this in a rather ad-hoc way, just using the same mechanisms I use for
+most articles, but last week I started to put in some more deliberate
+mechanisms into the site. (If you’re observant, you’ll spot that in the URLs.)&lt;/p&gt;
+
+&lt;p&gt;One benefit of all of this, at least in my book, is that it means my material is
+now fully visible in RSS. I’m probably showing my age, but I’m a big fan of RSS
+(or in my case, strictly Atom) feeds. I miss the feel of the heyday of the
+“blogosphere” before it got steamrolled by social media, and these fragment
+posts are, of course, just the same as the link blogs from that era. I still use my
+RSS reader every day to keep up with writers I like. (I’m pleased that Substack
+makes its content available via RSS.) It bothered me a bit that my micro-founts
+of Twitter knowledge weren’t visible on RSS, but was too lazy to do something
+about it. Now I don’t need to - the fragments are available in my RSS feed.&lt;/p&gt;
+
+</content>
+  </entry>
+
+<entry>
+    <title>Fragments Dec 11</title>
+    <link href="https://martinfowler.com/articles/2025-12-11-frags.html"/>
+    <updated>2025-12-11T10:17:00-05:00</updated>
+    <id>https://martinfowler.com/articles/2025-12-11-frags.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">
+&lt;p&gt;&lt;a href="https://www.nytimes.com/2025/12/03/magazine/chatbot-writing-style.html?utm_source=substack&amp;amp;utm_medium=email"&gt;Why does AI write like… that&lt;/a&gt; (NYT, gift link). Sam Kriss delves into the quiet hum of AI writing. AI’s work is not compelling prose: it’s phantom text, ghostly scribblings, a spectre woven into our communal tapestry.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://coding-is-like-cooking.info/2025/12/test-desiderata-2-0/"&gt;Emily Bache&lt;/a&gt; has written a set of Test Desiderata, building on some earlier writing from Kent Beck. She lists the characteristics of good tests, and how they support her four “macro desiderata” - the properties of a sound test suite&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Predict success in production&lt;/li&gt;
+    &lt;li&gt;Fast to get feedback&lt;/li&gt;
+    &lt;li&gt;Support ongoing code design change&lt;/li&gt;
+    &lt;li&gt;Low total cost of ownership&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;She also has a great list of other writers’ lists of good test characteristics.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://www.techpolicy.press/the-eus-fine-against-x-is-not-about-speech-or-censorship/"&gt;Daphne Keller&lt;/a&gt; explains that the EUs fines on X aren’t about free speech.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;There are three charges against X, which all stem from a multi-year investigation that was launched in 2023. One is about verification — X’s blue checkmarks on user accounts — and two are about transparency. These charges have nothing to do with what content is on X, or what user speech the platform should or should not allow.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://pluralistic.net/2025/12/05/pop-that-bubble/#u-washington"&gt;Cory Doctorow&lt;/a&gt; The Reverse-Centaur’s Guide to Criticizing AI&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Start with what a reverse centaur is. In automation theory, a “centaur” is a person who is assisted by a machine. … And obviously, a reverse centaur is machine head on a human body, a person who is serving as a squishy meat appendage for an uncaring machine.&lt;/p&gt;
+
+  &lt;p&gt;Like an Amazon delivery driver… the van can’t drive itself and can’t get a parcel from the curb to your porch. The driver is a peripheral for a van, and the van drives the driver, at superhuman speed, demanding superhuman endurance.&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Fragments Dec 4</title>
+    <link href="https://martinfowler.com/articles/20251204-frags.html"/>
+    <updated>2025-12-04T10:59:00-05:00</updated>
+    <id>https://martinfowler.com/articles/20251204-frags.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;&lt;a href="https://blog.robbowley.net/2025/12/04/ai-is-still-making-code-worse-a-new-cmu-study-confirms/"&gt;Rob Bowley&lt;/a&gt; summarizes a study from Carnegie Mellon looking on the impact of AI on a bunch of open-source software projects. Like any such study, we shouldn’t take its results as definitive, but there seems enough there to make it a handy data point. The key point is that the AI code probably reduced the quality of the code base - at least if static code analysis can be trusted to determine quality. And perhaps some worrying second-order effects&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;This study shows more than 800 popular GitHub projects with code quality degrading after adopting AI tools. It’s hard not to see a form of context collapse playing out in real time. If the public code that future models learn from is becoming more complex and less maintainable, there’s a real risk that newer models will reinforce and amplify those trends, producing even worse code over time.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Rob’s post is typical of much of the thoughtful writing on AI. We can see its short-term benefits, but worry about its long-term impact. But on a much deeper note is this lovely story from &lt;a href="https://www.linkedin.com/pulse/my-80th-birthday-i-bought-myself-new-brain-jim-highsmith-8qcrc/"&gt;Jim Highsmith&lt;/a&gt;. Jim has turned 0x50, and has spent the last decade fighting Parkinson’s disease. To help him battle it he has two AI assisted allies.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Between my neural implants and Byron’s digital guidance, I now collaborate with two adaptive systems: one for motion, one for thought. Neither replaces me. Both extend me.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;If you read anything on AI this week, &lt;a href="https://www.linkedin.com/pulse/my-80th-birthday-i-bought-myself-new-brain-jim-highsmith-8qcrc/"&gt;make it be this&lt;/a&gt;.&lt;/strong&gt; It offers a positive harbinger for our future and opens my mind to a whole different perspective of the role of AI in it&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Anthropic recently announced that it disrupted a Chinese state-sponsored operation abusing Claude Code. Jim Gumbley looks at the core lesson to learn from this, that we have to understand the serious risk of  &lt;a href="https://www.thoughtworks.com/insights/blog/security/anthropic-ai-espionage-disclosure-signal-from-noise?utm_source=linkedin&amp;amp;utm_medium=social-organic&amp;amp;utm_campaign=dt_bs_rp-in-clt_tech_thought_leaders_2025-11&amp;amp;gh_src=d1fe17bc1us"&gt;AI Jailbreaking&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;New AI tools are able to analyze your attack surface at the next level of granularity. As a business leader, that means you now have two options: wait for someone else to run AI-assisted vulnerability detection against your attack surface, or run it yourself first.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;There’s plenty of claims that AI Vibe Coding can replace software developers, something that folks like me (perhaps with a bias) think unlikely. &lt;a href="https://bsky.app/profile/gergely.pragmaticengineer.com/post/3m75kmb7bh22i"&gt;Gergely Orosz&lt;/a&gt; shared this tidbit&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Talked with an exec at a tech company who is obsessed with AI and has been for 3 years. Not a developer but company makes software. Uses AI for everything, vibe codes ideas.&lt;/p&gt;
+
+  &lt;p&gt;Here’s the kicker:&lt;/p&gt;
+
+  &lt;p&gt;Has a team of several devs to implement his vibe coded prototypes to sg workable&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I’d love to hear more about this (and similar stories)&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://checkeagle.com/checklists/njr/a-month-of-chat-oriented-programming/"&gt;Nick Radcliffe&lt;/a&gt; writes about a month of using AI&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;I spent a solid month “pair programming” with Claude Code, trying to suspend disbelief and adopt a this-will-be-productive mindset. More specifically, I got Claude to write well over 99% of the code produced during the month. I found the experience infuriating, unpleasant, and stressful before even worrying about its energy impact. Ideally, I would prefer not to do it again for at least a year or two. The only problem with that is that it “worked”.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;He stresses that his approach is the “polar opposite” of Vibe Coding. The post is long, and rambles a bit, but is worthwhile because he talks in detail about his workflow and how he uses the tool. Such posts are important so we can learn the nitty-gritty of how our programming habits are changing.&lt;/p&gt;
+
+&lt;p&gt; ❄                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Along similar lines is a post of &lt;a href="https://brianchambers.substack.com/p/chamber-of-tech-secrets-55-issue"&gt;Brian Chambers&lt;/a&gt; on his workflow, that he calls Issue-Driven Development (and yes, I’m also sick of the “something-driven” phraseology). As with much of the better stuff I’ve heard about AI assisted work, it’s all about carefully managing the context window, ensuring the AI is focused on the right things and not distracted by textual squirrels.&lt;/p&gt;
+
+</content>
+  </entry>
+
+<entry>
+    <title>Fragments Nov 19</title>
+    <link href="https://martinfowler.com/articles/2025-11-19-frags.html"/>
+    <updated>2025-11-19T14:02:00-05:00</updated>
+    <id>https://martinfowler.com/articles/2025-11-19-frags.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;&lt;img src="https://martinfowler.com/articles/images/frags-2025-11/radar.png" alt="radar image" width="300px"&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ve been on the road in Europe for the last couple of weeks, and while I was there Thoughtworks released &lt;a href="https://www.thoughtworks.com/radar"&gt;volume 33 of our Technology Radar&lt;/a&gt;. Again it’s dominated by the AI wave, with lots of blips capturing our explorations of how to use LLMs and similar technology. “Agents” are the big thing these days but we’re also seeing growing movements in infrastructure orchestration, coding workflows - and the inevitable antipatterns. Many thanks to my colleagues for putting this together again.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://martinfowler.com/articles/images/frags-2025-11/podcast.png" alt="Gergely and I recording the podcast" width="400px"&gt;&lt;/p&gt;
+
+&lt;p&gt;My trip to Europe started in Amsterdam, for a Thoughtworks event for a few of our clients there. Since I was in that lovely city, I got in touch with Gergely Orosz, host of &lt;a href="https://www.pragmaticengineer.com/"&gt;The Pragmatic Engineer&lt;/a&gt;, and he arranged to &lt;a href="https://www.youtube.com/watch?v=CQmI4XKTa0U"&gt;record a podcast&lt;/a&gt; with me. No surprise that AI was front-and-center of the conversation, as I said it was the biggest shift I’d seen in programming during my career, comparable only to the shift to high-level languages, which even I am not old enough to have experienced. It was a fun chat and I really enjoyed myself. Gergely later joined myself James Lewis and Giles Edwards-Alexander at the Thoughtworks event the next day.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;My travels also took me to Nüremberg, where I attended an internal conference for Siemens on the future of software architecture. When we think of technology, it’s easy to focus on the Faangs of Silicon Valley, but Siemens have a huge workforce of software developers working on heavy engineering systems like trains and factory automation. It was good to hear them talk about federated architectures, data mesh, and their use of AI.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://martinfowler.com/articles/images/frags-2025-11/features.webp" alt="Kent's graph of options vs features" width="400px"&gt;&lt;/p&gt;
+
+&lt;p&gt;I’ve often used pseudo-graphs to help explain why &lt;a href="https://martinfowler.com/articles/is-quality-worth-cost.html"&gt;high quality software is cheaper&lt;/a&gt;. This time, &lt;a href="https://tidyfirst.substack.com/p/why-does-development-slow"&gt;Kent Beck&lt;/a&gt; creates a unique perspective to this chart, dispensing with the temporal axis to help think in terms of optionality.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="https://martinfowler.com/articles/images/frags-2025-11/hc.jpg" alt="Heavy Cardboard banner" width="400px"&gt;&lt;/p&gt;
+
+&lt;p&gt;And in another life, Edward has finally finished the great migration of the Heavy Cardboard studio and returns to the tubes with &lt;a href="https://www.youtube.com/live/e8juRvm9h0c"&gt;our first game in the new digs&lt;/a&gt;. (No surprise that it’s Age of Steam.)&lt;/p&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>My Foreword to "Frictionless"</title>
+    <link href="https://martinfowler.com/articles/frictionless-foreword.html"/>
+    <updated>2025-11-18T12:19:00-05:00</updated>
+    <id>tag:martinfowler.com,2025-11-18:My-Foreword-to--Frictionless-</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/frictionless-foreword.html'&gt;&lt;img src = 'https://martinfowler.com/articles/frictionless-card.jpg' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;I find most writing on software productivity to be twaddle, but Nicole
+      Forsgren and Abi Noda are notable exceptions. I had a chance to take a
+      look at their new book, published today, and liked it so much I wrote a
+      foreword.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/frictionless-foreword.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>The Learning Loop and LLMs</title>
+    <link href="https://martinfowler.com/articles/llm-learning-loop.html"/>
+    <updated>2025-11-04T09:14:00-05:00</updated>
+    <id>tag:martinfowler.com,2025-11-04:The-Learning-Loop-and-LLMs</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/llm-learning-loop.html'&gt;&lt;img src = 'https://martinfowler.com/articles/llm-learning-loop/card.png' width = '350px'&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;b class = 'author'&gt;Unmesh Joshi&lt;/b&gt; finds LLMs to be a useful tool, but
+      explains why their help &lt;a href = 'https://martinfowler.com/articles/llm-learning-loop.html'&gt;becomes illusory&lt;/a&gt; if we use them to shortcut the
+      learning loop that's an essential part of our professional practice.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/llm-learning-loop.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Fragments Nov 3</title>
+    <link href="https://martinfowler.com/articles/2025-11-03-frags.html"/>
+    <updated>2025-11-03T19:42:00-05:00</updated>
+    <id>https://martinfowler.com/articles/2025-11-03-frags.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;I’m very concerned about the security dangers of LLM-enabled browsers, as it’s just too easy for them to contain the &lt;a href="https://simonwillison.net/2025/Oct/22/openai-ciso-on-atlas/"&gt;Lethal Trifecta&lt;/a&gt;. For up-to-date eyes on these issues, I follow the writings of coiner of that phrase: Simon Willison. Here &lt;a href="https://simonwillison.net/2025/Oct/22/openai-ciso-on-atlas/"&gt;he examines&lt;/a&gt; a post on how OpenAI is thinking about these issues.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;My takeaways from all of this? It’s not done much to influence my overall skepticism of the entire category of browser agents, but it does at least demonstrate that OpenAI are keenly aware of the problems and are investing serious effort in finding the right mix of protections.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;&lt;a href="https://blog.robbowley.net/2025/10/26/youre-probably-listening-to-the-wrong-people-about-ai-coding/"&gt;Rob Bowley&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Unsurprisingly, there are a lot of strong opinions on AI assisted coding. Some engineers swear by it. Others say it’s dangerous. And of course, as is the way with the internet, nuanced positions get flattened into simplistic camps where everyone’s either on one side or the other.&lt;/p&gt;
+
+  &lt;p&gt;A lot of the problem is that people aren’t arguing about the same thing. They’re reporting different experiences from different vantage points.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;His view is that beginners are very keen on AI-coding but they don’t see the problems they are creating. Experienced folks do see this, but it takes a further level of experience to realize that &lt;em&gt;when used well&lt;/em&gt; these tools are still valuable.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Interestingly, I’ve regularly seen sceptical experienced engineers change their view once they’ve been shown how you can blend modern/XP practices with AI assisted coding.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The upshot is this, is that you have be aware of the experience level of whoever is writing about this stuff - and that experience is not just in software development generally, but also in how to make use of LLMs. One thing that rings clearly from reading Simon Willison and Birgitta Böckeler is that effective use of LLMs is a skill that takes a while to develop.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Charlie Brown and Garfield, like most comic strip characters, never changed over the decades. But &lt;a href="https://blog.robbowley.net/2025/10/26/youre-probably-listening-to-the-wrong-people-about-ai-coding/"&gt;Doonesbury’s&lt;/a&gt; cast aged, had children, and some have died (I miss Lacey). Gary Trudeau retired from writing daily strips a few years ago, but his &lt;a href="https://x.com/RealRBHJr"&gt;reruns of older strips&lt;/a&gt; is one of the best things in the shabby remains of Twitter.&lt;/p&gt;
+
+&lt;p&gt;A couple of weeks ago, he reran one of the most &lt;a href="https://www.washingtonpost.com/doonesbury/strip/archive/2025/10/22"&gt;memorable strips&lt;/a&gt; in its whole run. The very first frame of Doonesbury introduced the character “B.D.”, a football jock never seen without his football helmet, or when on duty, his military helmet. This panel was the first time in over thirty years that B.D. was shown without a helmet, readers were so startled that they didn’t immediately notice that the earlier explosion had removed his leg. This set off a remarkable story arc about the travails of a wounded veteran. It’s my view that future generations will find Doonesbury to be a first-class work of literature, and a thoughtful perspective on contemporary America.&lt;/p&gt;
+
+</content>
+  </entry>
+
+<entry>
+    <title>Agentic AI and Security</title>
+    <link href="https://martinfowler.com/articles/agentic-ai-security.html"/>
+    <updated>2025-10-28T09:20:00-04:00</updated>
+    <id>tag:martinfowler.com,2025-10-28:Agentic-AI-and-Security</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/agentic-ai-security.html'&gt;&lt;img src = 'https://martinfowler.com/articles/agentic-ai-security/card.png' width = '350px'&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;Agentic AI systems are amazing, but introduce equally
+      amazing security risks. &lt;b class = 'author'&gt;Korny Sietsma&lt;/b&gt; explains that their
+      core architecture opens up &lt;a href = 'https://martinfowler.com/articles/agentic-ai-security.html'&gt;security issues&lt;/a&gt; through what Simon Willison
+      named the “Lethal Trifecta”. Korny goes on to talk about how to
+      mitigate this through removing legs of the trifecta and splitting complex
+      tasks.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/agentic-ai-security.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Fragments and Links</title>
+    <link href="https://martinfowler.com/articles/20251021-frags.html"/>
+    <updated>2025-10-21T11:02:00-04:00</updated>
+    <id>https://martinfowler.com/articles/20251021-frags.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;&lt;strong&gt;Mathias Verraes&lt;/strong&gt; writes about the relationship between &lt;a href="https://verraes.net/2025/08/domain-and-bounded-contexts-dont-map-one-on-one/"&gt;Domains and Bounded Contexts&lt;/a&gt; in Domain-Driven Design. It’s a common myth that there should always be a 1:1 relationship between them, but although it’s sometimes the case, deeper modeling often exposes a more interesting structure.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Gary Marcus:&lt;/strong&gt; (&lt;a href="https://www.nytimes.com/2025/10/16/opinion/ai-specialized-potential.html?unlocked_article_code=1.vE8.Rl9N.C2_mHrQ_1hHz&amp;amp;smid=url-share"&gt;NYT Gift Link&lt;/a&gt;)&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If the strengths of A.I. are truly to be harnessed, the tech industry should stop focusing so heavily on these one-size-fits-all tools and instead concentrate on narrow, specialized A.I. tools engineered for particular problems. Because, frankly, they’re often more effective.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;One of the truly annoying things about the US tax system is that we can’t easily file our tax returns electronically. In recent years an initiative called “Direct File” sought to fix that. &lt;strong&gt;Matt Bracken&lt;/strong&gt; &lt;a href="https://fedscoop.com/direct-file-future-of-tax-filing-fellows/"&gt;tells the story&lt;/a&gt; of how they developed a highly-regarded system in 25 states, but was canned by the Trump administration. He also explains how the creators of Direct File are working to prepare the ground for it to reappear.&lt;/p&gt;
+
+&lt;p&gt;Security issues are only getting worse, but the US government agency for cybersecurity is having its staff reassigned to other duties. Detailed story in &lt;a href="https://www.bloomberg.com/news/articles/2025-10-08/homeland-security-cyber-personnel-reassigned-to-jobs-in-trump-s-deportation-push"&gt;Bloomberg&lt;/a&gt; (paywalled) and an open (but more polemic) summary on &lt;a href="https://www.techdirt.com/2025/10/17/trumps-cisa-raid-pulling-cybersecurity-experts-off-critical-infrastructure-defense-to-process-deportation-paperwork/"&gt;Techdirt&lt;/a&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Changes have hit particularly hard in CISA’s Capacity Building team, which writes emergency directives and oversees cybersecurity for the government’s highest value assets, the employees said.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Defense and law enforcement are valuable things for a government to do, but here they seem to be walking away from a growing crisis.&lt;/p&gt;
+</content>
+  </entry>
+
+<entry>
+    <title>Understanding Spec-Driven-Development: Kiro, spec-kit, and Tessl</title>
+    <link href="https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html"/>
+    <updated>2025-10-15T08:33:00-04:00</updated>
+    <id>tag:martinfowler.com,2025-10-15:Understanding-Spec-Driven-Development--Kiro--spec-kit--and-Tessl</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html'&gt;&lt;img src = 'https://martinfowler.com/articles/exploring-gen-ai/donkey-card.png' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;b class = 'author'&gt;Birgitta B&amp;#xF6;ckeler&lt;/b&gt; has been trying to understand one of
+      the latest AI coding buzzword: Spec-driven development (SDD). She looked at
+      &lt;a href = 'https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html'&gt;three of the tools&lt;/a&gt; that label themselves as SDD tools and tried to
+      untangle what it means, as of now.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Anchoring AI to a reference application</title>
+    <link href="https://martinfowler.com/articles/exploring-gen-ai/anchoring-to-reference.html"/>
+    <updated>2025-09-25T12:57:00+03:00</updated>
+    <id>tag:martinfowler.com,2025-09-25:Anchoring-AI-to-a-reference-application</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/exploring-gen-ai/anchoring-to-reference.html'&gt;&lt;img src = 'https://martinfowler.com/articles/exploring-gen-ai/donkey-card.png' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;Service templates are a typical building block in the &amp;#x201C;golden paths&amp;#x201D;
+      organisations build for their engineering teams, to make it easy to do the
+      right thing. The templates are supposed to be the role models for all the
+      services in the organisation, always representing the most up to date
+      coding patterns and standards. One of the challenges with service
+      templates though is that once a team instantiated a service with one, it&amp;#x2019;s
+      tedious to feed template updates back to those services. &lt;b class = 'author'&gt;Birgitta
+      B&amp;#xF6;ckeler&lt;/b&gt; considers whether GenAI can help
+      with that.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/exploring-gen-ai/anchoring-to-reference.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>To vibe or not to vibe</title>
+    <link href="https://martinfowler.com/articles/exploring-gen-ai/to-vibe-or-not-vibe.html"/>
+    <updated>2025-09-23T10:53:00+03:00</updated>
+    <id>tag:martinfowler.com,2025-09-23:To-vibe-or-not-to-vibe</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/exploring-gen-ai/to-vibe-or-not-vibe.html'&gt;&lt;img src = 'https://martinfowler.com/articles/exploring-gen-ai/donkey-card.png' width = ''&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;b class = 'author'&gt;Birgitta B&amp;#xF6;ckeler&lt;/b&gt; examines the risk assessment around
+      when to use vibe coding, using three dimensions of risk: Probability,
+      Impact, and Detectability&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/exploring-gen-ai/to-vibe-or-not-vibe.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Some thoughts on LLMs and Software Development</title>
+    <link href="https://martinfowler.com/articles/202508-ai-thoughts.html"/>
+    <updated>2025-08-28T10:10:00-04:00</updated>
+    <id>https://martinfowler.com/articles/202508-ai-thoughts.html</id>
+    <author>
+      <name>Martin Fowler</name>
+      <email>martin@martinfowler.com</email>
+      <uri>https://martinfowler.com</uri>
+    </author>
+    <content type="html">&lt;p&gt;I’m about to head away from looking after this site for a few weeks (part vacation, part work stuff). As I contemplate some weeks away from the daily routine, I feel an urge to share some scattered thoughts about the state of LLMs and AI.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;I’ve seen a few early surveys on the effect AI is having on software development, is it really speeding folks up, does it improve or wreck code quality? One of the big problems with these surveys is that they aren’t taking into account &lt;em&gt;how&lt;/em&gt; people are using the LLMs. From what I can tell the vast majority of LLM usage is fancy auto-complete, often using co-pilot. But those I know who get the most value from LLMs reckon that auto-complete isn’t very useful, preferring approaches that allow the LLM to directly read and edit source code files to carry out tasks. My concern is that surveys that ignore the different work-flows of using LLMs will produce data that’s going to send people down the wrong paths.&lt;/p&gt;
+
+&lt;p&gt;(Another complication is the varying capabilities of different models.)&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;I’m often asked, “what is the future of programming?” Should people consider entering software development now? Will LLMs eliminate the need for junior engineers? Should senior engineers get out of the profession before it’s too late? My answer to all these questions is “I haven’t the foggiest”. Furthermore I think anyone who says they know what this future will be is talking from an inappropriate orifice. We are still figuring out how to use LLMs, and it will be some time before we have a decent idea of how to use them well, especially if they gain significant improvements.&lt;/p&gt;
+
+&lt;p&gt;What I suggest, is that people experiment with them. At the least, read about what others are doing, but pay attention to the details of their workflows. Preferably experiment yourself, and do share your experiences.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄               ❇                ❄&lt;/p&gt;
+
+&lt;p&gt;I’m also asked: “is AI a bubble”? To which my answer is “OF COURSE IT’S A BUBBLE”. All major technological advances have come with economic bubbles, from canals and railroads to the internet. We know with near 100% certainty that this bubble will pop, causing lots of investments to fizzle to nothing. However what we don’t know is &lt;em&gt;when&lt;/em&gt; it will pop, and thus how big the bubble will have grown, generating some real value in the process, before that happens. It could pop next month, or not for a couple of years.&lt;/p&gt;
+
+&lt;p&gt;We also know that when the bubble pops, many firms will go bust, but not all. When the dot-com bubble burst, it killed pets.com, it killed Webvan… but it did not kill Amazon.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;I &lt;a href="https://martinfowler.com/articles/202106-reducing-speaking.html"&gt;retired from public speaking&lt;/a&gt; a couple of years ago. But while I don’t miss the stress of giving talks, I do miss hanging out with my friends in the industry. So I’m looking forward to catching up with many of them at &lt;a href="https://gotocph.com/2025"&gt;GOTO Copenhagen&lt;/a&gt;. I’ve been involved with the GOTO conference series since the 1990s (when it was called JAOO), and continue to be impressed with how they put together a fascinating program.&lt;/p&gt;
+
+&lt;p&gt;                ✢                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;My former colleague Rebecca Parsons, has been saying for a long time that hallucinations aren’t a bug of LLMs, they are a feature. Indeed they are &lt;em&gt;the&lt;/em&gt; feature. All an LLM does is produce hallucinations, it’s just that we find some of them useful.&lt;/p&gt;
+
+&lt;p&gt;One of the consequences of this is that we should always consider asking the LLM the same question more than once, perhaps with some variation in the wording. Then we can compare answers, indeed perhaps ask the LLM to compare answers for us. The difference in the answers can be as useful as the answers themselves.&lt;/p&gt;
+
+&lt;p&gt;Certainly if we ever ask a hallucination engine for a numeric answer, we should ask it at least three times, so we get some sense of the variation. Furthermore we shouldn’t ask an LLM to calculate an answer than we can calculate deterministically (yes, I’ve seen this). It is OK to ask an LLM to generate code to calculate an answer (but still do it more than once).&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;Other forms of engineering have to take into account the variability of the world. A structural engineer builds in tolerance for all the factors she can’t measure. (I remember being told early in my career that the unique characteristic of digital electronics was that there was no concept of tolerances.) Process engineers consider that humans are executing tasks, and will sometimes be forgetful or careless. Software Engineering is unusual in that it works with deterministic machines. Maybe LLMs mark the point where we join our engineering peers in a world on non-determinism.&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;I’ve often heard, with decent reason, an LLM compared to a junior colleague. But I find LLMs are quite happy to say “all tests green”, yet when I run them, there are failures. If that was a junior engineer’s behavior, how long would it be before H.R. was involved?&lt;/p&gt;
+
+&lt;p&gt;                ❄                ❄                ❄                ❄&lt;/p&gt;
+
+&lt;p&gt;LLMs create a huge increase in the attack surface of software systems. Simon Willison described the &lt;a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/"&gt;The Lethal Trifecta&lt;/a&gt; for AI agents: an agent that combines access to your private data, exposure to untrusted content, and a way to externally communicate (“exfiltration”). That “untrusted content” can come in all sorts of ways, ask it to read a web page, and an attacker can easily put instructions on the website in 1pt white-on-white font to trick the gullible LLM to obtain that private data.&lt;/p&gt;
+
+&lt;p&gt;This is particularly serious when it comes to agents acting in a browser. Read an attacker’s web page, and it could trick the agent to go to your bank account in another tab and “buy you a present” by transferring your balance to the kind attacker. &lt;a href="https://simonwillison.net/2025/Aug/25/agentic-browser-security/"&gt;Willison’s view&lt;/a&gt; is that “the &lt;em&gt;entire concept&lt;/em&gt; of an agentic browser extension is fatally flawed and cannot be built safely”.&lt;/p&gt;
+
+</content>
+  </entry>
+
+<entry>
+    <title>From Black Box to Blueprint</title>
+    <link href="https://martinfowler.com/articles/black-box-to-blueprint.html"/>
+    <updated>2025-08-28T07:24:00-04:00</updated>
+    <id>tag:martinfowler.com,2025-08-28:From-Black-Box-to-Blueprint</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/black-box-to-blueprint.html'&gt;&lt;img src = 'https://martinfowler.com/articles/black-box-to-blueprint/card.png' width = '350px'&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;A common enterprise problem: crucial legacy systems become &amp;#x201C;black
+      boxes&amp;#x201D;&amp;#x2014;key to operations but opaque and risky to touch. &lt;b class = 'author'&gt;Thiyagu
+      Palanisamy&lt;/b&gt; and &lt;b class = 'author'&gt;Chandirasekar Thiagarajan&lt;/b&gt; worked with a
+      client to use AI-assisted reverse engineering to reconstruct functional
+      specifications from UI elements, binaries, and data lineage to overcome
+      analysis paralysis. They developed a methodical &amp;#x201C;multi-lens&amp;#x201D;
+      approach&amp;#x2014;starting from visible artifacts, enriching incrementally,
+      triangulating logic, and always preserving lineage. Human validation
+      remains central to ensure accuracy and confidence in extracted
+      functionality. This engagement revealed that turning a system from black
+      box to blueprint empowers modernization decisions and accelerates
+      migration efforts.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/black-box-to-blueprint.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Research, Review, Rebuild: Intelligent Modernisation with MCP and Strategic Prompting</title>
+    <link href="https://martinfowler.com/articles/research-review-rebuild.html"/>
+    <updated>2025-08-27T10:15:00-04:00</updated>
+    <id>tag:martinfowler.com,2025-08-27:Research--Review--Rebuild--Intelligent-Modernisation-with-MCP-and-Strategic-Prompting</id>
+    <content type="html">
+&lt;div class = 'img-link'&gt;&lt;a href = 'https://martinfowler.com/articles/research-review-rebuild.html'&gt;&lt;img src = 'https://martinfowler.com/articles/research-review-rebuild/card.png' width = '350px'&gt;&lt;/img&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;The Bahmni open-source hospital management system was began over nine
+      years ago with a front end using AngularJS and an OpenMRS REST API.
+      &lt;b class = 'author'&gt;Rahul Ramesh&lt;/b&gt; wished to convert this to use a React +
+      TypeScript front end with an HL7 FHIR API. In exploring how to do this
+      modernization he used a structured prompting workflow of &lt;a href = 'https://martinfowler.com/articles/research-review-rebuild.html'&gt;Research, Review,
+      and Rebuild&lt;/a&gt; - together with Cline, Claude 3.5 Sonnet, Atlassian MCP
+      server, and a filesystem MCP server. Changing a single control would
+      normally take 3&amp;#x2013;6 days of manual effort, but with these tools was
+      completed in under an hour at a cost of under $2.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/research-review-rebuild.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Building your own CLI Coding Agent with Pydantic-AI</title>
+    <link href="https://martinfowler.com/articles/build-own-coding-agent.html"/>
+    <updated>2025-08-27T07:50:00-04:00</updated>
+    <id>tag:martinfowler.com,2025-08-27:Building-your-own-CLI-Coding-Agent-with-Pydantic-AI</id>
+    <content type="html">
+&lt;p&gt;CLI coding agents are a fundamentally different tool to chatbots or
+      autocomplete tools - they're agents that can read code, run tests, and
+      update a codebase. &lt;b class = 'author'&gt;Ben O'Mahony&lt;/b&gt; explains that while
+      commercial tools are impressive, they don't understand the particular
+      context of our environment and the eccentricities of our specific project.
+      Instead &lt;a href = 'https://martinfowler.com/articles/build-own-coding-agent.html'&gt;we can build our own coding agent&lt;/a&gt; by assembling open source tools,
+      using our specific development standards for: testing, documentation
+      production, code reasoning, and file system operations.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/build-own-coding-agent.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Chatting with Unmesh about building language with LLMs</title>
+    <link href="https://martinfowler.com/articles/convo-llm-abstractions.html"/>
+    <updated>2025-08-26T09:26:00-04:00</updated>
+    <id>tag:martinfowler.com,2025-08-26:Chatting-with-Unmesh-about-building-language-with-LLMs</id>
+    <content type="html">
+&lt;p&gt;A few weeks ago, &lt;b class = 'author'&gt;Unmesh Joshi&lt;/b&gt; and I started having a conversation about
+      how he likes to grow a language of abstractions when working with an LLM.
+      We thought this was a conversation that others might find interesting so
+      we turned it into an article. We &lt;a href = 'https://martinfowler.com/articles/convo-llm-abstractions.html'&gt;talk about&lt;/a&gt; how programming is about both
+      building and applying abstractions and how the LLM helps us in different
+      ways with each activity.&lt;/p&gt;
+
+&lt;p&gt;&lt;a class = 'more' href = 'https://martinfowler.com/articles/convo-llm-abstractions.html'&gt;more…&lt;/a&gt;&lt;/p&gt;</content>
+  </entry>
+
+<entry>
+    <title>Bliki: Expansion Joints</title>
+    <link href="https://martinfowler.com/bliki/ExpansionJoints.html"/>
+    <updated>2025-08-18T00:00:00-04:00</updated>
+    <id>https://martinfowler.com/bliki/ExpansionJoints.html</id>
+    <category term="bliki"/>
+    <content type="html">
+&lt;p&gt;Back in the days when I did live talks, one of my abilities was to finish
+  on time, even if my talk time was cut at the last moment (perhaps due to the
+  prior speaker running over). The key to my ability to do this was to use
+  Expansion Joints - parts of the talk that I'd
+  pre-planned so I could cover them quickly or slowly depending on how much time
+  I had.&lt;/p&gt;
+
+&lt;p&gt;The way I'd do this would be to plan for some topics to be optional. The
+  talk would work if I skipped over them, but I could also witter on about them
+  for five (or ten) minutes. Ideally, each of these topics would get one slide,
+  usually with a bunch of key phrases on it - the headings of what I'd talk
+  about should I be talking about it. When I got to the slide, I'd look at how
+  time was going with the talk. If (as was usually the case) I was running short
+  of time, I could cover the slide in about thirty seconds, saying something
+  like: “in doing this, there's a bunch of things you need to consider, but they
+  are out of scope for today's talk”.&lt;/p&gt;
+
+&lt;p&gt;If, however, I did have time, I could then spend some time talking about
+  them. The slide would be simple, and not provide much of a &lt;a href="/bliki/VisualChannel.html"&gt;Visual Channel&lt;/a&gt;, but that wasn't so important, after all this material
+  was optional in the first place.&lt;/p&gt;
+
+&lt;p&gt;The single flex-slide was my favorite Expansion Joint, as it was easy to
+  use. Sometimes however my optional topic required a proper visual channel,
+  necessitating dedicated slides. My solution here was good control over
+  slide handling. Presentation tools include the ability to skip over slides
+  while I'm talking, and I made sure I practiced how to use them so I could skip
+  a bunch of slides without the audience knowing. It's crucial here that it's
+  invisible to the audience, I find it looks sloppy if anyone says “in the
+  interests of time I'll skip over these slides”. To do this, however, I do need
+  access to my laptop while presenting, venues that only provide a clicker while
+  loading the slides on some other machine lack that control. That started to
+  happen in my last couple of years, much to my annoyance.&lt;/p&gt;
+
+&lt;p&gt;When creating talks, I was always worried that I would run out of things to
+  say, even though experience told me I reliably crammed more stuff in than I
+  could possibly cover. Expansion Joints helped with this, I could aggressively
+  trim the core talk to less than I needed, and rely on the Expansion Joints to
+  fill the gap. In practice I usually didn't need the Expansion Joints anyway, but
+  their presence helped my confidence.&lt;/p&gt;
+
+&lt;p&gt;Using Expansion Joints was particularly important for me as I never
+  rehearsed my talks. I was always someone whose ability to present was driven by
+  adrenaline. Talking to a rubber duck just didn't work, the duck was clearly
+  every bit as bored as I was. Consequently the first time I gave a talk, I was
+  hazy as to how long it would take. Yet with Expansion Joints in place, I was
+  able to finish a talk right on time.&lt;/p&gt;
+
+&lt;p&gt;Expansion Joints enabled me to give the same talk
+  to different time slots. Sometimes I'd have thirty minutes, sometimes
+  forty-five. With Expansion Joints, I didn't need to change my slides,
+  particularly handy if a time cut (or more rarely a time increase) appeared at the
+  last moment. (Although in my later years, I handled this by doing a &lt;a href="/bliki/SuiteOfTalks.html"&gt;Suite Of Talks&lt;/a&gt;.)&lt;/p&gt;
+
+&lt;p&gt;Talks that encourage audience interaction need these because we can never
+  predict how much time the interaction will use up. Sometimes we get a steady
+  stream of questions, other times (particularly in Scandinavia, or
+  upper-Midwest America) a lack of questions had me blasting through the agenda.
+  Any such talk needed a double-dose of this temporal ballast.&lt;/p&gt;
+
+&lt;p&gt;Expansion Joints are at their most useful in later parts of the talk, as
+  it's then that I have the most information on how much time I have. Earlier
+  ones can still be handy, particularly if they come after an interactive
+  section when I'd like to rebase my timing.&lt;/p&gt;
+
+&lt;div class="furtherReading"&gt;
+&lt;h2&gt;Further Reading&lt;/h2&gt;
+
+&lt;p&gt;The name was coined by Neal Ford, Matthew McCullough, and Nathaniel
+    Schutta in their excellent book &lt;a href="https://www.amazon.com/gp/product/0321820800/ref=as_li_tl?ie=UTF8&amp;amp;camp=1789&amp;amp;creative=9325&amp;amp;creativeASIN=0321820800&amp;amp;linkCode=as2&amp;amp;tag=martinfowlerc-20"&gt;Presentation Patterns&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+  </entry>
+
+</feed>

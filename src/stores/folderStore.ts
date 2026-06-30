@@ -5,7 +5,8 @@
 
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { Folder } from 'src-electron/domain/models/Article';
+import type { Folder } from 'src/common/models';
+import { electronClient } from 'src/services/electronClient';
 
 export const useFolderStore = defineStore('folder', () => {
   // 状态
@@ -26,7 +27,7 @@ export const useFolderStore = defineStore('folder', () => {
     error.value = null;
 
     try {
-      folders.value = await window.electronAPI.getFolders();
+      folders.value = await electronClient.getFolders();
     } catch (err: any) {
       console.error('加载文件夹失败:', err);
       error.value = err.message || '加载文件夹失败';
@@ -42,7 +43,7 @@ export const useFolderStore = defineStore('folder', () => {
     error.value = null;
 
     try {
-      currentFolder.value = await window.electronAPI.getFolder(name);
+      currentFolder.value = await electronClient.getFolder(name);
     } catch (err: any) {
       console.error('加载文件夹失败:', err);
       error.value = err.message || '加载文件夹失败';
@@ -55,7 +56,7 @@ export const useFolderStore = defineStore('folder', () => {
   // 添加文件夹
   const addFolder = async (name: string) => {
     try {
-      await window.electronAPI.addFolderV2(name);
+      await electronClient.addFolderV2(name);
       await loadFolders(); // 重新加载列表
     } catch (err: any) {
       console.error('添加文件夹失败:', err);
@@ -66,7 +67,7 @@ export const useFolderStore = defineStore('folder', () => {
   // 删除文件夹
   const removeFolder = async (name: string) => {
     try {
-      await window.electronAPI.removeFolderV2(name);
+      await electronClient.removeFolderV2(name);
       await loadFolders(); // 重新加载列表
     } catch (err: any) {
       console.error('删除文件夹失败:', err);
@@ -77,7 +78,7 @@ export const useFolderStore = defineStore('folder', () => {
   // 重命名文件夹
   const renameFolder = async (oldName: string, newName: string) => {
     try {
-      await window.electronAPI.renameFolder(oldName, newName);
+      await electronClient.renameFolder(oldName, newName);
       await loadFolders(); // 重新加载列表
     } catch (err: any) {
       console.error('重命名文件夹失败:', err);

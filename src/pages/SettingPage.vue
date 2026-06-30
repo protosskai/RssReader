@@ -25,7 +25,26 @@
 
       <!-- 设置内容区域 -->
       <div class="settings-content">
+        <!-- 加载骨架屏 -->
+        <div v-if="isLoading" class="settings-loading">
+          <q-skeleton v-for="n in 6" :key="'setSk'+n" type="rect" class="q-mb-md skeleton-card"/>
+          <div class="text-center text-grey-6 q-mt-md">正在加载设置...</div>
+        </div>
+
+        <!-- 加载错误 -->
+        <div v-else-if="loadError" class="settings-error">
+          <q-banner rounded class="bg-negative text-white">
+            <template #avatar><q-icon name="error"/></template>
+            <div class="text-weight-medium">加载设置失败</div>
+            <div>{{ loadError }}</div>
+            <template #action>
+              <q-btn flat color="white" label="重试" @click="loadSettings"/>
+            </template>
+          </q-banner>
+        </div>
+
         <!-- 通用设置 -->
+        <template v-else>
         <q-tab-panels v-model="tab" animated>
           <q-tab-panel name="general" class="settings-panel">
             <div class="panel-header">
@@ -427,6 +446,7 @@
             </q-card>
           </q-tab-panel>
         </q-tab-panels>
+        </template>
       </div>
 
       <!-- 保存按钮 -->
@@ -459,6 +479,8 @@ const tab = ref('general');
 // 加载状态
 const saving = ref(false);
 const syncing = ref(false);
+const isLoading = ref(true);
+const loadError = ref<string | null>(null);
 
 // 语言选项
 const languageOptions = [
@@ -509,6 +531,8 @@ const syncStatus = ref<any>(null)
 
 // 加载设置
 const loadSettings = async () => {
+  isLoading.value = true;
+  loadError.value = null;
   try {
     const saved = localStorage.getItem('appSettings');
     if (saved) {
@@ -526,6 +550,9 @@ const loadSettings = async () => {
     await refreshSyncStatus()
   } catch (error) {
     console.error('加载设置失败:', error);
+    loadError.value = (error as Error).message || '加载设置失败';
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -764,6 +791,20 @@ onMounted(() => {
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+.settings-loading {
+  padding: 24px;
+
+  .skeleton-card {
+    height: 60px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+}
+
+.settings-error {
+  padding: 24px;
 }
 
 .setting-item {

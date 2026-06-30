@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Brendan Gregg&#39;s Blog</title>
+    <description></description>
+    <link>http://www.brendangregg.com/blog</link>
+    <atom:link href="http://www.brendangregg.com/blog/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Why I joined OpenAI</title>
+        <description>&lt;p&gt;The staggering and fast-growing cost of AI datacenters is a call for performance engineering like no other in history; it&amp;#39;s not just about saving costs &amp;ndash; it&amp;#39;s about saving the planet. I have joined OpenAI to work on this challenge directly, with an initial focus on ChatGPT performance. The scale is extreme and the growth is mind-boggling. As a leader in datacenter performance, I&amp;#39;ve realized that performance engineering as we know it may not be enough &amp;ndash; I&amp;#39;m thinking of new engineering methods so that we can find bigger optimizations than we have before, and find them faster. It&amp;#39;s the opportunity of a lifetime and, unlike in mature environments of scale, it feels as if there are no obstacles &amp;ndash; no areas considered too difficult to change. Do anything, do it at scale, and do it today.&lt;/p&gt;
+
+&lt;p&gt;Why OpenAI exactly? I had talked to industry experts and friends who recommended several companies, especially OpenAI. However, I was still a bit cynical about AI adoption. Like everyone, I was being bombarded with ads by various companies to use AI, but I wondered: was anyone actually using it? Everyday people with everyday uses? One day during a busy period of interviewing, I realized I needed a haircut (as it happened, it was the day before I was due to speak with Sam Altman). &lt;/p&gt;
+
+&lt;p&gt;Mia the hairstylist got to work, and casually asked what I do for a living. &amp;quot;I&amp;#39;m an Intel fellow, I work on datacenter performance.&amp;quot; Silence. Maybe she didn&amp;#39;t know what datacenters were or who Intel was. I followed up: &amp;quot;I&amp;#39;m interviewing for a new job to work on AI datacenters.&amp;quot; Mia lit up: &amp;quot;Oh, I use ChatGPT all the time!&amp;quot; While she was cutting my hair – which takes a while – she told me about her many uses of ChatGPT. (I, of course, was a captive audience.) She described uses I hadn&amp;#39;t thought of, and I realized how ChatGPT was becoming an essential tool for everyone. Just one example: She was worried about a friend who was travelling in a far-away city, with little timezone overlap when they could chat, but she could talk to ChatGPT anytime about what the city was like and what tourist activities her friend might be doing, which helped her feel connected. She liked the memory feature too, saying it was like talking to a person who was living there.&lt;/p&gt;
+
+&lt;p&gt;I had previously chatted to other random people about AI, including a realtor, a tax accountant, and a part-time beekeeper. All told me enthusiastically about their uses of ChatGPT; the beekeeper, for example, uses it to help with small business paperwork. My wife was already a big user, and I was using it more and more, e.g. to sanity-check quotes from tradespeople. Now my hairstylist, who recognized ChatGPT as a brand more readily than she did &lt;em&gt;Intel&lt;/em&gt;, was praising the technology and teaching &lt;em&gt;me&lt;/em&gt; about it. I stood on the street after my haircut and let sink in how big this was, how this technology has become an essential aide for so many, how I could lead performance efforts and help save the planet. Joining OpenAI might be the biggest opportunity of my lifetime.&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s nice to work on something big that many people recognize and appreciate. I felt this when working at Netflix, and I&amp;#39;d been missing that human connection when I changed jobs. But there are other factors to consider beyond a well-known product: what&amp;#39;s my role, who am I doing it with, and what is the compensation?&lt;/p&gt;
+
+&lt;p&gt;I ended up having &lt;strong&gt;26 interviews and meetings&lt;/strong&gt; (of course I kept a log) with various AI tech giants, so I learned a lot about the engineering work they are doing and the engineers who do it. The work itself reminds me of Netflix cloud engineering: huge scale, cloud computing challenges, fast-paced code changes, and freedom for engineers to make an impact. Lots of very interesting engineering problems across the stack. It&amp;#39;s not just GPUs, it&amp;#39;s everything.&lt;/p&gt;
+
+&lt;p&gt;The engineers I met were impressive: the AI giants have been very selective, to the point that I wasn&amp;#39;t totally sure I&amp;#39;d pass the interviews myself. Of the companies I talked to, OpenAI had the largest number of talented engineers I already knew, including former Netflix colleagues such as Vadim who was encouraging me to join. At Netflix, Vadim would bring me performance issues and watch over my shoulder as I debugged and fixed them. It&amp;#39;s a big plus to have someone at a company who knows you well, knows the work, and thinks you&amp;#39;ll be good at the work.&lt;/p&gt;
+
+&lt;p&gt;Some people may be excited by what it means for OpenAI to hire me, a well known figure in computer performance, and of course I&amp;#39;d like to do great things. But to be fair on my fellow staff, there are many performance engineers already at OpenAI, including veterans I know from the industry, and they have been busy finding important wins. I&amp;#39;m not the first, I&amp;#39;m just the latest.&lt;/p&gt;
+
+&lt;h2&gt;Building Orac&lt;/h2&gt;
+
+&lt;p&gt;AI was also an early dream of mine. As a child I was a fan of British SciFi, including Blake&amp;#39;s 7 (1978-1981) which featured a sarcastic, opinionated supercomputer named Orac. Characters could talk to Orac and ask it to do research tasks. Orac could communicate with all other computers in the universe, delegate work to them, and control them (this was very futuristic in 1978, pre-Internet as we know it). &lt;/p&gt;
+
+&lt;p&gt;Orac was considered the most valuable thing in the Blake&amp;#39;s 7 universe, and by the time I was a university engineering student I wanted to build Orac. So I started developing my own natural language processing software. I didn&amp;#39;t get very far, though: main memory at the time wasn&amp;#39;t large enough to store an entire dictionary plus metadata. I visited a PC vendor with my requirements and they laughed, telling me to buy a mainframe instead. I realized I needed it to distinguish hot versus cold data and leave cold data on disk, and maybe I should be using a database… and that was about where I left that project.&lt;/p&gt;
+
+&lt;p&gt;Last year I started using ChatGPT, and wondered if it knew about Blake&amp;#39;s 7 and Orac. So I asked:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;img src=&quot;/blog/images/2026/chatgpt_orac_01.png&quot; width=450 style=&quot;border: 1px solid black&quot;&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;ChatGPT&amp;#39;s response nails the character. I added it to Settings-&amp;gt;Personalization-&amp;gt;Custom Instructions, and now it always answers as Orac. I love it. (There&amp;#39;s also surprising news for Blake&amp;#39;s 7 fans: A &lt;a href=&quot;https://www.radiotimes.com/tv/sci-fi/blakes-7-reboot-peter-hoar-newsupdate/&quot;&gt;reboot&lt;/a&gt; was just announced!)&lt;/p&gt;
+
+&lt;h2&gt;What&amp;#39;s next for me&lt;/h2&gt;
+
+&lt;p&gt;I am now a Member of Technical Staff for OpenAI, working remotely from Sydney, Australia, and reporting to &lt;a href=&quot;https://www.linkedin.com/in/jbeck449/&quot;&gt;Justin Becker&lt;/a&gt;. The team I&amp;#39;ve joined is ChatGPT performance engineering, and I&amp;#39;ll be working with the other performance engineering teams at the company. One of my first projects is a multi-org strategy for improving performance and reducing costs.&lt;/p&gt;
+
+&lt;p&gt;There&amp;#39;s so many interesting things to work on, things I have done before and things I haven&amp;#39;t. I&amp;#39;m already using Codex for more than just coding. Will I be doing more eBPF, Ftrace, PMCs? I&amp;#39;m starting with OpenAI&amp;#39;s needs and seeing where that takes me; but given those technologies are proven for finding datacenter performance wins, it seems likely -- I can lead the way. (And if everything I&amp;#39;ve described here sounds interesting to you, OpenAI is hiring.)&lt;/p&gt;
+
+&lt;p&gt;I was at Linux Plumber&amp;#39;s Conference in Toyko in December, just after I announced leaving Intel, and dozens of people wanted to know where I was going next and why. I thought I&amp;#39;d write this blog post to answer everyone at once. I also need to finish part 2 of &lt;a href=&quot;/blog/2025-08-04/when-to-hire-a-computer-performance-engineering-team-2025-part1.html&quot;&gt;hiring a performance engineering team&lt;/a&gt; (it was already drafted before I joined OpenAI). I haven&amp;#39;t forgotten.&lt;/p&gt;
+
+&lt;p&gt;It took months to wrap up my prior job and start at OpenAI, so I was due for another haircut. I thought it&amp;#39;d be neat to ask Mia about ChatGPT now that I work on it, then realized it had been months and she could have changed her mind. I asked nervously: &amp;quot;Still using ChatGPT?&amp;quot;. Mia responded confidently: &amp;quot;twenty-four seven!&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;&lt;font size=-1&gt;&lt;i&gt;I checked with Mia, she was thrilled to be mentioned in my post. This is also a personal post: no one asked me to write this.&lt;/i&gt;&lt;/font&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sat, 07 Feb 2026 00:00:00 +1100</pubDate>
+        <link>http://www.brendangregg.com/blog//2026-02-07/why-i-joined-openai.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2026-02-07/why-i-joined-openai.html</guid>
+      </item>
+    
+      <item>
+        <title>Leaving Intel</title>
+        <description>&lt;div style=&quot;float:right;padding-left:10px;padding-right:5px&quot;&gt;&lt;center&gt;
+&lt;a href=&quot;https://youtu.be/PIJL2BGjL-4?si=4YcgtkncF1qktB37&amp;t=3536&quot;&gt;&lt;img src=&quot;/blog/images/2022/brendan_intel_banner01.jpg&quot; border=0 width=180&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;InnovatiON 2022&lt;/i&gt;&lt;/font&gt;&lt;br&gt;
+&lt;a href=&quot;/blog/2024-10-29/ai-flame-graphs.html&quot;&gt;&lt;img src=&quot;/blog/images/2024/firstAIflamegraph-thumb.jpg&quot; border=0 width=180&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;AI Flame Graphs&lt;/i&gt;&lt;/font&gt;&lt;br&gt;
+&lt;a href=&quot;/blog/2025-05-01/doom-gpu-flame-graphs.html&quot;&gt;&lt;img src=&quot;/blog/images/2025/flamescopes1.png&quot; border=0 width=180&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;GPU Flame Scope&lt;/i&gt;&lt;/font&gt;&lt;br&gt;
+&lt;a href=&quot;https://www.linkedin.com/posts/harshad-sane-56711a11_thrilled-to-meet-in-person-with-brendan-gregg-activity-6980768411198922753-Dw_k?utm_source=share&amp;utm_medium=member_desktop&amp;rcm=ACoAAAA8VAMBqJml4viT3EVYGfzv-hLOE0rjdIE&quot;&gt;&lt;img src=&quot;/blog/images/2025/Harshad_Brendan_Innovation2022-crop.jpeg&quot; border=0 width=120&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;Harshad Sane&lt;/i&gt;&lt;/font&gt;&lt;br&gt;
+&lt;a href=&quot;/blog/images/2023/SREcon2023_IMG_0071.jpg&quot;&gt;&lt;img src=&quot;/blog/images/2023/SREcon2023_IMG_0071thumb.jpg&quot; border=0 width=90&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;SREcon APAC&lt;/i&gt;&lt;/font&gt;&lt;br&gt;
+&lt;img src=&quot;/blog/images/2025/CloudTeams_titleonly.png&quot; border=0 width=150&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;Cloud strategy&lt;/i&gt;&lt;/font&gt;&lt;br&gt;
+&lt;a href=&quot;/blog/images/2025/brendanoffice2025dec.jpg&quot;&gt;&lt;img src=&quot;/blog/images/2025/brendanoffice2025dec-thumb.jpg&quot; border=0 width=150&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-2&gt;&lt;i&gt;Last day&lt;/i&gt;&lt;/font&gt;
+&lt;/center&gt;&lt;/div&gt;
+
+&lt;p&gt;I&amp;#39;ve resigned from Intel and accepted a new opportunity. If you are an Intel employee, you might have seen my fairly long email that summarized what I did in my 3.5 years. Much of this is public:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2024-10-29/ai-flame-graphs.html&quot;&gt;AI flame graphs&lt;/a&gt; and released them as &lt;a href=&quot;https://github.com/intel/iaprof&quot;&gt;open source&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2025-05-01/doom-gpu-flame-graphs.html&quot;&gt;GPU subsecond-offset heatmap&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Worked with Linux distros to enable &lt;a href=&quot;/blog/2024-03-17/the-return-of-the-frame-pointers.html&quot;&gt;stack walking&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Was interviewed by the WSJ about eBPF for &lt;a href=&quot;https://www.wsj.com/articles/how-the-crowdstrike-tech-outage-reignited-a-battle-over-the-heart-of-microsoft-systems-72b62c90?utm_source=chatgpt.com&quot;&gt;security monitoring&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Provided leadership on the eBPF Technical Steering Committee (&lt;a href=&quot;https://ebpf.foundation/bsc/&quot;&gt;BSC&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Co-chaired USENIX &lt;a href=&quot;/blog/2023-02-17/srecon-apac-2023.html&quot;&gt;SREcon APAC 2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Gave 6 conference keynotes&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It&amp;#39;s still early days for AI flame graphs. Right now when I browse CPU performance case studies on the Internet, I&amp;#39;ll often see a CPU flame graph as part of the analysis. We&amp;#39;re a long way from that kind of adoption for GPUs (and it doesn&amp;#39;t help that our open source version is Intel only), but I think as GPU code becomes more complex, with more layers, the need for AI flame graphs will keep increasing.&lt;/p&gt;
+
+&lt;p&gt;I also supported cloud computing, participating in 110 customer meetings, and created a company-wide strategy to win back the cloud with 33 specific recommendations, in collaboration with others across 6 organizations. It is some of my best work and features a visual map of interactions between all 19 relevant teams, described by Intel long-timers as the first time they have ever seen such a cross-company map. (This strategy, summarized in a slide deck, is internal only.)&lt;/p&gt;
+
+&lt;p&gt;I always wish I did more, in any job, but I&amp;#39;m glad to have contributed this much especially given the context: I overlapped with Intel&amp;#39;s toughest 3 years in history, and I had a hiring freeze for my first 15 months.&lt;/p&gt;
+
+&lt;p&gt;My fond memories from Intel include 
+meeting &lt;a href=&quot;/blog/images/2022/Brendan_Linus_Sep2022_01crop.jpg&quot;&gt;Linus&lt;/a&gt; at an Intel event who said &amp;quot;everyone is using &lt;em&gt;fleme&lt;/em&gt; graphs these days&amp;quot; (Finnish accent),
+meeting Pat Gelsinger who knew about my work and introduced me to everyone at an exec all hands,
+surfing lessons at an Intel Australia and HP offsite (&lt;a href=&quot;/blog/images/2024/Intel_HP_Urbnsurf_2024.mp4&quot;&gt;mp4&lt;/a&gt;),
+and meeting &lt;a href=&quot;https://www.linkedin.com/posts/harshad-sane-56711a11_thrilled-to-meet-in-person-with-brendan-gregg-activity-6980768411198922753-Dw_k?utm_source=share&amp;amp;utm_medium=member_desktop&amp;amp;rcm=ACoAAAA8VAMBqJml4viT3EVYGfzv-hLOE0rjdIE&quot;&gt;Harshad Sane&lt;/a&gt; (Intel cloud support engineer) who helped me when I was at Netflix and now has joined Netflix himself -- we&amp;#39;ve swapped ends of the meeting table. I also enjoyed meeting Intel&amp;#39;s hardware fellows and senior fellows who were happy to help me understand processor internals. (Unrelated to Intel, but if you&amp;#39;re a Who fan like me, I recently met some other &lt;a href=&quot;/blog/images/2025/brendan_mccoy.jpg&quot;&gt;people&lt;/a&gt; &lt;a href=&quot;/blog/images/2025/brendan_hines.jpg&quot;&gt;as&lt;/a&gt; &lt;a href=&quot;/blog/images/2025/brendan_ford.jpg&quot;&gt;well&lt;/a&gt;!)&lt;/p&gt;
+
+&lt;p&gt;My next few years at Intel would have focused on execution of those 33 recommendations, which Intel can continue to do in my absence. Most of my recommendations aren&amp;#39;t easy, however, and require accepting change, ELT/CEO approval, and multiple quarters of investment. I won&amp;#39;t be there to push them, but other employees can (my CloudTeams strategy is in the inbox of various ELT, and in a shared folder with all my presentations, code, and weekly status reports). This work will hopefully live on and keep making Intel stronger. Good luck.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 05 Dec 2025 00:00:00 +1100</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-12-05/leaving-intel.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-12-05/leaving-intel.html</guid>
+      </item>
+    
+      <item>
+        <title>On &quot;AI Brendans&quot; or &quot;Virtual Brendans&quot;</title>
+        <description>&lt;p&gt;There are now multiple AI performance engineering agents that use or are trained on my work. Some are helper agents that interpret flame graphs or eBPF metrics, sometimes privately called &lt;em&gt;AI Brendan&lt;/em&gt;; others have trained on my work to create a &lt;em&gt;virtual Brendan&lt;/em&gt; that claims it can tune everything just like the real thing. These virtual Brendans sound like my brain has been uploaded to the cloud by someone who is now selling it (yikes!). I&amp;#39;ve been told it&amp;#39;s even &amp;quot;easy&amp;quot; to do this thanks to all my publications available to train on: &amp;gt;90 talks, &amp;gt;250 blog posts, &amp;gt;600 open source tools, and &amp;gt;3000 book pages. Are people allowed to sell you, virtually? And am I the first individual engineer to be AI&amp;#39;d? (There is a 30-year-old precedent for this, which I&amp;#39;ll get to later.)&lt;/p&gt;
+
+&lt;p&gt;This is an emerging subject, with lots of different people, objectives, and money involved. Note that this is a personal post about my opinions, not an official post by my employer, so I won&amp;#39;t be discussing internal details about any particular project. I&amp;#39;m also not here to recommend you buy any in particular.&lt;/p&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;There are two types&lt;/strong&gt;:
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;AI agents&lt;/strong&gt;. I&amp;#39;ve sometimes heard them called an AI Brendan because it does Brendan-like things: systems performance recommendations and interpretation of flame graphs and eBPF metrics. There are already several of these and this idea in general should be useful.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Virtual Brendan&lt;/strong&gt; can refer to something not just built on my work, but trained on my publications to create a virtual &lt;em&gt;me&lt;/em&gt;. These would only automate about 15% of what I do as a performance engineer, and will go out of date if I&amp;#39;m not training it to follow industry changes.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Pricing is hard, in-house is easier&lt;/strong&gt;. With a typical pricing model of $20 per instance per month, customers may just use such an agent on one instance and then copy-and-paste any tuning changes to their entire fleet. There&amp;#39;s no practical way to keep tuning changes secret, either. These projects are easier as internal in-house tools.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Some claim a lot but do little&lt;/strong&gt;. There&amp;#39;s no Brendan Gregg benchmark or empirical measurement of my capability, so a company could claim to be selling a virtual Brendan that is nothing more than a dashboard with a few eBPF-based line charts and a flame graph. On some occasions when I&amp;#39;ve given suggestions to projects, my ideas have been considered too hard or a low priority. Which leads me to believe that some aren&amp;#39;t trying to make a good product -- they&amp;#39;re in it to make a quick buck.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;There&amp;#39;s already been one expensive product failure&lt;/strong&gt;, but I&amp;#39;m not rushing to conclude that the idea is bad and the industry will give up. Other projects already exist.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;I’m not currently involved with any of these products&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;We need AI to help save the planet from AI&lt;/strong&gt;. Performance engineering gets harder every year as systems become more complex. With the rising cost of AI datacenters, we need better performance engineering more than ever. &lt;strong&gt;We need AI agents that claim a lot &lt;i&gt;and do a lot&lt;/i&gt;&lt;/strong&gt;. I wish the best of luck to those projects that agree with this mantra.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Earlier uses of AI&lt;/h2&gt;
+
+&lt;p&gt;Before I get into the AI/Virtual Brendans, yes, we&amp;#39;ve been using AI to help performance engineering for years. Developers have been using coding agents that can help write performant code. And as a performance engineer, I&amp;#39;m already using ChatGPT to save time on resarch tasks, like finding URLs for release notes and recent developments for a given technology. I once used ChatGPT to find and old patch sent to lkml, just based on a broad description, which would otherwise take hours of trial-and-error searches. I keep finding more ways that ChatGPT/AI is useful to me in my work.&lt;/p&gt;
+
+&lt;h2&gt;AI Agents (AI Brendans)&lt;/h2&gt;
+
+&lt;p&gt;A common approach is to take a CPU flame graph and have AI do pattern matching to find performance issues. Some of these agents will apply fixes as well. It&amp;#39;s like a modern take on the practice of &amp;quot;recent performance issue checklists,&amp;quot; just letting AI do the pattern matching instead of the field engineer.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;ve recently worked on a &lt;a href=&quot;https://www.brendangregg.com/Slides/KernelRecipes2023_FastByFriday/&quot;&gt;Fast by Friday&lt;/a&gt; methodology: where we engineer systems so that performance can be root-cause analyzed in 5 days or less. Having an AI agent look over flame graphs, metrics, and other data sources to match previously seen issues will save time and help make Fast by Friday possible. For some companies with few or no performance engineers, I&amp;#39;d expect matching previously seen issues should find roughly 10-50% performance gains.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;ve heard some flame graph agents privately referred to as an &amp;quot;AI Brendan&amp;quot; (or similar variation on my name) and I guess I should be glad that I&amp;#39;m getting some kind of credit for my work. Calling a systems performance agent &amp;quot;Brendan&amp;quot; makes more sense than other random names like Siri or Alexa, so long as end users understand it means a Brendan-like agent and not a full virtual Brendan. I&amp;#39;ve also suspected this day would come ever since I began my performance career (more on this later).&lt;/p&gt;
+
+&lt;p&gt;Challenges:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Hard to quantify and sell&lt;/strong&gt;. What the product will actually do is unknown: maybe it&amp;#39;ll improve performance by 10%, 30%, or 0%. Consider how different this is from other products where you need a thing, it does the thing, you pay for it, the end. Here you need a thing, it might do the thing but no one can promise it, but please pay us money and find out. It&amp;#39;s a challenge. Free trials can help, but you&amp;#39;re still asking for engineering time to test something without a clear return. This challenge is also present for building in-house tools: it&amp;#39;s likewise hard to quantify the ROI.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;The analysis pricing model is hard&lt;/strong&gt;. If this is supposed to be a commercial product (and not just an in-house tool) customers may only pay for one server/instance a month and use that to analyze and solve issues that they then fix on the entire fleet. In a way, you&amp;#39;re competing with an established pricing model in this space: &lt;em&gt;performance consultants&lt;/em&gt; (I used to be one) where you pay a single expert to show up, do analysis, suggest fixes, and leave. Sometimes that takes a day, sometimes a week, sometimes longer. But the fixes can then be used on the entire fleet forever, no subscription.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;The tuning pricing model is harder&lt;/strong&gt;. If the agent also applies tuning, can&amp;#39;t the customer copy the changes everywhere? At least one AI auto-tuner initially explored solving this by keeping the tuning changes secret so you didn&amp;#39;t know what to copy-and-paste, forcing you to keep running and paying for it. A few years ago there was a presentation about one of these products with this pricing model, to a room of performance engineers from different companies (people I know), and straight after the talk the engineers discussed how quickly they could uncover the changes. I mean, the idea that a company is going to make some changes to your production systems (including at the superuser level) without telling you what they are changing is a bit batty anyway, and telling engineers you&amp;#39;re doing this is just a fun challenge, a technical game of hide and seek. Personally I&amp;#39;d checksum the entire filesystem before and after (there are tools that do this), I&amp;#39;d trace syscalls and use other kernel debugging facilities, I&amp;#39;d run every tool that dumped tunable and config settings and diff it to a normal system, and that&amp;#39;s just what comes to mind immediately. Or maybe I&amp;#39;d just run their agent through a debugger (if their T&amp;amp;Cs let me). There are so many ways. It&amp;#39;d have to be an actual rootkit to stand half a chance, and while that might hide things from file system and other syscalls, the weird kernel debuggers I use would take serious effort to disguise.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;It may get blamed for outages&lt;/strong&gt;. Commercial agents that do secret tuning will violate change control. Can you imagine what happens during the next company-wide outage? &amp;quot;Did anyone change anything recently?&amp;quot; &amp;quot;We actually don&amp;#39;t know, we run a AI performance tuning agent that changes things in secret&amp;quot; &amp;quot;Uh, WTF, that&amp;#39;s banned immediately.&amp;quot; Now, the agent may not be responsible for the outage at all, but we tend to blame the thing we can&amp;#39;t see.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Shouldn&amp;#39;t those fixes be upstreamed?&lt;/strong&gt; Let&amp;#39;s say an agent discovers a Java setting that improves performance significantly, and the customer&amp;#39;s engineers figure this out (see previous points). I see different scenarios where eventually someone will say &amp;quot;we should file a JVM ticket and have this fixed upstream.&amp;quot; Maybe someone changes jobs and remembers the tunable but doesn&amp;#39;t want to pay for the agent, or maybe they feel it&amp;#39;s good for the Java community, or maybe it only works on some hardware (like Intel) and that hardware vendor finds out and wants it upstreamed as a competitive edge. So over time the agent finds fewer wins as what it does find gets fixed in the target software.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;The effort to build&lt;/strong&gt;. (As is obvious) there&amp;#39;s challenging work to build orchestration, the UI, logging, debugging, security, documentation, and support for different targets (runtimes, clouds). That support will need frequent updates.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;For customers: AI-outsourcing your performance thinking may leave you vulnerable&lt;/strong&gt;. If a company spends less on performance engineers as it&amp;#39;s considered AI&amp;#39;d, it will reduce the company&amp;#39;s effective &amp;quot;performance IQ.&amp;quot; I&amp;#39;ve already seen an outcome: large companies that spend tens of millions on low-featured performance monitoring products, because they don&amp;#39;t have in-house expertise to build something cheaper and better. This problem could become a positive feedback loop where fewer staff enter performance engineering as a profession, so the industry&amp;#39;s &amp;quot;performance IQ&amp;quot; also decreases.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So it&amp;#39;s easier to see this working as an in-house tool or an open source collaboration, one where it doesn&amp;#39;t need to keep the changes secret and it can give fixes back to other upstream projects.&lt;/p&gt;
+
+&lt;h2&gt;Virtual Brendans&lt;/h2&gt;
+
+&lt;p&gt;Now onto the sci-fi-like topic of a virtual me, just like the real thing.&lt;/p&gt;
+
+&lt;p&gt;Challenges:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;My publications are an incomplete snapshot, so you can only make a partial virtual Brendan (at some tasks) that gets out of date quickly&lt;/strong&gt;. I think this is obvious to an engineer but not obvious to everyone.
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Incomplete&lt;/strong&gt;: I&amp;#39;ve published many blog posts (and talks) about some performance topics (observability, profiling, tracing, eBPF), less on others (tunining, benchmarking), and nearly nothing on some (distributed tracing). This is because blogging is a spare time hobby and I cover what I&amp;#39;m interested in and working on, but I can&amp;#39;t cover it all, so this body of published knowledge is incomplete. It&amp;#39;s also not as deep as human knowledge: I&amp;#39;m summarizing best practices but in my head is every performance issue I&amp;#39;ve debugged for the past 20+ years.
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Books&lt;/strong&gt; are different because in Systems Performance I try to summarize everything so that the reader can become a good performance engineer. You still can&amp;#39;t make a virtual Brendan from this book because the title isn&amp;#39;t &amp;quot;The Complete Guide to Brendan Gregg.&amp;quot;. I know that might be obvious, but when I hear about Virtual Brendan projects discussed by non-engineers like it really is a virtual me I feel I need to state it cleary. Maybe you can make a good performance engineering agent, but consider this: my drafts get so big (approaching 2000 pages) that my publisher complains about needing special book binding or needing to split it into volumes, so I end up cutting roughly half out of my books (an arduous process) and these missing pages are not training AI. Granted, they are the least useful half, which is why I deleted them, but it helps explain something wrong with all of this: The core of your product is to scrape publications designed for human attention spans -- you&amp;#39;re not engineering the best possible product, you&amp;#39;re just looking to make a quick buck from someone else&amp;#39;s pre-existing content. That&amp;#39;s what annoys me the most: not doing the best job we could. (There&amp;#39;s also the legality of training on copyrighted books and selling the result, but I&amp;#39;m not an expert on this topic so I&amp;#39;ll just note it as another challenge.)&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Out of date&lt;/strong&gt;: Everything I publish is advice at a point in time, and while some content is durable (methodologies) other content ages fast (tuning advice). Tunables are less of a problem as I avoid sharing them in the first place, as people will copy-n-paste them in environments where they don&amp;#39;t make sense (so tunables is more of an &amp;quot;incomplete&amp;quot; problem). The out-of-date problem is getting worse because I&amp;#39;ve published less since I joined Intel. One reason is I&amp;#39;ve been mentally focused on an internal strategy project. But there is another, newer reason: I&amp;#39;ve found it hard to get motivated. I now have this feeling that blogging means I&amp;#39;m giving up my weekends, unpaid, to train my AI replacement.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;So far these AI agents only automate a small part of my job&lt;/strong&gt;. The analysis, reporting, and tuning of previously seen issues. It&amp;#39;s useful, but to think those activities alone are an AI version of me is misleading. In my prior &lt;a href=&quot;/blog/2025-08-04/when-to-hire-a-computer-performance-engineering-team-2025-part1.html&quot;&gt;post&lt;/a&gt; I listed 10 things a performance engineer did (A-J), and analysis &amp;amp; tuning is only 2 out of 10 activities. And it&amp;#39;s only really doing half of analysis (next point), so 1.5/10 is 15%.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Half my analysis work is never-seen-before issues&lt;/strong&gt;. In part because seen-before issues are often solved before they reach me. A typical performance engineer will have a smaller but still significant portion of these issues. That&amp;#39;s still plenty of issues where there&amp;#39;s nothing online about it to train from, which isn&amp;#39;t the strength of the current AI agents.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;”Virtual Brendan&amp;quot; may just be a name&lt;/strong&gt;. In some cases, referring to me is just shorthand for saying it&amp;#39;s a systems-performance-flame-graphs-ebpf project. The challenge here is that some people (business people) may think it really is a virtual me, but it&amp;#39;s really more like the AI Brendan agent described earlier.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;I don&amp;#39;t know everything&lt;/strong&gt;. I try to learn it all but performance is a vast topic, and I&amp;#39;m usually at large companies where there are other teams who are better than I am at certain areas. When I worked at Netflix they had a team to handle distributed tracing, so I didn&amp;#39;t have to go deep on the topic myself, even though it&amp;#39;s important. So a Virtual Brendan is useful for a lot of things but not everything.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Some Historical Background&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;The first such effort that I’m aware of was “Virtual Adrian” in 1994&lt;/strong&gt;. Adrian Cockcroft, a performance engineering leader, had a software tool called Virtual Adrian that was described as: &amp;quot;Running this script is like having Adrian actually watching over your machine for you, whining about anything that doesn&amp;#39;t look well tuned.&amp;quot; (Sun Performance and Tuning 2nd Ed, 1998, page 498). It both analyzed and applied tuning, but it wasn&amp;#39;t AI, it was rule-based. I think it was the first such agent based on a real individual. That book was also the start of my own performance career: I read it and &lt;em&gt;Solaris Internals&lt;/em&gt; to see if I could handle and enjoy the topic; I didn&amp;#39;t just enjoy it, I fell in love with performance engineering. So I&amp;#39;ve long known about virtual Adrian, and long suspected that one day there might be a virtual Brendan.&lt;/p&gt;
+
+&lt;p&gt;There have been other rule-based auto tuners since then, although not named after an individual. Red Hat maintains one called &lt;a href=&quot;https://github.com/redhat-performance/tuned&quot;&gt;TuneD&lt;/a&gt;: a &amp;quot;Daemon for monitoring and adaptive tuning of system devices.&amp;quot; Oracle has a newer one called &lt;a href=&quot;https://github.com/oracle/bpftune&quot;&gt;bpftune&lt;/a&gt; (by Alan Maguire) based on eBPF. (Perhaps it should be called &amp;quot;Virtual Alan&amp;quot;?)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Machine learning was introduced by 2010&lt;/strong&gt;. At the time, I met with mathematicians who were applying machine learning to all the system metrics to identify performance issues. As mathematicians, they were not experts in systems performance and they assumed that system metrics were trustworthy and complete. I explained that their product actually had a &amp;quot;garbage in garbage out&amp;quot; problem – some metrics were unreliable, and there were many blind spots, which I have been helping fix with my tools. My advice was to fix the system metrics first, then do ML, but it never happened.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;AI-based auto-tuning companies arrived by 2020&lt;/strong&gt;: Granulate in 2018 and Akamas in 2019. Granulate were pioneers in this space, with a product that could automatically tune software using AI with no code changes required. In 2022 Intel acquired Granulate, a company of &lt;a href=&quot;https://www.intc.com/news-events/press-releases/detail/1535/intel-to-acquire-granulate&quot;&gt;120 staff&lt;/a&gt;, &lt;a href=&quot;https://www.theregister.com/2022/05/25/intel_granulate_cloud_analysis/?td=keepreading-btm&quot;&gt;reportedly&lt;/a&gt; for USD$650M, to boost cloud and datacenter performance. As shared at Intel Vision, Granulate fit into an optimization strategy where it would help application performance, accomplishing for &lt;a href=&quot;https://www.theregister.com/2022/05/25/intel_granulate_cloud_analysis/?td=keepreading-btm&quot;&gt;example&lt;/a&gt; &amp;quot;approximately 30% CPU reduction on Ruby and Java.&amp;quot; Sounds good. As Intel&amp;#39;s press release described, Granulate was expected to lean on Intel&amp;#39;s 19,000 software engineers to help it expand its capabilities.&lt;/p&gt;
+
+&lt;p&gt;The years that followed were tough for Intel in general. Granulate was renamed &amp;quot;Intel Tiber App-Level Optimization.&amp;quot; By 2025 the entire project was reportedly for &lt;a href=&quot;https://en.globes.co.il/en/article-intel-weighs-up-future-of-650m-israeli-acquisition-granulate-1001492477&quot;&gt;sale&lt;/a&gt; but, apparently finding no takers, the project was simply shut down. An Intel press release &lt;a href=&quot;https://en.globes.co.il/en/article-intel-closes-granulate-lays-off-dozens-1001492599&quot;&gt;stated&lt;/a&gt;: &amp;quot;As part of Intel&amp;#39;s transformation process, we continue to actively review each part of our product portfolio to ensure alignment with our strategic goals and core business. After extensive consideration, we have made the difficult decision to discontinue the Intel Tiber App-Level Optimization product line.&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;I learned about Granulate in my first days at Intel. I was told their product was entirely based on my work, using flame graphs for code profiling and my publications for tuning, and that as part of my new job I had to support it. It was also a complex project, as there was also a lot of infrastructure code for safe orchestration of tuning changes, which is not an easy problem. Flame graphs were the key interface: the first time I saw them demo their product they wanted to highlight their dynamic version of flame graphs thinking I hadn&amp;#39;t seen them before, but I recognized them as &lt;a href=&quot;https://github.com/spiermar/d3-flame-graph&quot;&gt;d3-flame-graphs&lt;/a&gt; that Martin Spier and I created at Netflix.&lt;/p&gt;
+
+&lt;p&gt;It was a bit dizzying to think that my work had just been &amp;quot;AI&amp;#39;d&amp;quot; and sold for $650M, but I wasn&amp;#39;t in a position to complain since it was now a project of my employer. But it was also exciting, in a sci-fi kind of way, to think that an AI Brendan could help tune the world, sharing all the solutions I&amp;#39;d previously published so I didn&amp;#39;t have to repeat them for the umpteenth time. It would give me more time to focus on new stuff.&lt;/p&gt;
+
+&lt;p&gt;The most difficult experience I had wasn&amp;#39;t with the people building the tool: they were happy I joined Intel (I heard they gave the CTO a standing ovation when he announced it). I also recognized that automating my prior tuning for everyone would be good for the planet. The difficulty was with others on the periphery (business people) who were not directly involved and didn&amp;#39;t have performance expertise, but were gung ho on the idea of an AI performance engineering agent. Specifically, a Virtual Brendan that could be sold to everyone. I (human Brendan and performance expert) had no role or say in these ideas, as there was this sense of: &amp;quot;now we&amp;#39;ve copied your brain we don&amp;#39;t need you anymore, get out of our way so we can sell it.&amp;quot; This was the only time I had concerns about the impact of AI on my career. It wasn&amp;#39;t the risk of being replaced by a better AI, it was being replaced by a worse one that people &lt;em&gt;think&lt;/em&gt; is better, and with a marketing budget to make &lt;em&gt;everyone else&lt;/em&gt; think it&amp;#39;s better. Human me wouldn&amp;#39;t stand a chance.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;2025 and beyond&lt;/strong&gt;: As an example of an in-house agent, Uber has one called &lt;a href=&quot;https://www.uber.com/en-AU/blog/perfinsights/&quot;&gt;PerfInsights&lt;/a&gt; that analyzes code profiles to find optimizations. And I learned about another agent, &lt;a href=&quot;https://x.com/parth21shah/status/1990112782482641006&quot;&gt;Linnix&lt;/a&gt;: AI-Powered Observability, while writing this post.&lt;/p&gt;
+
+&lt;h2&gt;Final Thoughts&lt;/h2&gt;
+
+&lt;p&gt;There are far more computers in the world than performance engineers to tune them, leaving most running untuned and wasting resources. In future there will be AI performance agents that can be run on everything, helping to save the planet by reducing energy usage. Some will be described as an AI Brendan or a Virtual Brendan (some already have been) but that doesn&amp;#39;t mean they are necessarily trained on all my work or had any direct help from me creating it. (Nor did they abduct me and feed me into a steampunk machine that uploaded my brain to the cloud.) Virtual Brendans only try to automate about 15% of my job (see my prior &lt;a href=&quot;/blog/2025-08-04/when-to-hire-a-computer-performance-engineering-team-2025-part1.html&quot;&gt;post&lt;/a&gt; for &amp;quot;What do performance engineers do?&amp;quot;).&lt;/p&gt;
+
+&lt;p&gt;Intel and the AI auto-tuning startup it acquired for $650M (based on my work) were pioneers in this space, but after Intel invested more time and resources into the project it was shut down. That doesn&amp;#39;t mean the idea was bad -- Intel&amp;#39;s public statement about the shutdown only mentions a core business review -- and this happened while Intel has been struggling in general (as has been widely reported).&lt;/p&gt;
+
+&lt;p&gt;Commercial AI auto-tuners have extra challenges: customers may only pay for one server/instance then copy-n-paste the tuning changes everywhere. Similar to the established pricing model of hiring a performance consultant. For 3rd-party code, someone at some point will have the bright idea to upstream any change an AI auto-tuner suggestss, so a commercial offering will keep losing whatever tuning advantages it develops. In-house tools don&amp;#39;t have these same concerns, and perhaps that&amp;#39;s the real future of AI tuning agents: an in-house or non-commercial open source collaboration.&lt;/p&gt;
+</description>
+        <pubDate>Fri, 28 Nov 2025 00:00:00 +1100</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-11-28/ai-virtual-brendans.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-11-28/ai-virtual-brendans.html</guid>
+      </item>
+    
+      <item>
+        <title>Intel is listening, don&#39;t waste your shot</title>
+        <description>&lt;p&gt;Intel&amp;#39;s new CEO, Lip-Bu Tan, has made listening to customers a top priority, saying at Intel Vision &lt;a href=&quot;https://www.reuters.com/technology/intels-new-ceo-tells-customers-be-brutally-honest-with-us-2025-03-31/&quot;&gt;earlier&lt;/a&gt; this year: &amp;quot;Please be brutally honest with us. This is what I expect of you this week, and I believe harsh feedback is most valuable.&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;d been in regular meetings with Intel for several years before I joined, and I had been giving them technical direction on various projects, including at times some brutal feedback.
+When I finally interviewed for a role at Intel I was told something unexpected: that I had already accomplished so much within Intel that I qualified to be an Intel Fellow candidate. I then had to pass several extra interviews to actually become a Fellow (and was told I may only be the third person in Intel&amp;#39;s history to be hired as a Fellow) but what stuck with me was that I had already accomplished so much at a company I&amp;#39;d never worked for.&lt;/p&gt;
+
+&lt;p&gt;If you are in regular meetings with a hardware vendor as a customer (or potential customer) you can accomplish a lot by providing firm and tough feedback, particularly with Intel today. This is easier said than done, however.&lt;/p&gt;
+
+&lt;p&gt;Now that I&amp;#39;ve seen it from the other side I realize I could have accomplished more, and you can too. I regret the meetings where I wasn&amp;#39;t really able to have my feedback land as the staff weren&amp;#39;t really getting it, so I eventually gave up. After the meeting I&amp;#39;d crack jokes with my colleagues about how the product would likely fail. (Come on, at least I tried to tell them!)&lt;/p&gt;
+
+&lt;p&gt;Here&amp;#39;s what I wish I had done in any hardware vendor meeting:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Prep before meetings&lt;/strong&gt;: study the agenda items and look up attendees on LinkedIn and note what they do, how many staff they say they manage, etc.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Be aware of intellectual property risks&lt;/strong&gt;: Don&amp;#39;t accept meetings covered by some agreement that involves doing a transfer of intellectual property rights for your feedback (I wrote a &lt;a href=&quot;/blog/2014-05-17/free-as-in-we-own-your-ip.html&quot;&gt;post&lt;/a&gt; on this); ask your legal team for help.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Make sure feedback is documented in the meeting minutes&lt;/strong&gt; (e.g., a shared Google doc) and that it isn&amp;#39;t watered down. Be firm about what you know and don&amp;#39;t know: it&amp;#39;s just as important to assert when you haven&amp;#39;t formed an opinion yet on some new topic.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stick to technical criticisms&lt;/strong&gt; that are constructive (uncompetitive, impractical, poor quality, poor performance, difficult to use, of limited use/useless) instead of trash talk (sucks, dumb, rubbish).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Check minutes include who was present and the date.&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ask how many staff are on projects&lt;/strong&gt; if they say they don&amp;#39;t have the resources to address your feedback (they may not answer if this is considered sensitive) and share industry expectations, for example: “This should only take one engineer one month, and your LinkedIn says you have over 100 staff.”&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Decline freeloading&lt;/strong&gt;: If staff ask to be taught technical topics they should already know (likely because they just started a new role), decline, as I&amp;#39;m the customer and not a free training resource.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ask &amp;quot;did you Google it?&amp;quot; a lot&lt;/strong&gt;: Sometimes staff join customer meetings to elevate their own status within the company, and ask questions they could have easily answered with Google or ChatGPT.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ask for staff/project bans&lt;/strong&gt;: If particular staff or projects are consistently wasting your time, tell the meeting host (usually the sales rep) to take them off the agenda for at least a year, and don&amp;#39;t join (or quit) meetings if they show up. Play bad cop, often no one else will.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Review attendees&lt;/strong&gt;. From time to time, consider: Am I meeting all the right people? Review the minutes. E.g., if you&amp;#39;re meeting Intel and have been talking about a silicon change, have any actual silicon engineers joined the call?&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Avoid peer pressure&lt;/strong&gt;: You may meet with the entire product team who are adamant that they are building something great, and you alone need to tell them it&amp;#39;s garbage (using better words). Many times in my life I&amp;#39;ve been the only person to speak up and say uncomfortable things in meetings, yet I&amp;#39;m not the only person present who could.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ask for status updates&lt;/strong&gt;: Be prepared that even if everyone appears grateful and appreciative of your feedback, you may realize six months later that nothing was done with it. Ask for updates and review the prior meeting minutes to see what you asked for and when.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Speak to ELT/CEO&lt;/strong&gt;: Once a year or so, ask to speak to someone on the executive leadership team (ELT; the leaders on the website) or the CEO. Share brutal feedback, and email them a copy of the meeting minutes showing the timeline of what you have shared and with whom. This may be the only way your feedback ever gets addressed, in particular for major changes. Ask to hear what they have been told about you and be prepared to refute details: your brutal feedback may have been watered down.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I&amp;#39;m now in meetings from the other side where we&amp;#39;d really appreciate brutal feedback, but some customers aren&amp;#39;t comfortable doing this, even when prompted. It isn&amp;#39;t easy to tell someone their project is doomed, or that their reasons for not doing something are BS.
+It isn&amp;#39;t easy dealing with peer pressure and a room of warm and friendly staff begging you say something, anything nice about their terrible product for fear of losing their jobs -- and realizing you must be brutal to their faces otherwise you&amp;#39;re not helping the vendor or your own company.
+And it&amp;#39;s extra effort to check meeting minutes and to push for meetings with the ELT or the CEO.
+Giving brutal feedback takes brutal effort.&lt;/p&gt;
+
+&lt;!--
+- Try to figure out which staff are trying to win business, and which are just trying to make the customer &quot;happy&quot; by doing or promising anything.
+--&gt;
+</description>
+        <pubDate>Sat, 22 Nov 2025 00:00:00 +1100</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-11-22/intel-is-listening.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-11-22/intel-is-listening.html</guid>
+      </item>
+    
+      <item>
+        <title>Third Stage Engineering</title>
+        <description>&lt;p&gt;The real performance of any computer hardware in production is the result of the hardware, software, and tuning; the investment and sequence of these efforts can be pictured as a three-stage rocket:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;img src=&quot;/blog/images/2025/3rd_stage_engineering.png&quot; width=550 border=1&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;I recently presented this embarrassingly simple diagram to Intel&amp;#39;s executive leadership, and at the time realized the value of sharing it publicly. The Internet is awash with comparisons about Intel (and other vendors’) product performance based on hardware performance alone, but the performance of software and then tuning can make a huge difference for your particular workload. You need all three stages to reach the highest, and most competitive, performance.&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s obvious why this is important for HW vendors to understand internally – they, like the Internet, can get overly focused on HW alone. But customers need to understand it as well. If a benchmark is comparing TensorFlow performance between HW vendors, was the Intel hardware tested using the &lt;a href=&quot;https://github.com/intel/intel-extension-for-tensorflow&quot;&gt;Intel Extension for TensorFlow Software&lt;/a&gt;, and was it then tuned? The most accurate and realistic evaluation for HW involves selecting the best software and then tuning it, and doing this for all HW options.&lt;/p&gt;
+
+&lt;p&gt;I spend a lot of time on the final stage, tuning – what I call &lt;em&gt;third-stage engineering&lt;/em&gt;. It&amp;#39;s composed of roughly four parts: People, training, tools, and capabilities. You need staff, you need them trained to understand performance methodologies and SW and HW internals, they need tools to analyze the system (both observational and experimental), and finally they need capabilities to tune (tunable parameters, settings, config, code changes, etc.). &lt;/p&gt;
+
+&lt;p&gt;I see too many HW evaluations that are trying to understand customer performance but are considering HW alone, which is like only testing the first stage of a rocket. This doesn&amp;#39;t help vendors or customers. I hope that&amp;#39;s what my simple diagram makes obvious: We need all three stages to reach the highest altitude.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 17 Nov 2025 00:00:00 +1100</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-11-17/third-stage-engineering.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-11-17/third-stage-engineering.html</guid>
+      </item>
+    
+      <item>
+        <title>When to Hire a Computer Performance Engineering Team (2025) part 1 of 2</title>
+        <description>&lt;p&gt;&lt;i&gt;&lt;font size=-1&gt;As a leader in computer performance I&amp;#39;ve been asked by companies about how (and why) to form a performance engineering team, and as this is broadly useful I&amp;#39;ll share my advice here.&lt;/font&gt;&lt;/i&gt;&lt;/p&gt;
+
+&lt;p&gt;Large tech companies in the US hire performance engineers (under that or other titles) to ensure that infrastructure costs and service latency don&amp;#39;t grow too high, and that their service is reliable under peak load. A new performance team can likely find enough optimizations to &lt;em&gt;halve&lt;/em&gt; infrastructure spend in their first couple of years, even for companies that have been using commercial performance or observability tools. Performance engineers do much more than those tools, working with development teams and vendors to build, test, debug, tune, and adopt new performance solutions, and to find deep optimizations that those tools can miss.&lt;/p&gt;
+
+&lt;p&gt;I previously worked on the performance engineering team for Netflix, a large tech consumer running on hundreds of thousands of AWS instances. I&amp;#39;m now doing similar work at Intel (a large tech vendor) for Intel and their customers. As a leader in this space I&amp;#39;ve also interacted with other performance teams and staff doing performance work at many companies. In this post I&amp;#39;ll explain what these teams do and when you should consider forming one. In part 2 I&amp;#39;ll provide sample job descriptions, specialties, advice, pitfalls, comments on AI, and what to do if you can&amp;#39;t hire a performance team.&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s easy for hardware vendors like Intel to justify hiring performance engineers, as the number one factor in sales is beating a competitor&amp;#39;s performance. However, my focus in this post is on non-vendor tech-heavy companies who hire these staff to drive down costs and latency outliers (e.g., banks, telecomms, defence, AI, tech-based companies, and anyone else who is spending more than $1M/year on back-end compute and AI).&lt;/p&gt;
+
+&lt;h1&gt;What is the ROI of performance engineering?&lt;/h1&gt;
+
+&lt;p&gt;The main ROIs are &lt;strong&gt;infrastructure cost savings&lt;/strong&gt;, &lt;strong&gt;latency reductions&lt;/strong&gt;, &lt;strong&gt;improved scalability and reliability&lt;/strong&gt;, and &lt;strong&gt;faster engineering&lt;/strong&gt;. The cost savings alone can justify a performance team and can help calculate its size, and I&amp;#39;ll explore that in depth, but the other ROIs are worth considering and may be more important to a company depending on its stage of growth.&lt;/p&gt;
+
+&lt;h2&gt;Infrastructure Cost Savings and Margin Improvements&lt;/h2&gt;
+
+&lt;p&gt;An appropriately-sized performance team should be targeting 5-10% cost savings per year through tuning and product adoptions. (I&amp;#39;ll explain appropriate sizes in the When To Hire section.) For many large companies a 5% result would be considered &amp;quot;good&amp;quot; and a 10% would be &amp;quot;great.&amp;quot; Achieving this in practice can mean finding large wins (15-80%) on parts of the infrastructure, which become 5-10% overall. Wins are cumulative, so a team hitting 5% savings each year will multiply to become 28% after their 5th year (like compound interest). Even a modest 2% per year will become significant over time. While these compounded numbers can become large, a team needs to continue finding new cost savings each year to justify long-term retention, and should always be focused on the &lt;em&gt;next&lt;/em&gt; 5-10%.&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;img src=&quot;/blog/images/2025/cumulative-cost-savings.png&quot; width=600&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;Companies may invest in this work for more than just the cost savings: It can be about &lt;strong&gt;developing a competitive advantage&lt;/strong&gt; in their area by providing a better cost/performance ratio, especially for companies with similar tech-based services that pass costs on to customers.&lt;/p&gt;
+
+&lt;p&gt;For sites that haven&amp;#39;t employed performance engineers before, there can be enough low-hanging fruit that the team can halve infrastructure costs in their first couple of years (50%). It all depends on the number of staff, their level of expertise, how much perf work other staff are already doing (senior developers, SREs), how much custom code is running, and how complex and volatile the stack is.&lt;/p&gt;
+
+&lt;p&gt;It would great if we could publicly share specific results, which would look something like this:&lt;/p&gt;
+
+&lt;ul&gt;&quot;This year we helped reduce our company&#39;s infrastructure spend by 5%, from $60M/year to $57M/year, however, since our user base also grew by 3%, we actually &lt;b&gt;reduced cost-per-user by 8%&lt;/b&gt;, saving $5M/year in this and all future years.&quot;&lt;/ul&gt;
+
+&lt;p&gt;However, these numbers are usually considered financially sensitive as they can reveal company growth, financial health, confidential infrastructure discounts, etc. As a performance engineer I can talk publicly about percent wins on a back-end service, but I usually can&amp;#39;t map it to dollar signs. That doesn&amp;#39;t help other companies to understand the value of performance engineering. It&amp;#39;s not so much of a problem in Silicon Valley, since staff change companies all the time and word spreads about the latest practices in tech. But in far away countries performance engineering doesn&amp;#39;t really exist yet, even though there are companies with sufficiently large infrastructure spend.&lt;/p&gt;
+
+&lt;p&gt;Continuing the above example, a typical 8% win could be composed of:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;2%: direct optimizations&lt;/strong&gt;. We looked across all the infrastructure and found on average 5% wins on 40% of the infrastructure (on the rest we found nothing, this year).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;3%: developer/SRE enablement&lt;/strong&gt;. We developed and adopted custom observability tools and helped developers use them, who in turn found some 15% wins across 20% of our infrastructure.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;3%: vendor adoptions&lt;/strong&gt;. We supported a major adoption project that replaced 10% of our infrastructure for a 30% win.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;With developer/SRE enablement and vendor adoptions, the performance team isn&amp;#39;t finding the wins directly but is enabling other teams and vendors to do so. For example, when I worked at Netflix we built and maintained the flame graph &amp;quot;self-service&amp;quot; application, which developers used daily to find wins, and we worked on multiple product adoptions every year. This all needs to be considered as part of the performance team’s ROI.&lt;/p&gt;
+
+&lt;h2&gt;Latency Reductions&lt;/h2&gt;
+
+&lt;p&gt;Reducing the response time or latency of a service is a large part of performance engineering. This involves analyzing average latency, 99th percentile latency, and outlier latency; ensuring latency SLA/SLOs are met; and ensuring acceptable latency during perturbations or peak usage.&lt;/p&gt;
+
+&lt;p&gt;Many of the cost optimizations described earlier will also reduce average latency, but latency variance or outliers can remain. For example, a once-every-5-minute system task may have negligible cost and CPU footprint, but it may briefly perturb the application and cause latency outliers. These are debugged differently, often using monitoring, logs, distributed tracing, system-level tracing, packet logs, and custom ad-hoc tools. Sometimes the high latency is caused by the request type itself (the system is fine, but the end-user has requested a slow thing) or is an expected consequence of load (queueing theory, tail latency). Other times it can be from complex interactions across multiple layers of the software stack or from interactions across multiple network endpoints.&lt;/p&gt;
+
+&lt;ul&gt;&lt;font size=-1&gt;As a related aside: One performance anti-pattern is when a company, to debug one performance problem, installs a monitoring tool that periodically does work and causes application latency outliers. Now the company has two problems. Tip: try turning off all monitoring agents and see if the problem goes away.&lt;/font&gt;&lt;/ul&gt;
+
+&lt;p&gt;While latency is the main consideration to improve end user experience, others include throughput and parallelism.&lt;/p&gt;
+
+&lt;h2&gt;Improved Scalability and Reliability&lt;/h2&gt;
+
+&lt;p&gt;Systems under load can respond with exponential latency or a cascading failure, causing disruptions or a service outage. Performance engineers can test resource scalability with custom load generators and benchmarks, and use analysis tools to study all parts of the system to find and solve bottlenecks. A performance engineer will not just measure scalability limits, but should also explain what the limiting factors are and how to address them to scale further.&lt;/p&gt;
+
+&lt;p&gt;A stable and performant service will also earn trust in your company, and can help you grow customers more quickly. It may be a requirement for satisfying enterprise SLA/SLOs.&lt;/p&gt;
+
+&lt;ul&gt;&lt;font size=-1&gt;I&#39;ll share a scalability story from my time at Sun Microsystems (a vendor). My goal was to achieve the number one throughput in the industry for a storage system, which would require exceeding 1M IOPS. The expected bottleneck was the rotational disks. I developed my own load generators and analysis tools and concluded that the real bottleneck was, surprisingly, the CPU interconnect. The interconnect was AMD HyperTransport 1, so AMD sent me a new systemboard with HT3 and faster CPUs. I installed it and…performance was identical. I was upset with myself for getting it wrong, until I discovered that AMD had sent me a HT1 board by mistake. They then sent me a real HT3 board and the performance increased by up to 75%! The CPU interconnect (when present) is just one of many components that companies typically don&#39;t check, and commercial observability tools don&#39;t check either.&lt;/font&gt;&lt;/ul&gt;
+
+&lt;h2&gt;Faster Engineering&lt;/h2&gt;
+
+&lt;p&gt;Performance engineers can take care of components outside of a developer&amp;#39;s code base so the developers can stay focused, and also provide them with a greater performance budget so that they can adopt expensive features earlier. For some early stage companies this ROI may be their most important (and is sometimes called &lt;em&gt;engineering velocity&lt;/em&gt;). In detail:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Eliminate outside performance distractions&lt;/strong&gt;: A development team can be coding at one hundred miles an hour in their codebase, but then run into a performance problem in a library, kernel, hypervisor, or hardware component, and need to slow down to learn some new thing and its analysis tools. Or, it could be some new performance technology that someone saw on hackernews and the development team wonder if they should stop to evaluate it. These performance activities can be offloaded to the perf team so the developers stay focused on their code and at full speed. This is the same as how OS, deployment, and reliability issues can be offloaded to SRE and DevOps teams.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Bypass expensive project failures&lt;/strong&gt;: Good performance engineers know the internals of the software and hardware stack (including the Linux kernel). Many developers don&amp;#39;t and most of the time they don&amp;#39;t need to. But this can lead to developers proposing ideas based on incorrect assumptions. (This actually happens a lot.) Having a one hour meeting with a performance engineering team can save months of engineering effort: A developer talks about their ideas A and B, and the perf team says &amp;quot;A won&amp;#39;t work and this is why, but B sounds good and we can help.&amp;quot; Months saved in one hour.
+&lt;ul&gt;&lt;font size=-1&gt;At one large tech company many years ago I analyzed an engineering proposal to adopt a new event-based coding framework on the belief it would improve performance by &lt;em&gt;ten fold&lt;/em&gt;. My analysis showed the real gain would have been &lt;em&gt;less than 10%&lt;/em&gt;. The project was abandoned. This saved having all the engineers rewrite all the company&amp;#39;s code, something we were expecting would take a year. This is one of the biggest performance wins of my career, not measured as a percentage but rather as engineering hours saved.&lt;/font&gt;&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Develop accelerator tools&lt;/strong&gt;: As mentioned earlier, performance teams can develop custom observability tools that developers use, finding issues sooner and accelerating development. For example, I&amp;#39;ve been publishing here about AI flame graphs, which involved kernel and hardware internals to build.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Faster feature adoption&lt;/strong&gt;: Reducing costs and latency can enable developers to do more with a limited infrastructure and latency budget, offering more capabilities for their service or allowing more processing to be crammed in per request. Some companies have cost limits for adding features, so optimization work can mean a feature is now approved. All this work can mean a company can outpace their competitors with feature adoption, while maintaining a reliable, low-latency, cost/performance competitive service.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1&gt;What do performance engineers do?&lt;/h1&gt;
+
+&lt;p&gt;For non-vendor tech companies, in summary:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;A. Test, debug, and tune new software and hardware products to find performance improvements, and drives company-wide adoption.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: New cloud instance types, language runtimes, JVM versions, JVM subsystems (new GC algorithms or compilers: Graal vs c2), system libraries (glibc vs tcmalloc etc.), kernels (Linux vs BSD) and versions, compilers (gcc, llvm, icc), processor features (AVX, QAT, etc.), hardware accelerators, and so on. It can take months to debug, fix, and patch everything so the latest thing delivers its performance claim.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;B. Develop in-house performance solutions, such as custom analysis tools, that other teams use to find performance wins.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Custom monitoring using Prometheus and Grafana, one-click flame graphs, and analysis tools using eBPF: All of this is open-source based, but someone has to get it working locally, integrate them with existing local tools, teach other teams how to use them, and maintain them.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;C. Does deep-dive analysis to identify and reduce workload bottleneck(s) and latency outliers.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Using code profilers (CPU flame graphs), distributed tracers (OpenTelemetry and products), application logs, system counters (Linux: sysstat), system tracers (Linux: eBPF, Ftrace, perf), static and dynamic instrumentation (Linux: kprobes, uprobes), debuggers (gdb, etc.), hardware counters (Linux: perf), and on rare occasions hardware instruction tracing. A lot of hands-on live debugging over an SSH session, following methodologies to efficiently find the root-cause(s), which can require the development of custom tools (mini load generators, observability tools, etc.).&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;D. Optimize software and hardware via tunable parameters and configuration choices.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: System tunables (Linux: sysctls), network tunables (socket options, qdiscs), device tunables, runtime tunables (Java -XX:*), library settings, environment variables, etc. As with (C), the team needs SSH access to do this and likely superuser privileges.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;E. Work with development teams (internal and external) to catch non-scalable solutions early in development, and to suggest or test later performance improvements.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Identifying communication layer will flood network links when horizontally scaled; A developer has a good optimization idea but can&amp;#39;t get it to work and needs some help; There&amp;#39;s a performance-related pull request on some software the company uses but the request is two years old and needs someone to fix code conflicts, test it, and advocate for merging it.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;F. Develop proof-of-concept demonstrations of new performance technologies.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Linux eBPF and io_uring can provide significant performance improvements when developed into hot-path kernel-based accelerators, but someone needs to at least build a POC to show it would work for the company. These are typically too esoteric for developers to try on their own.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;G. Develop performance improvements directly for internal and external code.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Performance engineers get a lot done by asking the right people, but sometimes no one has the time to code that Linux/runtime/database performance fix the company needs, so a perf engineer takes it on. We aren&amp;#39;t as quick as full-time developers since we are hopping between different languages all the time, and as a new code base committer will typically come under extra (and time-consuming) scrutiny.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;H. Capacity planning activities: purchase guidance, choosing metrics to monitor, and bottleneck forecasting.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Modeling and performance characterization for hardware purchases, resource utilization monitoring to forecast capacity issues (nowadays often done by developers and SREs using monitoring tools); propose the best metrics to be watched in those monitoring tools for alert generation and auto-scaling rules; work with business side of the company to help define practical SLA/SLOs.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;I. Perform knowledge sharing to uplift engineering.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Performance education to help developers produce more efficient software; act as a conduit to share performance learnings between teams (that may otherwise be siloed) to avoid rework and rediscovery.&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;J. Provide in-house expertise to guide purchasing performance solutions.&lt;/strong&gt;
+&lt;ul&gt;&lt;font size=-1&gt;Examples: Providing in-house expertise for performance topics like observability, telemetry, and eBPF can help the company choose better commercial products by evaluating their capabilities and overhead costs, and can recognize which are just Prometheus and Grafana, or my open source eBPF tools, in a suit. Without expertise you&amp;#39;re vulnerable to being ripped off, or may adopt a tool that increases infrastructure costs more than the gains it provides (I&amp;#39;ve seen some that have overhead exceeding 10%).&lt;/font&gt;&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;To elaborate on (A), the testing of new products: Other staff will try a technology by configuring it based on the README, run a load test, and then share the result with management. Some companies hire dedicated staff for this called &amp;quot;performance testers.&amp;quot; Performance engineers get more out of the same technology by running analyzers during the test to understand its limiter (&amp;quot;active benchmarking&amp;quot;), and will tune the technology to get an extra 5%, 50%, or more performance. They may also discover that the limiter is an unintended target (e.g., accidentally testing a caching layer instead). Any performance test should be accompanied by an explanation of the limiting factor, since no explanation will reveal the test wasn&amp;#39;t analyzed and the result may be bogus. You can simply ask &amp;quot;why is the result not double?&amp;quot;.&lt;/p&gt;
+
+&lt;ul&gt;&lt;font size=-1&gt;As an aside: &quot;CPU bound&quot; isn&#39;t an explanation. Do you mean (a) clockspeed, (b) thread pool size, (c) core count, (d) memory bus (which kernels misleadingly include in %CPU counters), or something else (like power, thermal, CPU subsystem bottleneck)? Each of those leads to a different actionable item for the company (E.g.: (a) faster processors; (b) more threads; (c) more cores; (d) faster memory, bigger caches, less NUMA, or software techniques like zero copy). That&#39;s just the generic stuff. The code behind any CPU bound workload will also be analyzed to look for inefficiencies, and sometimes their instructions as well.&lt;/font&gt;&lt;/ul&gt;
+
+&lt;p&gt;Day to day, a performance engineer can spend a lot of time fixing broken builds and configuring workloads, because you&amp;#39;re the first person testing new patches and bleeding-edge software versions.&lt;/p&gt;
+
+&lt;p&gt;What I&amp;#39;ve described here is for companies that consume tech. For vendors that sell it, performance engineering includes design modeling, analysis of prototype and in-development software and hardware, competitive benchmarking, non-regression testing of new product releases, and pre- and post-sales performance analysis support. (I explain this in more detail in Systems Performance 2nd edition, chapter 1.)&lt;/p&gt;
+
+&lt;h1&gt;When to Hire a Performance Team and How Many&lt;/h1&gt;
+
+&lt;p&gt;Most companies I&amp;#39;ve encountered are already doing some kind of performance work scattered across projects and individuals, but they don&amp;#39;t yet have a central performance engineering team looking deeply at everything. This leaves their attention spotty, ok in some areas, poor to absent in others. A central performance team looks at everything and prioritizes work based on the potential ROI.&lt;/p&gt;
+
+&lt;p&gt;Here are a few rough rules to determine when you should start forming a company-wide performance engineering team and how to size it (see caveats at the end):&lt;/p&gt;
+
+&lt;h2&gt;&lt;strong&gt;(A) One engineer at $1M/year infrastructure spend, then one per $10M to $20M/year&lt;/strong&gt;&lt;/h2&gt;
+
+&lt;p&gt;That first engineer finds some of the low-hanging fruit, and should be cost effective as your company grows past $1M/year. I&amp;#39;d then consider another performance engineer for every $10M to $20M, and maintain a 3:1 junior:senior ratio. The values you use depend on your performance engineer&amp;#39;s skill and the complexity of your environment, and how aggressively you wish to improve performance. At a $20M spend, 5% yearly wins means $1M in savings per staff member (minus their cost); whereas for a $10M spend you&amp;#39;d need to hit 10% wins yearly for $1M in savings.&lt;/p&gt;
+
+&lt;p&gt;Consider that as your spend keeps growing you will keep adding more staff, which makes their job harder as there is less low-hanging fruit to find. However, your site will also be growing in scale and complexity, and developing new performance issues for the growing team to solve. Also, smaller percent wins become more impactful at large scale, so I expect such a growing perf team to remain cost effective. (To a point: the largest teams I&amp;#39;ve seen stop at around 150 staff.)&lt;/p&gt;
+
+&lt;h2&gt;&lt;strong&gt;(B) Staff spend should equal or exceed observability monitoring spend&lt;/strong&gt;&lt;/h2&gt;
+
+&lt;p&gt;If you&amp;#39;re spending $1M/year on an observability product, you can spend $1M/year on a performance engineering team: e.g., 3 to 4 good staff. If you&amp;#39;re only spending $50k/year on an observability product, you can&amp;#39;t hire a performance engineer at that price, but you can bring in a consultant or pay for performance training and conference attendance. As I&amp;#39;d expect staff to halve infrastructure costs over time, just the savings on monitoring alone (which typically scale with instance/server count) will pay for the new staff. Because these new engineers are actively reducing infrastructure spend, the total savings are much greater.&lt;/p&gt;
+
+&lt;h2&gt;&lt;strong&gt;(C) When latency or reliability is prohibitive to growth&lt;/strong&gt;&lt;/h2&gt;
+
+&lt;p&gt;I’ve heard some small companies and startups say they spend more money on coffee than they do back-end compute, and don&amp;#39;t want to waste limited developer time on negligible cost reductions. However, when a wave of new customers arrive they may hit scalability issues and start losing customers because latency is too high or reliability is too inconsistent. That&amp;#39;s usually a good time for small companies to start investing in performance engineering.&lt;/p&gt;
+
+&lt;h2&gt;&lt;strong&gt;Caveats for A-C&lt;/strong&gt;&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;You likely already have some perf engineers under different titles&lt;/strong&gt;, such as senior developers or SREs who are focusing on perf work, leaving less work for the central performance team. Account for these focused staff when you are determining how many performance engineers to hire.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;There will be a backpressure effect&lt;/strong&gt;: If a new team halves your infrastructure, do you then halve the team? Up to you. But first think about what a perf engineer does: They have to work on anything, any operating system, language, or hardware the company needs. So you have these extra staff that can go deep on anything. Just some personal examples: There was an 18 month stretch when Netflix needed more core SREs on rotation, so myself and other perf engineers were temporarily assigned to do SRE work; Netflix would also have me do kernel crash dump analysis and application core dump analysis, since I was already using debuggers at that level.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;You ideally have more performance engineers than technologies&lt;/strong&gt; so staff members can specialize. E.g.: If your stack is AWS, Intel, Linux kernel, Ubuntu OS, containers, lambda, gRPC, Java, golang, Python, Cassandra, and TensorFlow, that&amp;#39;s 12 performance engineers. Plus at least one for locally developed code. Want to go multi-cloud? Add another engineer for each CSP.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Remember that performance wins are cumulative&lt;/strong&gt; for future years. A novice team could struggle to get up to speed with both performance engineering and your complex environment, and could also discover that you already had senior staff find all the low-hanging fruit. They might therefore only deliver 2% cost savings in each of their first three years. But that still combines to be 6% going forward.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1&gt;Companies and Global Staff&lt;/h1&gt;
+
+&lt;p&gt;Here are some example articles about performance engineering work at non-vendor companies:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://www.brendangregg.com/Slides/YOW2018_CloudPerfRCANetflix/&quot;&gt;Netflix&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Cloud Performance Root Cause Analysis&lt;/em&gt; [me, 2018]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://engineering.fb.com/2025/01/21/production-engineering/strobelight-a-profiling-service-built-on-open-source-technology/&quot;&gt;Meta&lt;/a&gt;&lt;/b&gt;: Strobelight: &lt;em&gt;A profiling service built on open source technology&lt;/em&gt; [Jordan Rome, 2025]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://engineering.linkedin.com/performance/who-moved-my-99th-percentile-latency&quot;&gt;Pinterest&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Debugging the One-in-a-Million Failure: Migrating Pinterest’s Search Infrastructure to Kubernetes&lt;/em&gt; [Samson Hu, et al. 2025]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://engineering.linkedin.com/performance/who-moved-my-99th-percentile-latency&quot;&gt;LinkedIn&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Who moved my 99th percentile latency?&lt;/em&gt; [Richard Hsu, Cuong Tran, 2015]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://innovation.ebayinc.com/stories/speed-by-a-thousand-cuts/&quot;&gt;eBay&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Speed by a Thousand Cuts&lt;/em&gt; [Senthil Padmanabhan, 2020]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://blog.x.com/engineering/en_us/topics/infrastructure/2019/expand-the-edge&quot;&gt;Twitter&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;#ExpandTheEdge: Making Twitter Faster&lt;/em&gt; [Todd Segal, Anthony Roberts, 2019]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://engineering.salesforce.com/how-salesforce-makes-performance-engineering-work-at-enterprise-scale-8c2c1323e81d/&quot;&gt;Salesforce&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;How Salesforce makes performance engineering work at Enterprise Scale&lt;/em&gt; [Archana Sethuraman]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://www.uber.com/en-AU/blog/perfinsights&quot;&gt;Uber&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;PerfInsights: Detecting Performance Optimization Opportunities in Go Code using Generative AI&lt;/em&gt; [Lavanya Verma, Ryan Hang, Sung Whang, Joseph Wang]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://blog.twitch.tv/en/2016/07/05/gos-march-to-low-latency-gc-a6fa96f06eb7/&quot;&gt;Twitch&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Go’s march to low-latency GC&lt;/em&gt; [Rhys Hiltner, 2016]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://medium.com/airbnb-engineering/creating-airbnbs-page-performance-score-5f664be0936&quot;&gt;Airbnb&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Creating Airbnb’s Page Performance Score&lt;/em&gt; [Andrew Scheuermann, 2021]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://stripe.com/blog/using-ml-to-detect-and-respond-to-performance-degradations-in-slices-of-stripe-payments&quot;&gt;Stripe&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Using ML to detect and respond to performance degradations in slices of Stripe payments&lt;/em&gt; [Lakshmi Narayan, Lakshmi Narayan, 2025]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://careersatdoordash.com/blog/how-doordash-standardized-and-improved-microservices-caching/&quot;&gt;DoorDash&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;How DoorDash Standardized and Improved Microservices Caching&lt;/em&gt; [Lev Neiman, Jason Fan, 2023]&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://blog.haydz6.com/2020/11/redesigned-highly-scaled-data-store-lower-99th-percentile-latency-100x&quot;&gt;Roblox&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;How We Redesigned a Highly Scaled Data Store to Lower 99th Percentile Latency 100x&lt;/em&gt; [Andrew Korytko, 2020] &lt;/li&gt;
+&lt;li&gt;&lt;b&gt;&lt;a href=&quot;https://www.capitalone.com/tech/cloud/cost-optimization-best-practices&quot;&gt;Capital One&lt;/a&gt;&lt;/b&gt;: &lt;em&gt;Driving cloud value through cost optimization &amp;amp; efficiency&lt;/em&gt; [Jerzy Grzywinski, Brent Segner, 2024]&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I would like to add &lt;strong&gt;Bank of America&lt;/strong&gt;, &lt;strong&gt;Wells Fargo&lt;/strong&gt;, &lt;strong&gt;JPMorgan Chase&lt;/strong&gt;, and &lt;strong&gt;CitiGroup&lt;/strong&gt; to this list since they have many staff with the title &amp;quot;performance engineer&amp;quot; (as you can find on LinkedIn) but it&amp;#39;s hard to find public articles about their work. I&amp;#39;d also like a canonical list of central performance engineering teams, but such org chart data can also be hard to find online, and staff don&amp;#39;t always call themselves &amp;quot;performance engineers.&amp;quot; Other keywords to look out for are: &lt;em&gt;insights&lt;/em&gt;, &lt;em&gt;monitoring&lt;/em&gt;, and &lt;em&gt;observability&lt;/em&gt;; some are just called &amp;quot;support engineers&amp;quot;.&lt;/p&gt;
+
+&lt;p&gt;Note that there is also a lot of performance engineering done at hardware, software, and cloud vendors (&lt;strong&gt;Intel&lt;/strong&gt;, &lt;strong&gt;AMD&lt;/strong&gt;, &lt;strong&gt;NVIDIA&lt;/strong&gt;, &lt;strong&gt;Apple&lt;/strong&gt;, &lt;strong&gt;Microsoft&lt;/strong&gt;, &lt;strong&gt;Google&lt;/strong&gt;, &lt;strong&gt;Amazon&lt;/strong&gt;, &lt;strong&gt;Red Hat&lt;/strong&gt;, etc.) not listed here, as well as at performance solution companies. In this post I just wanted to focus on non-vendor companies.&lt;/p&gt;
+
+&lt;h3&gt;Global Staff&lt;/h3&gt;
+
+&lt;p&gt;I&amp;#39;ve never seen concrete data on how many people are employed worldwide in performance engineering. Here are my guesses: &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Staff identifying as performance engineers at non-vendor companies: &amp;lt;1,000.&lt;/li&gt;
+&lt;li&gt;Staff identifying as performance engineers at SW/HW vendors: &amp;gt;10,000.&lt;/li&gt;
+&lt;li&gt;Staff who have become focused on performance engineering work under other titles (developer, SRE, support): &amp;gt;100,000.&lt;/li&gt;
+&lt;li&gt;Staff who occasionally do performance engineering work: I&amp;#39;d guess most developers.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It&amp;#39;s possible LinkedIn can provide better estimates if you have enterprise access.&lt;/p&gt;
+
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;There are many reasons to hire a performance engineering team, such as infrastructure cost savings, latency reductions, improved scalability and reliability, and faster engineering. Cost savings alone can justify hiring a team, because a team should be targeting 5-10% cost reductions every year, which over the years adds up to become significantly larger: 28%-61% savings after 5 years.&lt;/p&gt;
+
+&lt;p&gt;In this post I explained what performance engineers do and provided some suggested rules on hiring:&lt;/p&gt;
+
+&lt;ul&gt;A) One engineer at &gt;$1M infrastructure spend, then another for every $10-20M.&lt;br&gt;
+B) Performance staff spend should equal or exceed observability monitoring spend.&lt;/ul&gt;
+
+&lt;p&gt;Note that you likely already have some senior developers or SREs who are focusing on perf work, reducing the number of new performance engineers you need.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;ve met people who would like to work as performance engineers but their employer has no such roles (other than &lt;em&gt;performance testing&lt;/em&gt;: not the same thing) despite spending millions per year on infrastructure. I hope this post helps companies understand the value of performance engineering and understand when and how many staff to hire.&lt;/p&gt;
+
+&lt;p&gt;Hiring good performance engineers isn&amp;#39;t easy as it&amp;#39;s a specialized area with a limited talent pool. In part 2 I&amp;#39;ll discuss how to hire or train a performance engineering team and provide sample job descriptions and tips, and what to do if you can&amp;#39;t hire a performance team.&lt;/p&gt;
+
+&lt;h3&gt;&lt;em&gt;Thanks&lt;/em&gt;&lt;/h3&gt;
+
+&lt;p&gt;&lt;em&gt;Thanks for the feedback and suggestions: Vadim Filanovsky (OpenAI), Jason Koch (Netflix), Ambud Sharma (Pinterest), Harshad Sane (Netflix), Ed Hunter, Deirdre Straughan.&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Mon, 04 Aug 2025 00:00:00 +1000</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-08-04/when-to-hire-a-computer-performance-engineering-team-2025-part1.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-08-04/when-to-hire-a-computer-performance-engineering-team-2025-part1.html</guid>
+      </item>
+    
+      <item>
+        <title>3 Years of Extremely Remote Work</title>
+        <description>&lt;p&gt;In the last 3 years I&amp;#39;ve attended 77 meetings that began between 1am and 6am, roughly once every two weeks, followed by my usual 7am start, Monday to Saturday. I&amp;#39;m working remotely from Australia for a US firm (Intel) who does not have a local office here. I&amp;#39;m not complaining. I work weird hours, but I don&amp;#39;t think I work too many. I&amp;#39;m writing this post because there are some misconceptions and assumptions about the lives of remote workers, and I thought I&amp;#39;d share my own details as an anecdote, along with some tips for others in a similar situation (US job from Asia).&lt;/p&gt;
+
+&lt;p&gt;Most early meetings were 1 hour, but some were longer, for a total of 102 hours awake. As a histogram:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;img src=&quot;/blog/images/2025/latemeetings.png&quot; width=420&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;ve never been a morning person, but I can manage a 7am start. What about a 2am meeting? Also doable. They sound ok in isolation, but consider that every 2-3am is followed by a 7am start, which means a 6:30am alarm after going back to sleep at 3:30am, if you&amp;#39;re lucky. It&amp;#39;s not easy working this timezone difference, and I&amp;#39;d guess others have it even worse than I do (more meetings).&lt;/p&gt;
+
+&lt;p&gt;Like other remote staff I work with, I have a dedicated office at home where I can close the door and work uninterrupted for hours (it&amp;#39;s changed quite a bit since it was filmed in the &lt;a href=&quot;https://youtu.be/Wb_vD3XZYOA?si=If9PARovWYlEtg4b&amp;amp;t=593&quot;&gt;eBPF documentary&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;img src=&quot;/blog/images/2025/brendanoffice2025.jpg&quot; width=550&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;That&amp;#39;s a Samson Meteor mic on a desktop suspension boom, and I have another suspension boom clamped onto a bookcase holding a Logitech BRIO camera (when I had it sitting on my monitor it&amp;#39;d shake as I typed). It&amp;#39;s important to have the best sound and video when that&amp;#39;s how you&amp;#39;re interacting with people all day.&lt;/p&gt;
+
+&lt;p&gt;Miscellaneous notes and tips about remote work:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Count out-of-hours meetings&lt;/strong&gt;. Sometimes people hesitate to book me at 2am, when there&amp;#39;s no other time that would work, and it takes a few emails to convince them that it&amp;#39;s ok. I&amp;#39;ve found it saves time to log these meetings, count them, and share stats: &amp;quot;I&amp;#39;ve had 76 meetings between 1am and 6am, if you need to add another, that&amp;#39;s ok, it&amp;#39;ll be my 77th.&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Never complain about the hours&lt;/strong&gt;. There may be someone in management who doesn&amp;#39;t support remote work, who could use such complains to argue against it. Sometimes, when I&amp;#39;m searching to find the right words to say at 4-something-am, I&amp;#39;ve confessed that I&amp;#39;m a bit tired, but I really try to never mention it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Staying motivated&lt;/strong&gt;. I found keeping a daily log of what I accomplished works best (I&amp;#39;ve done this for over a decade). If one day my entry looks soft, I try to do more on the next. I summarize each week for my manager.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;People assume it&amp;#39;s a problem when it isn&amp;#39;t&lt;/strong&gt;. Brendan didn&amp;#39;t accept the meeting, oh, it&amp;#39;s because it&amp;#39;s 2am for him and he&amp;#39;ll be asleep. Wrong! It&amp;#39;s because I have a clash with another 2am meeting. I try to communicate this with the meeting host, but there can be others in the meeting that don&amp;#39;t get the message, and they never consider this possibility. If I were back in California I&amp;#39;d still miss the meeting, but people would assume it&amp;#39;s due to a clash. Here, they &lt;em&gt;assume&lt;/em&gt; I&amp;#39;m asleep and not making the effort, when in fact I am. It means people are assuming that remote work is a problem when it isn&amp;#39;t.&lt;/p&gt;
+
+&lt;!--
+**Pre-meeting routine**. If I&#39;m listening to a meeting, I set an alarm for 7 minutes before the meeting starts. That&#39;s enough time to brush my hair, get to my computer, unsuspend it, connect to the VPN, and join the meeting. If I&#39;m running a meeting, I set an alarm 30 minutes before. First thing is to unsuspend my computer and check if there was a cancellation. If the meeting is going ahead, then I go make coffee, brush hair, connect to VPN, drink coffee, do pre-meeting prep, then join. I didn&#39;t get this right when I started remote work, and had times where I downed an espresso at 1:45am, opened my computer, then found the meeting was cancelled.
+--&gt;
+
+&lt;p&gt;&lt;strong&gt;Some meetings get cancelled or silently recorded&lt;/strong&gt;. The 77 count I mentioned earlier doesn&amp;#39;t include the several meetings that were cancelled at the last minute, but I woke up for anyway, or those that weren&amp;#39;t supposed to be recorded but I woke up to find they were. If you have remote staff, please try to cancel meetings before they go to bed, and be clear on which meetings are recorded for later viewing.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Upset stomaches&lt;/strong&gt;. One early meeting every two weeks doesn&amp;#39;t sound too bad. The worst problem is that it can leave me with an upset stomach that can last for days. I&amp;#39;m still working fine, it&amp;#39;s just uncomfortable. I don&amp;#39;t know if other people suffer this or why it happens. Maybe it&amp;#39;s just the extra coffee.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Fewer sick days&lt;/strong&gt;. I don&amp;#39;t normally take many sick days, so I can&amp;#39;t say my data is very significant. FWIW: In my last in-person job I averaged 1.5 sick days/year (9 in 6 years), and now it&amp;#39;s 0.33 (1 in 3 years).  &lt;/p&gt;
+
+&lt;!--
+**I join early meetings on the dot**. I found when I joined a 2am meeting early, people like to ask about me &quot;hey Brendan, wow, what time is it over there?&quot; Chit-chat is useful for remote workers to stay connected, but I felt bad about being the subject of discussion so much, so I started joining on the dot instead.
+--&gt;
+
+&lt;p&gt;&lt;strong&gt;Northen/Southern hemisphere times get weird&lt;/strong&gt;. Daylight savings moves in different directions and on different dates, so from Sydney depending on the time of year I have 3, 4, or 5 hours of overlap with 9-5pm on the US west coast. To make it easy for people I setup my calendar with my work hours highlighted.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Saturday?&lt;/strong&gt; Saturday morning is Friday afternoon in the US. For a while I tried working Tuesday to Saturday, but it&amp;#39;s better for family time if I finish early on Saturday (at US 5pm) and work Monday to make up the difference.&lt;/p&gt;
+
+&lt;div style=&quot;float:right;padding-left:10px;padding-top:10px;padding-right:15px&quot;&gt;&lt;center&gt;&lt;img border=0 src=&quot;/blog/images/2025/alarmscreenshot.jpg&quot; width=125&gt;&lt;br&gt;&lt;font size=-1&gt;&lt;i&gt;Phone alarms&lt;/i&gt;&lt;/font&gt;&lt;/center&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Career limiting&lt;/strong&gt; I&amp;#39;ve experienced it to be career limiting, and I&amp;#39;ve heard the saying &amp;quot;out of sight, out of mind.&amp;quot; Opportunities can be given to local workers despite the remote worker being more qualified, or even number one in the world in that area. The remote worker is then expected to teach the local worker in weekly or monthly meetings. It&amp;#39;s not enough time and there&amp;#39;s a power imbalance: the local worker is in charge and doesn&amp;#39;t have to listen. This reduces company competitiveness. It&amp;#39;s also fixable: try giving remote workers the chance they are best qualified to do.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Compared to office work&lt;/strong&gt;. It depends on the job and meeting load. In my last years as an in-person office worker I was on a team where we typically worked solo on different projects, with headphones on, and primarily communicated over chatrooms with few in-person meetings. The only regular time we had human interaction was lunch. Remote work has not been a big difference to that kind of job: similar work, similar chatrooms. (The thing I miss the most about the office is playing cricket with other staff after work.) It wouldn&amp;#39;t make a big difference to my current job either, as the people I work with are scattered. The one thing it would solve is &amp;quot;out of sight&amp;quot; problem, but that&amp;#39;s not the only way to solve it.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Remote work success stories&lt;/strong&gt;. Linux development is a great example of engineers around the world working together. Note that Linux engineers do try to meet at least once a year at one of the Linux conferences, something remote office workers can do as well at company get-togethers. My books are another example: they are out-of-hours projects where I worked with the reviewers online, some of whom I still haven&amp;#39;t met. And the world&amp;#39;s first &lt;a href=&quot;https://www.brendangregg.com/blog/2024-10-29/ai-flame-graphs.html&quot;&gt;AI Flame Graphs&lt;/a&gt; is the work of a fully-remote team.&lt;/p&gt;
+
+&lt;p&gt;I was in a video meeting recently with US staff where I mentioned the &amp;quot;77 meetings between 1 and 6am&amp;quot; statistic, and I could see the look of shock in their faces. Did they assume I was just working 9-5 and not making an effort to accommodate other timezones? I know some companies are discussing ending remote-work: are the deciders also making such assumptions about the lives of remote workers? It may not do much, but I can at least share my own details here as an example anecdote.&lt;/p&gt;
+
+&lt;p&gt;Update: Some comments about this post have pointed out that these hours can be unhealthy and shouldn&amp;#39;t be encouraged, and I don&amp;#39;t disagree. I hope to have fewer early meetings in the years ahead, myself. This post is just to show that remote workers can be more accomodating than people may assume, and I hope that&amp;#39;s taken into consideration when changing remote work policies.&lt;/p&gt;
+
+&lt;p&gt;When some people hear I&amp;#39;m working from Australia, they may think of beaches and surfboards and sunny vacations, but my reality is a full time job across weird hours, lots of coffee, and being overlooked for opportunities. That said, every job has its pros and cons, and I&amp;#39;m still grateful that some companies make fully remote work an option.&lt;/p&gt;
+
+&lt;!--
+I kinda think of it all like choosing Doom&#39;s difficulty level. If you&#39;re white, male, straight, local, non-disabled, and a US citizen, you&#39;re playing on the easiest setting. So I&#39;m not local or a US citizen, but I&#39;m fortunate I&#39;m still closer to the easier end, and I&#39;m still able to do great work and thrive. (XXX Delete this paragraph?)
+--&gt;
+</description>
+        <pubDate>Thu, 22 May 2025 00:00:00 +1000</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-05-22/3-years-of-extremely-remote-work.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-05-22/3-years-of-extremely-remote-work.html</guid>
+      </item>
+    
+      <item>
+        <title>Doom GPU Flame Graphs</title>
+        <description>&lt;p&gt;&lt;a href=&quot;/blog/2024-10-29/ai-flame-graphs.html&quot;&gt;AI Flame Graphs&lt;/a&gt; are now &lt;a href=&quot;https://github.com/intel/iaprof&quot;&gt;open source&lt;/a&gt; and include Intel Battlemage GPU support, which means it can also generate full-stack GPU flame graphs for providing new insights into gaming performance, especially when coupled with &lt;a href=&quot;/flamescope.html&quot;&gt;FlameScope&lt;/a&gt; (an older open source project of mine). Here&amp;#39;s an example of GZDoom, and I&amp;#39;ll start with flame scopes for both CPU and GPU utilization, with details annotated:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;a href=&quot;/blog/images/2025/flamescopes1.png&quot;&gt;&lt;img src=&quot;/blog/images/2025/flamescopes1.png&quot; width=700&gt;&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;(Here are the raw &lt;a href=&quot;/blog/images/2025/cpu_flamescope.png&quot;&gt;CPU&lt;/a&gt; and &lt;a href=&quot;/blog/images/2025/gpu_flamescope.png&quot;&gt;GPU&lt;/a&gt; versions.) FlameScope shows a subsecond-offset heatmap of profile samples, where each column is one second (in this example, made up of 50 x 20ms blocks) and the color depth represents the number of samples, revealing variance and perturbation that you can select to generate a flame graph just for that time range. Update: the row size can be ajusted (it is limited by the sample rate captured in the profile), e.g., you could generate 60 rows to match 60fps games.&lt;/p&gt;
+
+&lt;p&gt;Putting these CPU and GPU flame scopes side by side has enabled your eyes to do pattern matching to solve what would otherwise be a time-consuming task of performance correlation. The gaps in the GPU flame scope on the right &amp;ndash; where the GPU was not doing much work &amp;ndash; match the heavier periods of CPU work on the left.&lt;/p&gt;
+
+&lt;h2&gt;CPU Analysis&lt;/h2&gt;
+
+&lt;p&gt;FlameScope lets us click on the interesting periods. By selecting one of the CPU shader compilation stripes we get the flame graph just for that range:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;a href=&quot;/blog/images/2025/cpuflamegraph_shader1.png&quot;&gt;&lt;img src=&quot;/blog/images/2025/cpuflamegraph_shader1.png&quot; width=700&gt;&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;This is brilliant, and we can see exactly why the CPUs were busy for about 180 ms (the vertical length of the red stripe): it&amp;#39;s doing compilation of GPU shaders and some NIR preprocessing (optimizations to the &lt;a href=&quot;https://docs.mesa3d.org/nir/index.html&quot;&gt;NIR intermediate representation&lt;/a&gt; that Mesa uses internally). If you are new to flame graphs, you look for the widest towers and optimize them first. Here is the &lt;a href=&quot;/blog/images/2025/cpu_flamegraph.svg&quot;&gt;interactive SVG&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;CPU flame graphs and CPU flame scope aren&amp;#39;t new (from &lt;a href=&quot;/flamegraphs.html&quot;&gt;2011&lt;/a&gt; and &lt;a href=&quot;/flamescope.html&quot;&gt;2018&lt;/a&gt;, both open source). What is new is full-stack &lt;strong&gt;GPU&lt;/strong&gt; flame graphs and &lt;strong&gt;GPU&lt;/strong&gt; flame scope.&lt;/p&gt;
+
+&lt;h2&gt;GPU Analysis&lt;/h2&gt;
+
+&lt;div style=&quot;float:right;padding-left:10px;padding-right:15px&quot;&gt;&lt;center&gt;&lt;img border=0 src=&quot;/blog/images/2025/gpuflamescope_highlight.png&quot; width=118&gt;&lt;/a&gt;&lt;/div&gt;
+
+&lt;p&gt;Interesting details can also be selected in the GPU FlameScope for generating GPU flame graphs.
+This example selects the &amp;quot;room 3&amp;quot; range, which is a room in the Doom map that contains hundreds of enemies.
+The &lt;font color=&quot;#00bb00&quot;&gt;green&lt;/font&gt; frames are the actual instructions running on the GPU, &lt;font color=&quot;#008888&quot;&gt;aqua&lt;/font&gt; shows the source for these functions, and &lt;font color=&quot;#bb0000&quot;&gt;red&lt;/font&gt; (C) and &lt;font color=&quot;#888800&quot;&gt;yellow&lt;/font&gt; (C++) show the CPU code paths that initiated the GPU programs. The &lt;font color=&quot;#808080&quot;&gt;gray&lt;/font&gt; &amp;quot;-&amp;quot; frames just help highlight the boundary between CPU and GPU code. (This is similar to what I described in the &lt;a href=&quot;/blog/2024-10-29/ai-flame-graphs.html&quot;&gt;AI flame graphs&lt;/a&gt; post, which included extra frames for kernel code.) The x-axis is proportional to cost, so you look for the widest things and find ways to reduce them.&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;p&gt;&lt;a href=&quot;/blog/images/2025/gpuflamegraph_title.png&quot;&gt;&lt;img src=&quot;/blog/images/2025/gpuflamegraph_title.png&quot; width=700&gt;&lt;/a&gt;
+&lt;object data=&quot;/blog/images/2025/gpu_flamegraph.svg&quot; type=&quot;image/svg+xml&quot; width=720&gt;
+&lt;img src=&quot;/blog/images/2025/gpu_flamegraph.svg&quot; width=720 /&gt;
+&lt;/object&gt;&lt;/p&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;ve included the &lt;a href=&quot;/blog/images/2025/gpu_flamegraph.svg&quot;&gt;interactive SVG&lt;/a&gt; version of this flame graph so you can mouse-over elements and click to zoom. (&lt;a href=&quot;/blog/images/2025/gpu_flamegraph.png&quot;&gt;PNG&lt;/a&gt; version.)&lt;/p&gt;
+
+&lt;p&gt;The GPU flame graph is split between stalls coming from rendering walls (41.4%), postprocessing effects (35.7%), stenciling (17.2%), and sprites (4.95%). The CPU stacks are further differentiated by the individual shaders that are causing stalls, along with the reasons for those stalls.&lt;/p&gt;
+
+&lt;h2&gt;GZDoom&lt;/h2&gt;
+
+&lt;p&gt;We picked &lt;a href=&quot;https://zdoom.org/index&quot;&gt;GZDoom&lt;/a&gt; to try since it&amp;#39;s an open source version of a well known game that runs on Linux (our profiler does not support Windows yet). Intel Battlemage makes light work of GZDoom, however, and since the GPU profile is stall-based we weren&amp;#39;t getting many samples. We could have switched to a more modern and GPU-demanding game, but didn&amp;#39;t have any great open source ideas, so I figured we&amp;#39;d just make GZDoom more demanding. We built GPU demanding maps for GZDoom (I can&amp;#39;t believe I have found a work-related reason to be using &lt;a href=&quot;https://slade.mancubus.net/index.php?page=about&quot;&gt;Slade&lt;/a&gt;), and also set some Battlemage tunables to limit resources, magnifying the utilization of remaining resources.&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;a href=&quot;/blog/images/2025/gzdoom_screenshot.jpg&quot;&gt;&lt;img src=&quot;/blog/images/2025/gzdoom_screenshot.jpg&quot; width=400&gt;&lt;/a&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;Our GZDoom test map has three rooms: room 1 is empty, room 2 is filled with torches, and room 3 is open with a large skybox and filled with enemies, including spawnpoints for Sergeants. This gave us a few different workloads to examine by walking between the rooms.&lt;/p&gt;
+
+&lt;h2&gt;Using iaprof: Intel&#39;s open source accelerator profiler&lt;/h2&gt;
+
+&lt;p&gt;The AI Flame Graph project is pioneering work, and has needed various changes to graphics compilers, libraries, and kernel drivers, not just the code but also how they are built. Since Intel has its own public cloud (the &lt;a href=&quot;https://www.intel.com/content/www/us/en/developer/tools/tiber/ai-cloud.html&quot;&gt;Intel® Tiber™ AI Cloud&lt;/a&gt;) we can fix the software stack in advance so that for customers it &amp;quot;just works.&amp;quot; Check the &lt;a href=&quot;https://github.com/intel/iaprof/releases&quot;&gt;available releases&lt;/a&gt;. It currently supports the Intel Max Series GPU.&lt;/p&gt;
+
+&lt;p&gt;If you aren&amp;#39;t on the Intel cloud, or you wish to try this with Intel Battlemage, then it can require a lot of work to get the system ready to be profiled. Requirements include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A Linux system with superuser (root) access, so that eBPF and Intel eustalls can be used.&lt;/li&gt;
+&lt;li&gt;A newer Linux kernel with the latest Intel GPU drivers. For Intel Battlemage this means Linux 6.15+ with the Xe driver; For the Intel Max Series GPU it&amp;#39;s Linux 5.15 with the i915 driver.&lt;/li&gt;
+&lt;li&gt;The Linux kernel built with Intel driver-specific eustall and eudebug interfaces (see the &lt;a href=&quot;https://github.com/intel/iaprof/blob/main/README.md&quot;&gt;github docs&lt;/a&gt; for details). Some of these modifications are upstreamed in the latest versions of Linux and others are currently in progress. (These interfaces are made available by default on the Intel® Tiber™ AI Cloud.)
+&lt;div style=&quot;float:right;padding-left:10px;padding-top:10px;padding-right:15px&quot;&gt;&lt;center&gt;&lt;img border=0 src=&quot;/blog/images/2025/gzdoom_difficulty-crop.jpg&quot; width=250&gt;&lt;/a&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;All system libraries or programs that are being profiled need to include frame pointers so that the full stacks are visible, including Intel&amp;#39;s oneAPI and graphics libraries. For this example, GZDoom itself needed to be compiled with frame pointers and also all libraries used by GZDoom (glibc, etc.). This is getting easier in the lastest versions of Fedora and Ubuntu (e.g., Ubuntu 24.04 LTS) which are shipping system libraries with &lt;a href=&quot;/blog/2024-03-17/the-return-of-the-frame-pointers.html&quot;&gt;frame pointers&lt;/a&gt; by default. But I&amp;#39;d expect there will be applications and dependencies that don&amp;#39;t have frame pointers yet, and need recompilation. If your flame graph has areas that are very short, one or two frames deep, this is why.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you are new to custom kernel builds and library tinkering, then getting this all working may feel like Nightmare! difficulty. Over time things will improve and gradually get easier: check the &lt;a href=&quot;https://github.com/intel/iaprof/blob/main/README.md&quot;&gt;github docs&lt;/a&gt;. Intel can also develop a much easier version of this tool as part of a broader product offering and get it working on more than just Linux and Battlemage (either watch this space or, if you have an Intel rep, ask them to make it a priority).&lt;/p&gt;
+
+&lt;p&gt;Once you have it all working, you can run the &lt;tt&gt;iaprof&lt;/tt&gt; command to profile the GPU. E.g.:&lt;/p&gt;
+
+&lt;pre class=&quot;narrow&quot;&gt;
+git clone --recursive https://github.com/intel/iaprof
+cd iaprof
+make deps
+make
+sudo &lt;b&gt;iaprof record&lt;/b&gt; &gt; profile.txt
+cat profile.txt | iaprof flame &gt; flame.svg
+&lt;/pre&gt;
+
+&lt;p&gt;&lt;tt&gt;iaprof&lt;/tt&gt; is modeled on the Linux &lt;tt&gt;perf&lt;/tt&gt; command. (Maybe one day it&amp;#39;ll become included in &lt;tt&gt;perf&lt;/tt&gt; directly.) Thanks to Gabriel Muñoz for getting the work done to get this open sourced.&lt;/p&gt;
+
+&lt;h2&gt;FAQ and Future Work&lt;/h2&gt;
+
+&lt;p&gt;From the launch of AI flame graphs last year, I can guess what FAQ #1 will be: “What about NVIDIA?”. They do have flame graphs in Nsight Graphics for GPU workloads, although their flame graphs are currently shallow as it is GPU code only, and onerous to use as I believe it requires an interposer; on the plus side they have click-to-source. The new GPU profiling method we&amp;#39;ve been developing allows for easy, everything, anytime profiling, like you expect from CPU profilers.&lt;/p&gt;
+
+&lt;p&gt;Future work will include github releases, more hardware support, and overhead reduction. We&amp;#39;re the first to use eustalls in this way, and we need to add more optimization to reach our target of &amp;lt;5% overhead, especially with the i915 driver.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;We&amp;#39;ve open sourced &lt;a href=&quot;/blog/2024-10-29/ai-flame-graphs.html&quot;&gt;AI flame graphs&lt;/a&gt; and tested it on new hardware, Intel Battlemage, and a non-AI workload: GZDoom (gaming). It&amp;#39;s great to see a view of both CPU and GPU resources down to millisecond resolution, where we can see visual patterns in the flame scope heat maps that can be selected to produce flame graphs to show the code. We applied these new tools to GZDoom and explained GPU pauses by selecting the corresponding CPU burst and reading the flame graph, as well as GPU code use for arbitrary time windows.&lt;/p&gt;
+
+&lt;p&gt;While we have &lt;a href=&quot;https://github.com/intel/iaprof&quot;&gt;open sourced&lt;/a&gt; this, getting it all running requires Intel hardware and Linux kernel and library tinkering – which can be a lot of work. (Actually playing Doom on Nightmare! difficulty may be easier.) This will get better over time. We look forward to seeing if anyone can fight their way through this work in the meantime and what new performance issues they can solve.&lt;/p&gt;
+
+&lt;p&gt;Authors: Brendan Gregg, Ben Olson, Brandon Kammerdiener, Gabriel Muñoz.&lt;/p&gt;
+</description>
+        <pubDate>Thu, 01 May 2025 00:00:00 +1000</pubDate>
+        <link>http://www.brendangregg.com/blog//2025-05-01/doom-gpu-flame-graphs.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2025-05-01/doom-gpu-flame-graphs.html</guid>
+      </item>
+    
+      <item>
+        <title>AI Flame Graphs</title>
+        <description>&lt;p&gt;Imagine halving the resource costs of AI and what that could mean for the planet and the industry -- based on extreme estimates such savings could reduce the total US power usage by over 10% by 2030&lt;font size=-2&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/font&gt;. At Intel we&amp;#39;ve been creating a new analyzer tool to help reduce AI costs called &lt;em&gt;AI Flame Graphs&lt;/em&gt;: a visualization that shows an AI accelerator or GPU hardware profile along with the full software stack, based on my &lt;strong&gt;&lt;a href=&quot;https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html&quot;&gt;CPU flame graphs&lt;/a&gt;&lt;/strong&gt;. Our first version is available to customers in the &lt;strong&gt;&lt;a href=&quot;https://www.intel.com/content/www/us/en/developer/tools/devcloud/services.html&quot;&gt;Intel Tiber AI Cloud&lt;/a&gt;&lt;/strong&gt; as a preview for the Intel Data Center GPU Max Series (previously called Ponte Vecchio). Here is an example:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;a href=&quot;/blog/images/2024/matrixAIflamegraph.svg&quot;&gt;&lt;img src=&quot;/blog/images/2024/matrixAIflamegraph.png&quot; width=700&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-1&gt;&lt;i&gt;Simple example: SYCL matrix multiply microbenchmark&lt;/i&gt;&lt;/font&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;(Click for interactive &lt;a href=&quot;/blog/images/2024/matrixAIflamegraph.svg&quot;&gt;SVG&lt;/a&gt;.) The &lt;font color=&quot;#00bb00&quot;&gt;green&lt;/font&gt; frames are the actual instructions running on the AI or GPU accelerator, &lt;font color=&quot;#008888&quot;&gt;aqua&lt;/font&gt; shows the source code for these functions, and &lt;font color=&quot;#bb0000&quot;&gt;red&lt;/font&gt; (C), &lt;font color=&quot;#888800&quot;&gt;yellow&lt;/font&gt; (C++), and &lt;font color=&quot;#a04000&quot;&gt;orange&lt;/font&gt; (kernel) show the CPU code paths that initiated these AI/GPU programs. The &lt;font color=&quot;#808080&quot;&gt;gray&lt;/font&gt; &amp;quot;-&amp;quot; frames just help highlight the boundary between CPU and AI/GPU code. The x-axis is proportional to cost, so you look for the widest things and find ways to reduce them.&lt;/p&gt;
+
+&lt;div style=&quot;float:right;padding-left:10px;padding-right:15px&quot;&gt;&lt;center&gt;&lt;img border=0 src=&quot;/blog/images/2024/AIflamegraph-legend.png&quot; width=150&gt;&lt;br&gt;&lt;font size=-1&gt;&lt;i&gt;Layers&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;
+
+&lt;p&gt;This flame graph shows a simple program for SYCL (a high-level C++ language for accelerators) that tests three implementations of matrix multiply, running them with the same input workload. The flame graph is dominated by the slowest implementation, multiply_basic(), which doesn&amp;#39;t use any optimizations and consumes at 72% of stall samples and is shown as the widest tower. On the right are two thin towers for multiply_local_access() at 21% which replaces the accessor with a local variable, and multiply_local_access_and_tiling() at 6% which also adds matrix tiling. The towers are getting smaller as optimizations are added.&lt;/p&gt;
+
+&lt;p&gt;This flame graph profiler is a prototype based on Intel EU stall profiling for hardware profiling and &lt;a href=&quot;https://ebpf.io/&quot;&gt;eBPF&lt;/a&gt; for software instrumentation. It&amp;#39;s designed to be &lt;strong&gt;easy and low-overhead&lt;/strong&gt;, just like a CPU profiler. You should be able to generate a flame graph of an existing AI workload whenever you want, without having to restart anything or launch additional code via an interposer.&lt;/p&gt;
+
+&lt;h2&gt;Instruction-offset Profiling&lt;/h2&gt;
+
+&lt;p&gt;This is not the first project to build an AI profiler or even something called an AI Flame Graph, however, others I&amp;#39;ve seen focus on tracing CPU stacks and timing accelerator execution, but don&amp;#39;t profile the instruction offsets running on the accelerator; or do profile them but via expensive binary instrumentation. I wanted to build AI flame graphs that work like CPU flame graphs: Easy to use, negligible cost, production safe, and shows everything. A daily tool for developers, with most of the visualization &lt;em&gt;in the language of the developer&lt;/em&gt;: source code functions.&lt;/p&gt;
+
+&lt;p&gt;This has been an internal AI project at Intel for the past year. Intel was already investing in this space, building the EU stall profiler capability for the Intel Data Center GPU Max Series that provides an approximation of HW instruction sampling. I was lucky to have &lt;strong&gt;Dr. Matthew (Ben) Olson&lt;/strong&gt;, an Intel AI engineer who has also worked on eBPF performance tooling (&lt;a href=&quot;https://github.com/intel/processwatch&quot;&gt;processwatch&lt;/a&gt;) as well as memory management research, join my team and do most of the development work. His background has helped us power through difficulties that seemed insurmountable. We&amp;#39;ve also recently been joined by &lt;strong&gt;Dr. Brandon Kammerdiener&lt;/strong&gt; (coincidentally another graduate of the University of Tennessee, like Ben), who also has eBPF and memory internals experience, and has been helping us take on harder and harder workloads. And &lt;strong&gt;Gabriel Muñoz&lt;/strong&gt; just joined today to help with releases. Now that our small team has shown that this is possible, we&amp;#39;ll be joined by other teams at Intel to develop this further.&lt;/p&gt;
+
+&lt;p&gt;We could have built a harder-to-use and higher-overhead version months ago using Intel &lt;a href=&quot;binary%20instrumentation&quot;&gt;GTPin&lt;/a&gt; but for widespread adoption it needs minimal overhead and ease of use so that developers don&amp;#39;t hesitate to use this daily and to add it to deployment pipelines.&lt;/p&gt;
+
+&lt;h2&gt;What&#39;s a Flame Graph?&lt;/h2&gt;
+
+&lt;div style=&quot;float:right;padding-left:10px;padding-right:15px&quot;&gt;&lt;center&gt;&lt;img border=1 src=&quot;/blog/images/2024/flamegraph-cost.png&quot; width=300&gt;&lt;/div&gt;
+
+&lt;p&gt;A &lt;a href=&quot;https://www.brendangregg.com/flamegraphs.html&quot;&gt;flame graph&lt;/a&gt; is a visualization I invented in 2011 for showing sampled code stack traces. It has become the standard for CPU profiling and analysis, helping developers quickly find performance improvements and eliminate regressions. A CPU flame graph shows the &amp;quot;big picture&amp;quot; of running software, with x-axis proportional to CPU cost. The example picture on the right summarizes how easy it can be to go from compute costs to responsible code paths. Prior to flame graphs, it could take hours to understand a complex profile by reading through &lt;a href=&quot;https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Problem&quot;&gt;hundreds of pages of output&lt;/a&gt;. Now it takes seconds: all you have to do is look for the widest rectangles.&lt;/p&gt;
+
+&lt;p&gt;Flame graphs have had worldwide adoption. They have been the basis for five startups so far, have been adopted in over thirty performance analysis products, and have had &lt;a href=&quot;https://www.brendangregg.com/Slides/YOW2022_flame_graphs/#8&quot;&gt;over eighty implementations&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;My first implementation of flame graphs took a few hours on a Wednesday night after work. The real effort has been in the decade since, where I worked with different profilers, runtimes, libraries, kernels, compilers, and hypervisors to get flame graphs working properly in different environments, including fixing stack walking and symbolization. Earlier this year I posted about the final missing piece: Helping distros &lt;a href=&quot;/blog/2024-03-17/the-return-of-the-frame-pointers.html&quot;&gt;enable frame pointers&lt;/a&gt; so that profiling works across standard system libraries.&lt;/p&gt;
+
+&lt;p&gt;Similar work is necessary for AI workloads: fixing stacks and symbols and getting profiling to work for different hardware, kernel drivers, user-mode drivers, frameworks, runtimes, languages, and models. A lot more work, too, as AI analysis has less maturity than CPU analysis.&lt;/p&gt;
+
+&lt;h2&gt;Searching Samples&lt;/h2&gt;
+
+&lt;p&gt;If you are new to flame graphs, it&amp;#39;s worth mentioning the built-in search capability. In the earlier example, most of the stall samples are caused by sbid: software scoreboard dependency. As that may be a unique search term, you can run search (Ctrl-F, or click &amp;quot;Search&amp;quot;) on &amp;quot;sbid&amp;quot; and it will highlight it in magenta:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;img border=1 src=&quot;/blog/images/2024/AIflamegraph-search.png&quot; width=530&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;Search also shows the total number of stack samples that contained sbid in the bottom right: 78.4%. You can search for any term in the flame graph: accelerator instructions, source paths, function names, etc., to quickly calculate the percentage of stacks where it is present (excluding vertical overlap) helping you prioritise performance work.&lt;/p&gt;
+
+&lt;p&gt;Note that the samples are EU stall-based, which means theoretical performance wins can take the percentages down to zero. This is different to timer-based samples as are typically used in CPU profiling. Stalls mean you better focus on the pain, the parts of the code that aren&amp;#39;t making forward progress, but you aren&amp;#39;t seeing resource usage by unstalled instructions. I&amp;#39;d like to supuport timer-based samples in the future as well, so we can have both views.&lt;/p&gt;
+
+&lt;h2&gt;Who will use this?&lt;/h2&gt;
+
+&lt;p&gt;At a recent golang conference, I asked the audience of 200+ to raise their hands if they were using CPU flame graphs. Almost every hand went up. I know of companies where flame graphs are a daily tool that developers use to understand and tune their code, reducing compute costs. This will become a daily tool for AI developers.&lt;/p&gt;
+
+&lt;p&gt;My employer will use this as well for evaluation analysis, to find areas to tune to beat competitors, as well as to better understand workload performance to aid design.&lt;/p&gt;
+
+&lt;h2&gt;Why is AI profiling hard?&lt;/h2&gt;
+
+&lt;p&gt;Consider CPU instruction profiling: This is easy when the program and symbol table are both in the file system and in a standardized file format (such as ELF) as is the case with native compiled code (C). CPU profiling gets hard for JIT-complied code, like Java, as instructions and symbols are dynamically generated and placed in main memory (the process heap) without following a universal standard. For such JITted code we use runtime-specific methods and agents to retrieve snapshots of the heap information, which is different for each runtime.&lt;/p&gt;
+
+&lt;p&gt;AI workloads also have different runtimes (and frameworks, languages, user-mode drivers, compilers, etc.) any of which can require special tinkering to get their CPU stacks and symbols to work. These CPU stacks are shown as the red, orange, and yellow frames in the AI Flame Graph. Some AI workloads are easy to get these frames working, some (like PyTorch) are a lot more work. &lt;/p&gt;
+
+&lt;div style=&quot;float:left;padding-left:15px;padding-right:10px&quot;&gt;&lt;center&gt;&lt;img border=1 src=&quot;/blog/images/2024/AIsourcezoom.png&quot; width=450&gt;&lt;/div&gt;
+
+&lt;p&gt;But the real challenge is instruction profiling of actual GPU and AI accelerator programs -- shown as the aqua and green frames -- and correctly associating them with the CPU stacks beneath them. Not only may these GPU and AI programs not exist in the file system, but they may not even exist in main memory! Even for running programs. Once execution begins, they may be deallocated from main memory and only exist in special accelerator memory, beyond the direct reach of OS profilers and debuggers. Or within reach, but only through a prohibitively high-overhead HW-specific debugger interface.&lt;/p&gt;
+
+&lt;p&gt;There&amp;#39;s also no /proc representation for these programs either (I&amp;#39;ve been proposing building an equivalent) so there&amp;#39;s no direct way to even tell what is running and what isn&amp;#39;t, and all the other /proc details. Forget instruction profiling, even ps(1) and all the other process tools do not work.&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s been a mind-bending experience, revealing what gets taken for granted because it has existed in CPU land for decades: A process table. Process tools. Standard file formats. Programs that exist in the file system. Programs running from main memory. Debuggers. Profiliers. Core dumping. Disassembling. Single stepping. Static and dynamic instrumentation. Etc. For GPUs and AI, this is all far less mature. It can make the work exciting at times, when you think something is impossible and then find or devise a way.&lt;/p&gt;
+
+&lt;p&gt;Fortunately we have a head start as some things do exist. Depending on the runtime and kernel driver, there are debug interfaces where you can list running accelerator programs and other statistics, as used by tools like intel_gpu_top(1). You can kill -9 a GPU workload using intel_gpu_abrt(1). Some interfaces can even generate basic ELF files for the running accelerator programs that you can try to load in a debugger like gdb(1). And there is support for GPU/AI program disassembly, if you can get your hands on the binary. It feels to me like GPU/AI debugging, OS style, is about two years old. Better than zero, but still early on, and lots more ahead of us. A decade, at least.&lt;/p&gt;
+
+&lt;h2&gt;What do AI developers think of this?&lt;/h2&gt;
+
+&lt;p&gt;We&amp;#39;ve shown AI Flame Graphs to other AI developers at Intel and a common reaction is to be a bit puzzled, wondering what to do with it. AI developers think about their bit of code, but with AI Flame Graphs they can now see the entire stack for the first time, including the HW, and many layers they don&amp;#39;t usually think about or don&amp;#39;t know about. It basically looks like a pile of gibberish with their code only a small part of the flame graph.&lt;/p&gt;
+
+&lt;div style=&quot;float:right;padding-left:10px;padding-right:15px&quot;&gt;&lt;center&gt;&lt;a href=&quot;https://www.brendangregg.com/Slides/YOW2022_flame_graphs/#8&quot;&gt;&lt;img border=1 src=&quot;/blog/images/2024/flamegraph-montage.png&quot; width=190&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-1&gt;&lt;i&gt;CPU Flame Graph Implementations&lt;/i&gt;&lt;/font&gt;&lt;/div&gt;
+
+&lt;p&gt;This reaction is similar to people&amp;#39;s first experiences with CPU flame graphs, which show parts of the system that developers and engineers typically don&amp;#39;t work on, such as runtime internals, system libraries, and kernel internals. Flame graphs are great at highlighting the dozen or so functions that matter the most, so it becomes a problem of learning what those functions do across a few different code bases, which are typically open source. Understanding a dozen such functions can take a few hours or even a few days -- but if this leads to a 10% or 2x cost win, it is time well spent. And the next time the user looks at a flame graph, they start saying &amp;quot;I&amp;#39;ve seen that function before&amp;quot; and so on. You can get to the point where understanding the bulk of a CPU flame graph takes less than a minute: look for the widest tower, click to zoom, read the frames, done.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;m encouraged by the success of CPU flame graphs, with over 80 implementations and countless real world case studies. Sometimes I&amp;#39;m browsing a performance issue I care about on github and hit page down and there&amp;#39;s a CPU flame graph. They are everywhere.&lt;/p&gt;
+
+&lt;p&gt;I expect AI developers will also be able to understand AI Flame Graphs in less than a minute, but to start with people will be spending a day or more browsing code bases they didn&amp;#39;t know were involved. Publishing case studies of found wins will also help people learn how to interpret them, and also help explain the value.&lt;/p&gt;
+
+&lt;h2&gt;What about PyTorch?&lt;/h2&gt;
+
+&lt;p&gt;Another common reaction we&amp;#39;ve had is that AI developers are using PyTorch, and initially we didn&amp;#39;t support it as it meant walking Python stacks, which isn&amp;#39;t trivial. But prior work has been done there (to support CPU profiling) and after a lot of tinkering we now have the first PyTorch AI Flame Graph:&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;&lt;a href=&quot;/blog/images/2024/PyTorchFlamegraph.svg&quot;&gt;&lt;img src=&quot;/blog/images/2024/PyTorchFlamegraph.png&quot; width=700&gt;&lt;/a&gt;&lt;br&gt;&lt;font size=-1&gt;&lt;i&gt;PyTorch frames in pink &lt;/i&gt;&lt;/font&gt;&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;(Click for interactive &lt;a href=&quot;/blog/images/2024/PyTorchFlamegraph.svg&quot;&gt;SVG&lt;/a&gt;.) The PyTorch functions are at the bottom and are colored pink. This example runs oneDNN kernels that are JIT-generated, and don&amp;#39;t have a source path so that layer just reads &amp;quot;jit&amp;quot;. Getting all other the layers included was a real pain to get going, but an important milestone. We think if we can do PyTorch we can do anything.&lt;/p&gt;
+
+&lt;p&gt;In this flame graph, we show PyTorch running the Llama 2 7B model using the Intel Extensions for PyTorch (IPEX). This flame graph shows the origin of the GPU kernel execution all the way back to the Python source code shown in pink. Most samples are from a stack leading up to a gemm_kernel (matrix multiply) shown in aqua, which like the previous example has many stalls due to software scoreboarding.&lt;/p&gt;
+
+&lt;p&gt;There are two instructions (0xa30 and 0xa90) that combined are 27% of the entire profile. I expect someone will ask: Can&amp;#39;t we just click on instructions and have it bring up a dissassembly view with full source? Yes, that should be possible, but I can&amp;#39;t answer how we&amp;#39;re going to provide this yet. Another expected question I can&amp;#39;t yet answer: Since there are now multiple products providing AI auto-tuning of CPU workloads using CPU flame graphs (including &lt;a href=&quot;https://granulate.io/&quot;&gt;Intel Granulate&lt;/a&gt;) can&amp;#39;t we have AI auto-tuning of &lt;em&gt;AI&lt;/em&gt; workloads using AI Flame Graphs?&lt;/p&gt;
+
+&lt;h2&gt;First Release: Sometimes hard and with moderate overhead&lt;/h2&gt;
+
+&lt;p&gt;Getting AI Flame Graphs to work with some workloads is easy, but others are currently hard and cost moderate overhead. It&amp;#39;s similar to CPU profiling, where some workloads and languages are easy to profile, whereas others need various things fixed. Some AI workloads use many software dependencies that need various tweaks and recompilation (e.g., enabling frame pointers so that stack walking works) making setup time consuming. PyTorch is especially difficult and can take over a week of OS work to be ready for AI Flame Graphs. We will work on getting these tweaks changed upstream in their respective repositories, something involving teams inside and outside of Intel, and is a process I&amp;#39;d expect to take at least a year. During that time AI workloads will gradually become easier to flame graph, and with lower-overhead as well.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;m reminded of eBPF in the early days: You had to patch and recompile the kernel and LLVM and Clang, which could take multiple days if you hit errors. Since then all the eBPF dependency patches have been merged, and default settings changed, so that eBPF &amp;quot;just works.&amp;quot; We&amp;#39;ll get there with AI Flame Graphs too, but right now it&amp;#39;s still those early days.&lt;/p&gt;
+
+&lt;p&gt;The changes necessary for AI Flame Graphs are really about improving debugging in general, and are a requirement for &lt;a href=&quot;https://www.brendangregg.com/Slides/eBPFSummit2023_FastByFriday/&quot;&gt;Fast by Friday&lt;/a&gt;: A vision where we can root-cause analyze anything in five days or less.&lt;/p&gt;
+
+&lt;h2&gt;Availability&lt;/h2&gt;
+
+&lt;p&gt;AI Flame Graphs will first become available on the &lt;a href=&quot;yes,%20Intel%20has%20a%20public%20cloud&quot;&gt;Intel Tiber AI Cloud&lt;/a&gt; as a preview feature for the Intel Data Center GPU Max Series. If you are currently deployed there you can ask through the Intel service channel for early access. As for if or when it will support other hardware types, be in other Intel products, be officially launched, be open source, etc., these involve various other teams at Intel and they need to make their own announcements before I can discuss them here.&lt;/p&gt;
+
+&lt;h2&gt;Conclusions&lt;/h2&gt;
+
+&lt;p&gt;Finding performance improvements for AI data centers of just fractions of a percent can add up to planetary savings in electricity, water, and money. If AI flame graphs have the success that CPU flame graphs have had, I&amp;#39;d expect finding improvements of over 10% will be common, and 50% and higher will eventually be found*. But it won&amp;#39;t be easy in these early days as there are still many software components to tweak and recompile, and software layers to learn about that are revealed in the AI flame graph.&lt;/p&gt;
+
+&lt;p&gt;In the years ahead I imagine others will build their own AI flame graphs that look the same as this one, and there may even be startups selling them, but if they use more difficult-to-use and higher-overhead technologies I fear they could turn companies off the idea of AI flame graphs altogether and prevent them from finding sorely needed wins. This is too important to do badly. AI flame graphs should be easy to use, cost negligible overhead, be production safe, and show everything. Intel has proven it&amp;#39;s possible.&lt;/p&gt;
+
+&lt;h2&gt;Disclaimer&lt;/h2&gt;
+
+&lt;p&gt;&lt;font size=-1&gt;
+* This is a personal blog post that makes personal predictions but not guarantees of possible performance improvements. Feel free to take any claim with a grain of salt, and feel free to wait for an official publication and public launch by Intel on this technology.&lt;/p&gt;
+
+&lt;p&gt;&lt;sup&gt;1&lt;/sup&gt; Based on halving the Arm CEO Rene Haas&amp;#39; estimate of 20-25% quoted in &lt;a href=&quot;https://arstechnica.com/ai/2024/06/is-generative-ai-really-going-to-wreak-havoc-on-the-power-grid/&quot;&gt;Taking a closer look at AI&amp;#39;s supposed energy apocalypse&lt;/a&gt; by Kyle Orland of ArsTechnica.
+&lt;/font&gt;&lt;/p&gt;
+
+&lt;h2&gt;Updates&lt;/h2&gt;
+
+&lt;p&gt;(Jan 2025): I wasn&amp;#39;t going to talk about other specific profilers, but since FAQ #1 is &amp;quot;what about NVIDIA?&amp;quot;: They do have flame graphs in Nsight Graphics for GPU workloads, so I&amp;#39;d guess they aren&amp;#39;t far from supporting AI workloads as well. Their version looks shallow as it&amp;#39;s only the GPU code, so it is missing the CPU context necessary to understand the full picture, and seems based on interposing (launching the app from Nsights) which is the old method. The new method we&amp;#39;ve created allows for easy, everything, anytime profiling, like you expect from CPU profilers. Theirs does have click-to-source integration, which is quite handy, and I do like the default orientation and colors, thank you!&lt;/p&gt;
+
+&lt;h2&gt;Thanks&lt;/h2&gt;
+
+&lt;p&gt;&lt;i&gt;Thanks to everyone at Intel who have helped us make this happen. Markus Flierl has driven this project and made it a top priority, and Greg Lavender has expressed his support. Special thanks to Michael Cole, Matthew Roper, Luis Strano, Rodrigo Vivi, Joonas Lahtinen, Stanley Gambarin, Timothy Bauer, Brandon Yates, Maria Kraynyuk, Denis Samoylov, Krzysztof Raszkowski, Sanchit Jain, Po-Yu Chen, Felix Degrood, Piotr Rozenfeld, Andi Kleen, and all of the other coworkers that helped clear things up for us, and thanks in advance for everyone else who will be helping us in the months ahead.&lt;/p&gt;
+
+&lt;p&gt;My final thanks is to the companies and developers who do the actual hands-on work with flame graphs, collecting them, examining them, finding performance wins, and applying them.&lt;br&gt;You are helping save the planet.&lt;/i&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 29 Oct 2024 00:00:00 +1100</pubDate>
+        <link>http://www.brendangregg.com/blog//2024-10-29/ai-flame-graphs.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2024-10-29/ai-flame-graphs.html</guid>
+      </item>
+    
+      <item>
+        <title>No More Blue Fridays</title>
+        <description>&lt;p&gt;In the future, computers will not crash due to bad software updates, even those updates that involve kernel code. In the future, these updates will push &lt;a href=&quot;https://ebpf.io/&quot;&gt;eBPF&lt;/a&gt; code.&lt;/p&gt;
+
+&lt;p&gt;Friday July 19th provided an unprecedented example of the inherent dangers of kernel programming, and has been called the largest outage in the &lt;a href=&quot;https://en.m.wikipedia.org/wiki/2024_CrowdStrike_incident#Cost&quot;&gt;history&lt;/a&gt; of information technology. Windows computers around the world encountered blue-screens-of-death and boot loops, causing &lt;a href=&quot;https://www.washingtonpost.com/technology/2024/07/19/microsoft-windows-outage-blue-screen-bsod/&quot;&gt;outages&lt;/a&gt; for hospitals, airlines, banks, grocery stores, media broadcasters, and more. This was caused by a &lt;a href=&quot;https://www.crowdstrike.com/blog/falcon-update-for-windows-hosts-technical-details/&quot;&gt;config update&lt;/a&gt; by a security company for their widely used product that included a kernel driver on Windows systems. The update caused the kernel driver to &lt;a href=&quot;https://medium.com/@shyamsundarb/technical-details-of-the-windows-bsod-disaster-due-to-crowdstrike-58de2371c19c&quot;&gt;try to read invalid memory&lt;/a&gt;, an error type that will crash the kernel.&lt;/p&gt;
+
+&lt;p&gt;For Linux systems, the company behind this outage was already in the process of adopting eBPF, which is immune to such crashes. Once Microsoft&amp;#39;s &lt;a href=&quot;https://github.com/microsoft/ebpf-for-windows&quot;&gt;eBPF support for Windows&lt;/a&gt; becomes production-ready, Windows security software can be ported to eBPF as well. These security agents will then be safe and unable to cause a Windows kernel crash.&lt;/p&gt;
+
+&lt;p&gt;eBPF (no longer an acronym) is a secure kernel execution environment, similar to the secure JavaScript runtime built into web browsers. If you&amp;#39;re using Linux, you likely already have eBPF available on your systems whether you know it or not, as it was included in the kernel several years ago. eBPF programs cannot crash the entire system because they are safety-checked by a software verifier and are effectively run in a sandbox. If the verifier finds any unsafe code, the program is rejected and not executed. The verifier is rigorous -- the Linux implementation has &lt;a href=&quot;https://github.com/torvalds/linux/blob/master/kernel/bpf/verifier.c&quot;&gt;over 20,000 lines of code&lt;/a&gt; -- with contributions from industry (e.g., Meta, Isovalent, Google) and academia (e.g., &lt;a href=&quot;https://people.cs.rutgers.edu/~sn624/verified-sandboxing.html&quot;&gt;Rutgers University&lt;/a&gt;, &lt;a href=&quot;https://unsat.cs.washington.edu/projects/jitterbug/&quot;&gt;University of Washington&lt;/a&gt;). The safety this provides is a key benefit of eBPF, along with heightened security and lower resource usage.&lt;/p&gt;
+
+&lt;p&gt;Some eBPF-based security startups (e.g., &lt;a href=&quot;https://www.oligo.security/blog/recent-crowdstrike-outage-emphasizes-the-need-for-ebpf-based-sensors&quot;&gt;Oligo&lt;/a&gt;, &lt;a href=&quot;https://www.uptycs.com/blog/crowdstrike-outage-less-intrusive-malware-detection&quot;&gt;Uptycs&lt;/a&gt;) have made their own statements about the recent outage, and the advantages of migrating to eBPF. Larger tech companies are also adopting eBPF for security. As an example, Cisco acquired the eBPF-startup Isovalent and has announced a new eBPF security product: &lt;a href=&quot;https://blogs.cisco.com/security/cisco-hypershield-reimagining-security&quot;&gt;Cisco Hypershield&lt;/a&gt;, a fabric for security enforcement and monitoring. &lt;a href=&quot;https://www.youtube.com/watch?v=N4YKcMV8iaY&quot;&gt;Google&lt;/a&gt; and &lt;a href=&quot;https://lpc.events/event/17/contributions/1602/&quot;&gt;Meta&lt;/a&gt; already rely on eBPF to detect and stop bad actors in their fleet, thanks to eBPF&amp;#39;s speed, deep visibility, and safety guarantees. Beyond security, eBPF is also used for networking and observability.&lt;/p&gt;
+
+&lt;p&gt;The worst thing an eBPF program can do is to merely consume more resources than is desirable, such as CPU cycles and memory. eBPF cannot prevent developers writing poor code -- wasteful code -- but it will prevent serious issues that cause a system to crash. That said, as a new technology eBPF has had some bugs in its management code, including a &lt;a href=&quot;https://access.redhat.com/solutions/7068083&quot;&gt;Linux kernel panic&lt;/a&gt; discovered by the same security company in the news today. This doesn&amp;#39;t mean that eBPF has solved nothing, substituting a vendor&amp;#39;s bug for its own. Fixing these bugs in eBPF means fixing these bugs for &lt;em&gt;all&lt;/em&gt; eBPF vendors, and more quickly improving the security of everyone.&lt;/p&gt;
+
+&lt;p&gt;There are other ways to reduce risks during software deployment that can be employed as well: canary testing, staged rollouts, and &amp;quot;resilience engineering&amp;quot; in general. What&amp;#39;s important about the eBPF method is that it is a software solution that will be available in both Linux and Windows kernels by default, and has already been adopted for this use case.&lt;/p&gt;
+
+&lt;p&gt;If your company is paying for commercial software that includes kernel drivers or kernel modules, you can make eBPF a requirement. It&amp;#39;s possible for Linux today, and Windows soon. While some vendors have already proactively adopted eBPF (thank you), others might need a little encouragement from their paying customers. Please help raise awareness, and together we can make such global outages a lesson of the past.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Authors: Brendan Gregg, Intel; Daniel Borkmann, Isovalent; Joe Stringer, Isovalent; KP Singh, Google.&lt;/em&gt;&lt;/p&gt;
+</description>
+        <pubDate>Mon, 22 Jul 2024 00:00:00 +1000</pubDate>
+        <link>http://www.brendangregg.com/blog//2024-07-22/no-more-blue-fridays.html</link>
+        <guid isPermaLink="true">http://www.brendangregg.com/blog//2024-07-22/no-more-blue-fridays.html</guid>
+      </item>
+    
+  </channel>
+</rss>

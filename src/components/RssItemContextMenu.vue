@@ -16,7 +16,7 @@
           </q-item-label>
         </q-item-section>
       </q-item>
-      <q-separator v-if="item.separator" v-for="(item, index) in contextMenuInfo.filter(i => i.separator)" :key="index" />
+      <q-separator v-for="(item, index) in contextMenuInfo.filter(i => i.separator)" :key="'sep-' + index" />
     </q-list>
   </q-menu>
 </template>
@@ -26,7 +26,7 @@ import {ref} from "vue";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {useSystemDialogStore} from "stores/systemDialogStore";
 import {useQuasar} from "quasar";
-import {RssInfoItem} from "src/common/RssInfoItem";
+import {RssInfoItem} from "src/common/models";
 
 const props = defineProps<{
   rssItem: RssInfoItem;

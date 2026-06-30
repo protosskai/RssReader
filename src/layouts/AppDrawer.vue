@@ -84,7 +84,8 @@ import SubscriptionList from "components/SubscriptionList.vue";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import EditFolderDialog from "components/EditFolderDialog.vue";
 import { useSearchStore } from 'src/stores/searchStore';
-import type { PostIndexItem } from 'src/electron/storage/common';
+import type { PostIndexItem } from 'src/common/models';
+import { switchPage } from 'src/common/util';
 
 interface Props {
   leftDrawerOpen?: boolean
@@ -166,8 +167,10 @@ const formatDate = (dateString: string): string => {
 
 // 打开文章
 const openArticle = (article: PostIndexItem) => {
-  // 导航到文章内容页
-  window.location.hash = `/#/content?guid=${article.guid}`
+  switchPage('Content', {
+    RssId: article.rssId || 'search',
+    PostId: article.guid,
+  })
   // 清空搜索以显示订阅源列表
   searchQuery.value = ''
 }

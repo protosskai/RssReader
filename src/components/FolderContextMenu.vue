@@ -5,7 +5,7 @@
   >
     <q-list dense style="min-width: 100px">
       <q-item clickable v-close-popup v-for="(item, index) in contextMenuInfo"
-              :key="index"
+              :key="item.title"
               @click="item.clickHandler"
       >
         <q-item-section>{{ item.title }}</q-item-section>
@@ -18,11 +18,8 @@
   </q-menu>
 </template>
 <script setup lang="ts">
-import {ref} from "vue";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {useSystemDialogStore} from "stores/systemDialogStore";
-
-const feedUrl = ref('')
 
 const props = defineProps<{
   folderName: string
@@ -32,7 +29,7 @@ const {toggleEditFolderDialog, setEditFolderDialogOldFolderName} = systemDialogS
 const rssInfoStore = useRssInfoStore()
 const {removeFolder} = rssInfoStore
 
-export interface ContextMenuItem {
+interface ContextMenuItem {
   title: string,
   icon?: string,
   clickHandler?: () => void,
@@ -48,7 +45,10 @@ const onRename = () => {
   toggleEditFolderDialog()
 }
 const onDeleted = async () => {
-  await removeFolder(props.folderName)
+  const result = await removeFolder(props.folderName)
+  if (!result?.success) {
+    // Error handled by store
+  }
 }
 const contextMenuInfo: ContextMenuItem[] = [
   {

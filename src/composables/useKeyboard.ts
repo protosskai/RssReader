@@ -1,191 +1,158 @@
-import { onMounted, onUnmounted } from 'vue'
-import { useKeyboardStore } from '../stores/keyboardStore'
-
 /**
- * 键盘快捷键Composable
- * 提供便捷的方式在组件中注册和使用键盘快捷键
+ * useKeyboard — 键盘快捷键管理
  */
-export const useKeyboard = () => {
-  const keyboardStore = useKeyboardStore()
+import { ref, computed, type Ref } from "vue";
 
-  /**
-   * 注册键盘快捷键
-   * @param options 快捷键选项
-   */
-  const registerShortcut = (options: {
-    id: string
-    label: string
-    keys: string[]
-    description: string
-    action: () => void
-    global?: boolean
-  }) => {
-    keyboardStore.registerShortcut(options)
-  }
-
-  /**
-   * 注册多个键盘快捷键
-   * @param shortcuts 快捷键数组
-   */
-  const registerShortcuts = (shortcuts: Array<{
-    id: string
-    label: string
-    keys: string[]
-    description: string
-    action: () => void
-    global?: boolean
-  }>) => {
-    shortcuts.forEach(shortcut => {
-      keyboardStore.registerShortcut(shortcut)
-    })
-  }
-
-  /**
-   * 注销键盘快捷键
-   * @param shortcutId 快捷键ID
-   */
-  const unregisterShortcut = (shortcutId: string) => {
-    keyboardStore.unregisterShortcut(shortcutId)
-  }
-
-  /**
-   * 监听键盘事件
-   */
-  const handleKeydown = (event: KeyboardEvent) => {
-    keyboardStore.executeShortcut(event)
-  }
-
-  // 在组件挂载时添加键盘事件监听器
-  onMounted(() => {
-    window.addEventListener('keydown', handleKeydown)
-    console.log('[useKeyboard] Keyboard event listener added')
-  })
-
-  // 在组件卸载时移除键盘事件监听器
-  onUnmounted(() => {
-    window.removeEventListener('keydown', handleKeydown)
-    console.log('[useKeyboard] Keyboard event listener removed')
-  })
-
-  return {
-    registerShortcut,
-    registerShortcuts,
-    unregisterShortcut,
-    shortcuts: keyboardStore.shortcuts,
-    isEnabled: keyboardStore.isEnabled,
-    toggleShortcuts: keyboardStore.toggleShortcuts
-  }
+export interface KeyboardShortcut {
+	id: string;
+	label: string;
+	keys: string[];
+	description: string;
+	action: () => void;
+	global?: boolean;
 }
 
-/**
- * 常用快捷键键位组合
- */
+/** Predefined shortcut key combinations */
 export const SHORTCUT_KEYS = {
-  // 导航
-  UP: 'ArrowUp',
-  DOWN: 'ArrowDown',
-  LEFT: 'ArrowLeft',
-  RIGHT: 'ArrowRight',
-  ENTER: 'Enter',
-  ESCAPE: 'Escape',
-  TAB: 'Tab',
+	HELP: ["ctrl", "shift", "?"],
+	SYNC: ["ctrl", "s"],
+	SEARCH: ["ctrl", "f"],
+	SETTINGS: ["ctrl", ","],
+	NEW_SUBSCRIPTION: ["ctrl", "n"],
+	TOGGLE_DARK_MODE: ["ctrl", "d"],
+	REFRESH: ["ctrl", "r"],
+} as const;
 
-  // 常用组合键
-  NEW: ['ctrl', 'n'],
-  SAVE: ['ctrl', 's'],
-  SEARCH: ['ctrl', 'f'],
-  SETTINGS: ['ctrl', ','],
-  SYNC: ['ctrl', 'r'],
-  FULLSCREEN: ['ctrl', 'shift', 'f'],
-  DARK_MODE: ['ctrl', 'shift', 'd'],
-  HELP: ['ctrl', '?'],
-  PREVIOUS: ['ctrl', 'p'],
-  NEXT: ['ctrl', 'n'],
-  FAVORITE: ['ctrl', 'd'],
-  REFRESH: ['f5'],
-  MINIMIZE: ['ctrl', 'm'],
-  CLOSE: ['ctrl', 'w']
-} as const
+export interface ShortcutActions {
+	onSync?: () => void;
+	onSearch?: () => void;
+	onSettings?: () => void;
+	onNewSubscription?: () => void;
+	onToggleDarkMode?: () => void;
+	onRefresh?: () => void;
+}
 
-/**
- * 预定义的快捷键集合
- * @param actions 动作函数
- */
-export const createDefaultShortcuts = (actions: {
-  onSync?: () => void
-  onSearch?: () => void
-  onSettings?: () => void
-  onNewSubscription?: () => void
-  onToggleDarkMode?: () => void
-  onRefresh?: () => void
-}) => {
-  const shortcuts = []
+/** Create default shortcuts from action callbacks (all optional) */
+export function createDefaultShortcuts(
+	actions: ShortcutActions,
+): KeyboardShortcut[] {
+	const s: KeyboardShortcut[] = [];
+	if (actions.onSync)
+		s.push({
+			id: "sync",
+			label: "同步",
+			keys: [...SHORTCUT_KEYS.SYNC],
+			description: "同步所有RSS源",
+			action: actions.onSync,
+		});
+	if (actions.onSearch)
+		s.push({
+			id: "search",
+			label: "搜索",
+			keys: [...SHORTCUT_KEYS.SEARCH],
+			description: "搜索文章",
+			action: actions.onSearch,
+		});
+	if (actions.onSettings)
+		s.push({
+			id: "settings",
+			label: "设置",
+			keys: [...SHORTCUT_KEYS.SETTINGS],
+			description: "打开设置",
+			action: actions.onSettings,
+		});
+	if (actions.onNewSubscription)
+		s.push({
+			id: "new",
+			label: "新建订阅",
+			keys: [...SHORTCUT_KEYS.NEW_SUBSCRIPTION],
+			description: "添加新订阅源",
+			action: actions.onNewSubscription,
+		});
+	if (actions.onToggleDarkMode)
+		s.push({
+			id: "dark",
+			label: "暗色模式",
+			keys: [...SHORTCUT_KEYS.TOGGLE_DARK_MODE],
+			description: "切换暗色/亮色模式",
+			action: actions.onToggleDarkMode,
+		});
+	if (actions.onRefresh)
+		s.push({
+			id: "refresh",
+			label: "刷新",
+			keys: [...SHORTCUT_KEYS.REFRESH],
+			description: "刷新当前页面",
+			action: actions.onRefresh,
+		});
+	return s;
+}
 
-  // 同步
-  if (actions.onSync) {
-    shortcuts.push({
-      id: 'sync-all',
-      label: '同步所有RSS源',
-      keys: SHORTCUT_KEYS.SYNC,
-      description: '手动同步所有RSS源',
-      action: actions.onSync
-    })
-  }
+export function useKeyboard() {
+	const shortcuts: Ref<KeyboardShortcut[]> = ref([]);
+	const isEnabled = ref(true);
+	const enabledShortcuts = computed(() =>
+		shortcuts.value.filter((s) => isEnabled.value),
+	);
 
-  // 搜索
-  if (actions.onSearch) {
-    shortcuts.push({
-      id: 'search',
-      label: '搜索',
-      keys: SHORTCUT_KEYS.SEARCH,
-      description: '打开搜索框',
-      action: actions.onSearch
-    })
-  }
+	const register = (s: KeyboardShortcut) => {
+		if (!shortcuts.value.some((x) => x.id === s.id)) shortcuts.value.push(s);
+	};
+	const unregister = (id: string) => {
+		const i = shortcuts.value.findIndex((s) => s.id === id);
+		if (i > -1) shortcuts.value.splice(i, 1);
+	};
 
-  // 设置
-  if (actions.onSettings) {
-    shortcuts.push({
-      id: 'settings',
-      label: '设置',
-      keys: SHORTCUT_KEYS.SETTINGS,
-      description: '打开设置页面',
-      action: actions.onSettings
-    })
-  }
+	const execute = (event: KeyboardEvent) => {
+		if (!isEnabled.value) return;
+		const target = event.target as HTMLElement;
+		if (
+			(target.tagName === "INPUT" ||
+				target.tagName === "TEXTAREA" ||
+				target.contentEditable === "true") &&
+			!(event.ctrlKey && event.key === "f")
+		)
+			return;
+		const keys: string[] = [];
+		if (event.ctrlKey || event.metaKey) keys.push("ctrl");
+		if (event.altKey) keys.push("alt");
+		if (event.shiftKey) keys.push("shift");
+		keys.push(event.key.toLowerCase());
+		const matched = shortcuts.value.find(
+			(s) =>
+				s.keys.every((k) => keys.includes(k)) && s.keys.length === keys.length,
+		);
+		if (matched) {
+			event.preventDefault();
+			event.stopPropagation();
+			matched.action();
+		}
+	};
 
-  // 新建订阅
-  if (actions.onNewSubscription) {
-    shortcuts.push({
-      id: 'new-subscription',
-      label: '新建订阅',
-      keys: SHORTCUT_KEYS.NEW,
-      description: '添加新的RSS订阅',
-      action: actions.onNewSubscription
-    })
-  }
+	const registerShortcut = register;
+	const registerShortcuts = (list: KeyboardShortcut[]) => {
+		for (const s of list) register(s);
+	};
+	const getHelp = () =>
+		shortcuts.value.map((s) => ({
+			label: s.label,
+			keys: s.keys.join("+").toUpperCase(),
+			description: s.description,
+		}));
+	const clearAll = () => {
+		shortcuts.value = [];
+	};
 
-  // 切换暗色主题
-  if (actions.onToggleDarkMode) {
-    shortcuts.push({
-      id: 'toggle-dark-mode',
-      label: '切换暗色主题',
-      keys: SHORTCUT_KEYS.DARK_MODE,
-      description: '在明暗主题之间切换',
-      action: actions.onToggleDarkMode
-    })
-  }
-
-  // 刷新
-  if (actions.onRefresh) {
-    shortcuts.push({
-      id: 'refresh',
-      label: '刷新',
-      keys: SHORTCUT_KEYS.REFRESH,
-      description: '刷新当前页面',
-      action: actions.onRefresh
-    })
-  }
-
-  return shortcuts
+	return {
+		shortcuts,
+		isEnabled,
+		enabledShortcuts,
+		register,
+		registerShortcut,
+		registerShortcuts,
+		unregister,
+		execute,
+		getHelp,
+		clearAll,
+	};
 }

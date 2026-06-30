@@ -69,11 +69,7 @@ export function useGlobalLoading() {
       message: `${message} (${progress}%)`,
       spinnerColor: 'primary',
       messageColor: 'dark',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      progress: {
-        color: 'primary',
-        value: progress
-      }
+      backgroundColor: 'rgba(255, 255, 255, 0.9)'
     });
   };
 
@@ -81,13 +77,7 @@ export function useGlobalLoading() {
    * 更新进度
    */
   const updateProgress = (progress: number, message?: string) => {
-    $q.loading.update({
-      progress: {
-        color: 'primary',
-        value: progress
-      },
-      message: message || `加载中... (${progress}%)`
-    });
+    showProgressLoading(message || '加载中...', progress);
   };
 
   /**

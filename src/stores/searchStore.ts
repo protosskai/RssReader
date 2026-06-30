@@ -1,214 +1,224 @@
-import { defineStore } from 'pinia'
-import type { PostIndexItem } from 'app/src-electron/storage/common'
-import { ref, computed } from 'vue'
+import { defineStore } from 'pinia';
+import type { PostIndexItem } from 'src/common/models';
+import { ref, computed } from 'vue';
+import { unwrapOrThrow } from 'src/common/ErrorMsg';
+import { electronClient } from 'src/services/electronClient';
+
+const MAX_HISTORY_ITEMS = 10;
+const LS_KEY = 'searchHistory';
 
 export const useSearchStore = defineStore('search', () => {
-  // 状态
-  const searchQuery = ref('')
-  const searchResults = ref<PostIndexItem[]>([])
-  const isSearching = ref(false)
-  const searchError = ref<string | null>(null)
-  const searchHistory = ref<string[]>([])
-  const maxHistoryItems = 10
+  // ── State ────────────────────────────────────────────────
+  const searchQuery = ref('');
+  const searchResults = ref<PostIndexItem[]>([]);
+  const isSearching = ref(false);
+  const searchError = ref<string | null>(null);
+  const searchHistory = ref<string[]>([]);
 
-  // 计算属性
-  const hasResults = computed(() => searchResults.value.length > 0)
-  const hasHistory = computed(() => searchHistory.value.length > 0)
-  const isQueryEmpty = computed(() => searchQuery.value.trim() === '')
+  // ── Computed ─────────────────────────────────────────────
+  const hasResults = computed(() => searchResults.value.length > 0);
+  const hasHistory = computed(() => searchHistory.value.length > 0);
+  const isQueryEmpty = computed(() => searchQuery.value.trim() === '');
 
-  // 方法
+  // ── Internal helpers ─────────────────────────────────────
+
   /**
-   * 执行搜索
-   * @param query 搜索关键词
-   * @param posts 要搜索的文章列表（用于本地搜索）
-   * @param options 搜索选项（用于全局搜索）
+   * Debounce guard – prevents concurrent search execution.
+   * The last caller's results always win; in-flight earlier
+   * calls are simply overwritten.
+   */
+  let abortController: AbortController | null = null;
+
+  const saveSearchHistory = (): void => {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(searchHistory.value));
+    } catch (err) {
+      console.error('保存搜索历史失败:', err);
+    }
+  };
+
+  const loadSearchHistory = (): void => {
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) searchHistory.value = JSON.parse(saved);
+    } catch (err) {
+      console.error('加载搜索历史失败:', err);
+      searchHistory.value = [];
+    }
+  };
+
+  // ── Actions ──────────────────────────────────────────────
+
+  /**
+   * Execute a search (local filter or global FTS, depending
+   * on whether `posts` is supplied).
    */
   const search = async (
     query: string,
     posts: PostIndexItem[] = [],
     options?: {
-      folderId?: string
-      dateFrom?: string
-      dateTo?: string
-      limit?: number
-    }
-  ) => {
+      folderId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      limit?: number;
+    },
+  ): Promise<void> => {
     if (!query.trim()) {
-      searchResults.value = []
-      return
+      searchResults.value = [];
+      return;
     }
+
+    // Cancel any in-flight global search
+    if (abortController) {
+      abortController.abort();
+    }
+    abortController = new AbortController();
+
+    isSearching.value = true;
+    searchError.value = null;
+    searchQuery.value = query;
 
     try {
-      isSearching.value = true
-      searchError.value = null
-      searchQuery.value = query
-
-      // 如果提供了文章列表，则在本地搜索
       if (posts.length > 0) {
-        performLocalSearch(query, posts)
+        performLocalSearch(query, posts);
       } else {
-        // 否则调用electronAPI进行全局搜索
-        await performGlobalSearch(query, options)
+        await performGlobalSearch(query, options);
       }
+      addToSearchHistory(query);
+    } catch (err) {
+      // Aborted searches are expected noise; don't show as errors
+      if (err instanceof DOMException && err.name === 'AbortError') return;
 
-      // 保存到搜索历史
-      addToSearchHistory(query)
-    } catch (error) {
-      console.error('搜索失败:', error)
-      searchError.value = error instanceof Error ? error.message : '搜索失败'
-      searchResults.value = []
+      const msg = err instanceof Error ? err.message : '搜索失败';
+      searchError.value = msg;
+      console.error('搜索失败:', err);
+      searchResults.value = [];
     } finally {
-      isSearching.value = false
+      if (abortController && !abortController.signal.aborted) {
+        isSearching.value = false;
+      }
     }
-  }
+  };
 
-  /**
-   * 本地搜索（用于前端过滤）
-   */
-  const performLocalSearch = (query: string, posts: PostIndexItem[]) => {
-    const lowerQuery = query.toLowerCase()
-    searchResults.value = posts.filter(post =>
-      post.title.toLowerCase().includes(lowerQuery) ||
-      post.author.toLowerCase().includes(lowerQuery) ||
-      (post.desc && post.desc.toLowerCase().includes(lowerQuery))
-    )
-  }
+  /** Local substring filter over an already-fetched post array. */
+  const performLocalSearch = (query: string, posts: PostIndexItem[]): void => {
+    const lowerQuery = query.toLowerCase();
+    searchResults.value = posts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(lowerQuery) ||
+        post.author.toLowerCase().includes(lowerQuery) ||
+        (post.desc && post.desc.toLowerCase().includes(lowerQuery)),
+    );
+  };
 
-  /**
-   * 全局搜索（调用后端API，使用FTS5全文索引）
-   */
+  /** Global FTS5 search via the Electron main process. */
   const performGlobalSearch = async (
     query: string,
     options?: {
-      folderId?: string
-      dateFrom?: string
-      dateTo?: string
-      limit?: number
+      folderId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      limit?: number;
+    },
+  ): Promise<void> => {
+    // Check for abort before making the IPC call
+    if (abortController?.signal.aborted) return;
+    // searchPosts now returns ApiResponse<PostIndexItem[]>
+    const rawResult = await electronClient.searchPosts(query, options);
+    if (abortController?.signal.aborted) return;
+    const results = unwrapOrThrow(rawResult);
+    searchResults.value = results;
+  };
+
+  /** Push a query to the top of the history stack (unique). */
+  const addToSearchHistory = (query: string): void => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    searchHistory.value = searchHistory.value.filter(
+      (item) => item !== trimmed,
+    );
+    searchHistory.value.unshift(trimmed);
+
+    if (searchHistory.value.length > MAX_HISTORY_ITEMS) {
+      searchHistory.value = searchHistory.value.slice(0, MAX_HISTORY_ITEMS);
     }
-  ) => {
-    try {
-      // 调用electronAPI进行全局搜索（使用SQLite FTS5全文索引）
-      const results = await window.electronAPI.searchPosts(query, options)
-      searchResults.value = results
-      console.log('全局搜索完成，结果数量:', results.length)
-    } catch (error) {
-      console.error('全局搜索失败:', error)
-      throw error
-    }
-  }
+    saveSearchHistory();
+  };
+
+  const removeFromSearchHistory = (query: string): void => {
+    searchHistory.value = searchHistory.value.filter((item) => item !== query);
+    saveSearchHistory();
+  };
+
+  const clearSearchHistory = (): void => {
+    searchHistory.value = [];
+    saveSearchHistory();
+  };
+
+  /** Wipe current query + results. */
+  const clearSearch = (): void => {
+    searchQuery.value = '';
+    searchResults.value = [];
+    searchError.value = null;
+  };
 
   /**
-   * 添加到搜索历史
+   * Re-run a previous history query.
+   * Returns a Promise so callers can await / catch.
    */
-  const addToSearchHistory = (query: string) => {
-    const trimmedQuery = query.trim()
-    if (!trimmedQuery) return
-
-    // 移除重复项
-    searchHistory.value = searchHistory.value.filter(item => item !== trimmedQuery)
-    
-    // 添加到开头
-    searchHistory.value.unshift(trimmedQuery)
-    
-    // 限制历史记录数量
-    if (searchHistory.value.length > maxHistoryItems) {
-      searchHistory.value = searchHistory.value.slice(0, maxHistoryItems)
-    }
-    
-    // 保存到本地存储
-    saveSearchHistory()
-  }
-
-  /**
-   * 从搜索历史中删除
-   */
-  const removeFromSearchHistory = (query: string) => {
-    searchHistory.value = searchHistory.value.filter(item => item !== query)
-    saveSearchHistory()
-  }
-
-  /**
-   * 清空搜索历史
-   */
-  const clearSearchHistory = () => {
-    searchHistory.value = []
-    saveSearchHistory()
-  }
-
-  /**
-   * 保存搜索历史到本地存储
-   */
-  const saveSearchHistory = () => {
-    try {
-      localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value))
-    } catch (error) {
-      console.error('保存搜索历史失败:', error)
-    }
-  }
-
-  /**
-   * 从本地存储加载搜索历史
-   */
-  const loadSearchHistory = () => {
-    try {
-      const savedHistory = localStorage.getItem('searchHistory')
-      if (savedHistory) {
-        searchHistory.value = JSON.parse(savedHistory)
-      }
-    } catch (error) {
-      console.error('加载搜索历史失败:', error)
-      searchHistory.value = []
-    }
-  }
-
-  /**
-   * 清空搜索结果
-   */
-  const clearSearch = () => {
-    searchQuery.value = ''
-    searchResults.value = []
-    searchError.value = null
-  }
-
-  /**
-   * 从历史记录中执行搜索
-   */
-  const searchFromHistory = (
+  const searchFromHistory = async (
     query: string,
     posts: PostIndexItem[] = [],
     options?: {
-      folderId?: string
-      dateFrom?: string
-      dateTo?: string
-      limit?: number
-    }
-  ) => {
-    searchQuery.value = query
-    search(query, posts, options)
-  }
+      folderId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      limit?: number;
+    },
+  ): Promise<void> => {
+    searchQuery.value = query;
+    await search(query, posts, options);
+  };
 
-  // 初始化时加载搜索历史
-  loadSearchHistory()
+  /**
+   * Reset store to initial state.
+   * Call on logout / app-close / user-data clear.
+   */
+  const $reset = (): void => {
+    searchQuery.value = '';
+    searchResults.value = [];
+    isSearching.value = false;
+    searchError.value = null;
+    abortController = null;
+    // searchHistory is intentionally preserved (persisted to LS)
+  };
+
+  // ── Initialisation ───────────────────────────────────────
+
+  loadSearchHistory();
+
+  // ── Public API ───────────────────────────────────────────
 
   return {
-    // 状态
+    // state
     searchQuery,
     searchResults,
     isSearching,
     searchError,
     searchHistory,
-    
-    // 计算属性
+    // computed
     hasResults,
     hasHistory,
     isQueryEmpty,
-    
-    // 方法
+    // actions
     search,
     clearSearch,
+    loadSearchHistory,
     addToSearchHistory,
     removeFromSearchHistory,
     clearSearchHistory,
-    searchFromHistory
-  }
-})
+    searchFromHistory,
+    $reset,
+  };
+});

@@ -1,1 +1,54 @@
 // app global css in SCSS form
+
+/* ===================== Accessibility ===================== */
+
+/* Focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #1976d2 !important;
+  outline-offset: 2px;
+}
+
+/* Ensure focus rings are visible in dark mode */
+.body--dark *:focus-visible {
+  outline-color: #64b5f6 !important;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better focus styling for interactive elements */
+.q-btn:focus-visible,
+.q-input :focus-visible,
+.q-select :focus-visible,
+.q-checkbox :focus-visible,
+.q-toggle :focus-visible,
+a:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.body--dark .q-btn:focus-visible,
+.body--dark .q-input :focus-visible {
+  outline-color: #64b5f6;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(25, 118, 210, 0.2);
+  color: inherit;
+}

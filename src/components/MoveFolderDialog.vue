@@ -94,11 +94,17 @@ const {rssFolderList, moveFolder} = rssInfoStore;
 // 选中的目标文件夹
 const selectedTargetFolder = ref<string>('');
 
+interface FolderTreeNode {
+  folderName: string
+  children?: FolderTreeNode[]
+  data?: unknown[]
+}
+
 // 可用的目标文件夹（排除当前文件夹及其子文件夹）
 const availableFolders = computed(() => {
-  const folders: any[] = [];
+  const folders: FolderTreeNode[] = [];
   
-  const collectAvailableFolders = (folderList: any[], excludeFolderName: string, isChild: boolean = false) => {
+  const collectAvailableFolders = (folderList: FolderTreeNode[], excludeFolderName: string, isChild: boolean = false) => {
     for (const folder of folderList) {
       // 排除当前文件夹
       if (folder.folderName !== excludeFolderName) {
@@ -160,12 +166,6 @@ const onSubmit = async () => {
     closeDialog();
   }
 };
-
-// 监听对话框显示，重置选择
-onMounted(() => {
-  const unwatch = showMoveFolderDialog.value;
-  return unwatch;
-});
 </script>
 
 <style scoped lang="scss">

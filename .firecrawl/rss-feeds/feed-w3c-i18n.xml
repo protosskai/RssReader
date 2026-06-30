@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?><rdf:RDF
+	xmlns="http://purl.org/rss/1.0/"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:admin="http://webns.net/mvcb/"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	>
+<channel rdf:about="https://www.w3.org/blog/International">
+	<title>Internationalization Activity Blog</title>
+	<link>https://www.w3.org/blog/International</link>
+	<description></description>
+	<dc:date>2026-02-05T00:43:20Z	</dc:date>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<sy:updateBase>2000-01-01T12:00+00:00</sy:updateBase>
+	<admin:generatorAgent rdf:resource="https://wordpress.org/?v=6.9.1" />
+	<items>
+		<rdf:Seq>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2026/02/05/new-first-public-draft-note-text-to-speech-rendering-of-electronic-documents-containing-ruby-user-requirements/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2026/02/03/new-articles-has-been-published/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/10/16/for-review-number-currency-and-unit-formatting/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/10/08/new-translation-into-chinese-23/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/09/01/new-translations-into-chinese-2/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/08/22/for-review-guide-to-the-ecmascript-internationalization-api/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/08/06/for-review-address-formats-around-the-world/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/07/31/new-translation-into-chinese-22/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/07/30/new-translation-into-chinese-21/"/>
+					<rdf:li rdf:resource="https://www.w3.org/blog/International/2025/07/16/new-translation-into-chinese-20/"/>
+				</rdf:Seq>
+	</items>
+</channel>
+<item rdf:about="https://www.w3.org/blog/International/2026/02/05/new-first-public-draft-note-text-to-speech-rendering-of-electronic-documents-containing-ruby-user-requirements/">
+	<title>New First Public Draft Note: Text-to-Speech Rendering of Electronic Documents Containing Ruby: User Requirements</title>
+	<link>https://www.w3.org/blog/International/2026/02/05/new-first-public-draft-note-text-to-speech-rendering-of-electronic-documents-containing-ruby-user-requirements/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2026-02-05T00:38:44Z</dc:date>
+			<dc:subject><![CDATA[clreq]]></dc:subject>
+		<dc:subject><![CDATA[jlreq]]></dc:subject>
+		<dc:subject><![CDATA[New resource]]></dc:subject>
+		<dc:subject><![CDATA[ruby-tts-req]]></dc:subject>
+
+			<description><![CDATA[The Internationalization Activity published Text-to-Speech Rendering of Electronic Documents Containing Ruby: User Requirements as a First Public Draft Note. This document describes user requirements related to text-to-speech rendering of electronic documents containing ruby annotations. It examines the roles and practices &#8230; <a href="https://www.w3.org/blog/International/2026/02/05/new-first-public-draft-note-text-to-speech-rendering-of-electronic-documents-containing-ruby-user-requirements/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+		<content:encoded><![CDATA[<p>The Internationalization Activity published <a href="https://www.w3.org/TR/2026/DNOTE-ruby-tts-req-20260129/">Text-to-Speech Rendering of Electronic Documents Containing Ruby: User Requirements</a> as a First Public Draft Note.</p>
+<p>This document describes user requirements related to text-to-speech rendering of electronic documents containing ruby annotations. It examines the roles and practices of ruby in different writing systems and discusses the implications of various reading strategies for text-to-speech, without prescribing algorithms or implementation-specific behavior.</p>
+<p>Comments welcome, via the GH links indicated at the top of it.</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2026/02/03/new-articles-has-been-published/">
+	<title>New articles have been published</title>
+	<link>https://www.w3.org/blog/International/2026/02/03/new-articles-has-been-published/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2026-02-03T08:20:05Z</dc:date>
+			<dc:subject><![CDATA[New resource]]></dc:subject>
+		<dc:subject><![CDATA[Translation needed]]></dc:subject>
+		<dc:subject><![CDATA[articles-intl]]></dc:subject>
+		<dc:subject><![CDATA[qa-address-formats]]></dc:subject>
+
+			<description><![CDATA[Two articles have been published: Address formats around the world Guide to the ECMAScript Internationalization API Address formats vary widely across the globe, with differences in structure, content, and the level of granularity. For authors and developers designing forms, databases, &#8230; <a href="https://www.w3.org/blog/International/2026/02/03/new-articles-has-been-published/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+		<content:encoded><![CDATA[<p>Two articles have been published:</p>
+<ul>
+<li><a style="font-size: 1.2em" href="https://www.w3.org/International/questions/qa-address-formats">Address formats around the world</a></li>
+<li><a style="font-size: 1.2em" href="https://www.w3.org/International/articles/intl/index">Guide to the ECMAScript Internationalization API</a></li>
+</ul>
+<p>Address formats vary widely across the globe, with differences in structure, content, and the level of granularity. For authors and developers designing forms, databases, or systems that handle addresses, understanding these variations is crucial to avoid frustrating users from other countries. The first article will introduce some of the key differences in address formats around the world and provide guidance on how to design systems that can handle them effectively.</p>
+<p>The second article will serve as a practical overview of the most essential parts of the Intl API, providing actionable examples you can use to internationalize your web applications today.</p>
+<p><a href="https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39.png"><img fetchpriority="high" decoding="async" class="alignleft size-full wp-image-3458" src="https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39.png" alt="An address in Germany. The street name comes first, followed by the house number." width="1890" height="264" srcset="https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39.png 1890w, https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39-300x42.png 300w, https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39-1024x143.png 1024w, https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39-768x107.png 768w, https://www.w3.org/blog/International/files/2026/02/Screenshot-2026-02-03-at-16.15.39-1536x215.png 1536w" sizes="(max-width: 1890px) 100vw, 1890px" /></a></p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/10/16/for-review-number-currency-and-unit-formatting/">
+	<title>FOR REVIEW: Number, currency, and unit formatting</title>
+	<link>https://www.w3.org/blog/International/2025/10/16/for-review-number-currency-and-unit-formatting/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-10-16T12:20:25Z</dc:date>
+			<dc:subject><![CDATA[For review]]></dc:subject>
+		<dc:subject><![CDATA[qa-number-format]]></dc:subject>
+
+			<description><![CDATA[The article Number, currency, and unit formatting is out for wide review. We are looking for comments by Friday 20 February, 2026. Hardcoding formats is a brittle and unsustainable approach. Fortunately, the web platform provides robust, standards-based solutions to navigate &#8230; <a href="https://www.w3.org/blog/International/2025/10/16/for-review-number-currency-and-unit-formatting/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+		<content:encoded><![CDATA[<p>The article <a style="font-size: 1.2em" href="https://w3c.github.io/i18n-drafts/questions/qa-number-format.en.html">Number, currency, and unit formatting</a> is out for wide review. We are looking for <strong>comments by Friday 20 February, 2026</strong>.</p>
+<p>Hardcoding formats is a brittle and unsustainable approach. Fortunately, the web platform provides robust, standards-based solutions to navigate this complex landscape. This article will guide you, step-by-step, through leveraging JavaScript&#8217;s built-in <code>Intl</code> object to effortlessly adapt your web pages to varying international number, currency, and unit formats.</p>
+<p>Please send any comments as GitHub issues by <a href="https://github.com/w3c/i18n-drafts/issues/new?title=[questions/qa-number-format]%20%20BRIEF_TITLE_GOES_HERE&amp;body=%5Bsource%5D%20(https%3A%2F%2Fw3c.github.io%2Fi18n-drafts%2Fquestions%2Fqa-number-format.en.html)%20%5Ben%5D%0A%0A">clicking on this link</a>, or on “Leave a comment” at the bottom of the article. (That will add some useful information to your comment.)</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/10/08/new-translation-into-chinese-23/">
+	<title>New translation into Chinese</title>
+	<link>https://www.w3.org/blog/International/2025/10/08/new-translation-into-chinese-23/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-10-08T12:50:20Z</dc:date>
+			<dc:subject><![CDATA[New translation]]></dc:subject>
+		<dc:subject><![CDATA[article-definitions-characters]]></dc:subject>
+
+			<description><![CDATA[字符编码：核心概念 (Character encodings: Essential concepts) Thanks to Fuqiao Xue for providing this translation.]]></description>
+		<content:encoded><![CDATA[<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/articles/definitions-characters/index.zh-hans.html">字符编码：核心概念</a> (Character encodings: Essential concepts)</p>
+<p>Thanks to Fuqiao Xue for providing this translation.</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/09/01/new-translations-into-chinese-2/">
+	<title>New translations into Chinese</title>
+	<link>https://www.w3.org/blog/International/2025/09/01/new-translations-into-chinese-2/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-09-01T03:18:47Z</dc:date>
+			<dc:subject><![CDATA[New translation]]></dc:subject>
+		<dc:subject><![CDATA[qa-b-and-i-tags]]></dc:subject>
+		<dc:subject><![CDATA[qa-bidi-source]]></dc:subject>
+		<dc:subject><![CDATA[qa-bidi-space]]></dc:subject>
+		<dc:subject><![CDATA[qa-bidi-unicode-controls]]></dc:subject>
+		<dc:subject><![CDATA[qa-byte-order-mark]]></dc:subject>
+		<dc:subject><![CDATA[qa-html-language-declarations]]></dc:subject>
+
+			<description><![CDATA[处理RTL文字的源代码和代码示例 (Working with source code markup and code examples for RTL scripts) 双向文本空格丢失 (Bidi space loss) 如何用Unicode控制字符处理双向文本 (How to use Unicode controls for bidi text) HTML中的字节顺序标记（BOM） (The byte-order mark (BOM) in HTML) 在HTML中声明语言 (Declaring language in HTML) 使用b和i元素 (Using b &#8230; <a href="https://www.w3.org/blog/International/2025/09/01/new-translations-into-chinese-2/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+		<content:encoded><![CDATA[<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-bidi-source.zh-hans.html">处理RTL文字的源代码和代码示例</a> (Working with source code markup and code examples for RTL scripts)</p>
+<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-bidi-space.zh-hans.html">双向文本空格丢失</a> (Bidi space loss)</p>
+<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-bidi-unicode-controls.zh-hans.html">如何用Unicode控制字符处理双向文本</a> (How to use Unicode controls for bidi text)</p>
+<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-byte-order-mark.zh-hans.html">HTML中的字节顺序标记（BOM）</a> (The byte-order mark (BOM) in HTML)</p>
+<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-html-language-declarations.zh-hans.html">在HTML中声明语言</a> (Declaring language in HTML)</p>
+<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-b-and-i-tags.zh-hans.html">使用b和i元素</a> (Using b and i elements)</p>
+<p>Thanks to Fuqiao Xue for providing these translations.</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/08/22/for-review-guide-to-the-ecmascript-internationalization-api/">
+	<title>FOR REVIEW: Guide to the ECMAScript Internationalization API</title>
+	<link>https://www.w3.org/blog/International/2025/08/22/for-review-guide-to-the-ecmascript-internationalization-api/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-08-22T01:56:28Z</dc:date>
+			<dc:subject><![CDATA[For review]]></dc:subject>
+		<dc:subject><![CDATA[article-intl]]></dc:subject>
+
+			<description><![CDATA[The article Guide to the ECMAScript Internationalization API is out for wide review. We are looking for comments by Friday 26 December. The ECMAScript Internationalization API, available globally in JavaScript via the Intl object, provides a native way to handle &#8230; <a href="https://www.w3.org/blog/International/2025/08/22/for-review-guide-to-the-ecmascript-internationalization-api/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+		<content:encoded><![CDATA[<p>The article <a style="font-size: 1.2em" href="https://w3c.github.io/i18n-drafts/articles/intl/index.en.html">Guide to the ECMAScript Internationalization API</a> is out for wide review. We are looking for <strong>comments by Friday 26 December</strong>.</p>
+<p>The ECMAScript Internationalization API, available globally in JavaScript via the Intl object, provides a native way to handle locale- and culture-sensitive data and operations, ensuring your application speaks your user&#8217;s language correctly and efficiently.</p>
+<p>Please send any comments as GitHub issues by <a href="https://github.com/w3c/i18n-drafts/issues/new?title=[articles/intl/index]%20%20BRIEF_TITLE_GOES_HERE&amp;body=%5Bsource%5D%20(https%3A%2F%2Fw3c.github.io%2Fi18n-drafts%2Farticles%2Fintl%2Findex.en.html%23survey)%20%5Ben%5D%0A%0A">clicking on this link</a>, or on “Leave a comment” at the bottom of the article. (That will add some useful information to your comment.)</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/08/06/for-review-address-formats-around-the-world/">
+	<title>FOR REVIEW: Address formats around the world</title>
+	<link>https://www.w3.org/blog/International/2025/08/06/for-review-address-formats-around-the-world/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-08-06T03:04:54Z</dc:date>
+			<dc:subject><![CDATA[For review]]></dc:subject>
+		<dc:subject><![CDATA[qa-address-formats]]></dc:subject>
+
+			<description><![CDATA[The article Address formats around the world is out for wide review. We are looking for comments by Friday 5 December. Address formats vary widely across the globe, with differences in structure, content, and the level of granularity. For authors &#8230; <a href="https://www.w3.org/blog/International/2025/08/06/for-review-address-formats-around-the-world/">Continue reading <span class="meta-nav">&#8594;</span></a>]]></description>
+		<content:encoded><![CDATA[<p>The article <a style="font-size: 1.2em" href="https://w3c.github.io/i18n-drafts/questions/qa-address-formats.en.html">Address formats around the world</a> is out for wide review. We are looking for <strong>comments by Friday 5 December</strong>.</p>
+<p>Address formats vary widely across the globe, with differences in structure, content, and the level of granularity. For authors and developers designing forms, databases, or systems that handle addresses, understanding these variations is crucial to avoid frustrating users from other countries. This article will introduce some of the key differences in address formats around the world and provide guidance on how to design systems that can handle them effectively.</p>
+<p>Please send any comments as GitHub issues by <a href="https://github.com/w3c/i18n-drafts/issues/new?title=[questions/qa-address-formats]%20%20BRIEF_TITLE_GOES_HERE&amp;body=%5Bsource%5D%20(https%3A%2F%2Fw3c.github.io%2Fi18n-drafts%2Fquestions%2Fqa-address-formats.en.html)%20%5Ben%5D%0A%0A">clicking on this link</a>, or on “Leave a comment” at the bottom of the article. (That will add some useful information to your comment.)</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/07/31/new-translation-into-chinese-22/">
+	<title>New translation into Chinese</title>
+	<link>https://www.w3.org/blog/International/2025/07/31/new-translation-into-chinese-22/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-07-31T01:12:37Z</dc:date>
+			<dc:subject><![CDATA[New translation]]></dc:subject>
+		<dc:subject><![CDATA[article-inline-bidi-markup]]></dc:subject>
+
+			<description><![CDATA[HTML中的行内标记和双向文本 (Inline markup and bidirectional text in HTML) Thanks to Fuqiao Xue for providing this translation.]]></description>
+		<content:encoded><![CDATA[<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/articles/inline-bidi-markup/index.zh-hans">HTML中的行内标记和双向文本</a> (Inline markup and bidirectional text in HTML)</p>
+<p>Thanks to Fuqiao Xue for providing this translation.</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/07/30/new-translation-into-chinese-21/">
+	<title>New translation into Chinese</title>
+	<link>https://www.w3.org/blog/International/2025/07/30/new-translation-into-chinese-21/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-07-30T09:33:43Z</dc:date>
+			<dc:subject><![CDATA[New translation]]></dc:subject>
+		<dc:subject><![CDATA[qa-html-dir]]></dc:subject>
+
+			<description><![CDATA[HTML中的结构标记和从右向左的文本 (Structural markup and right-to-left text in HTML) Thanks to Fuqiao Xue for providing this translation.]]></description>
+		<content:encoded><![CDATA[<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-html-dir.zh-hans.html">HTML中的结构标记和从右向左的文本</a> (Structural markup and right-to-left text in HTML)</p>
+<p>Thanks to Fuqiao Xue for providing this translation.</p>
+]]></content:encoded>
+	
+	</item>
+<item rdf:about="https://www.w3.org/blog/International/2025/07/16/new-translation-into-chinese-20/">
+	<title>New translation into Chinese</title>
+	<link>https://www.w3.org/blog/International/2025/07/16/new-translation-into-chinese-20/</link>
+
+	<dc:creator><![CDATA[Fuqiao Xue]]></dc:creator>
+	<dc:date>2025-07-16T05:58:16Z</dc:date>
+			<dc:subject><![CDATA[New translation]]></dc:subject>
+		<dc:subject><![CDATA[qa-bidi-css-markup]]></dc:subject>
+
+			<description><![CDATA[CSS与标记语言对双向文本的支持 (CSS vs. markup for bidi support) Thanks to Fuqiao Xue for providing this translation.]]></description>
+		<content:encoded><![CDATA[<p><a style="font-size: 1.2rem" href="https://www.w3.org/International/questions/qa-bidi-css-markup.zh-hans.html">CSS与标记语言对双向文本的支持</a> (CSS vs. markup for bidi support)</p>
+<p>Thanks to Fuqiao Xue for providing this translation.</p>
+]]></content:encoded>
+	
+	</item>
+</rdf:RDF>

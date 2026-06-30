@@ -1,0 +1,563 @@
+{
+  "audit_timestamp": "2026-06-27",
+  "project": "RssReader (Quasar Framework + Electron)",
+  "summary": {
+    "total_gaps_found": 54,
+    "critical": 13,
+    "major": 18,
+    "minor": 23
+  },
+
+  "gaps": {
+
+    "1_stub_implementations": {
+      "title": "Stub/placeholder functions that throw 'not implemented'",
+      "severity": "critical",
+      "items": [
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "deleteArticle(id)",
+          "throws": "deleteArticle is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "markAsRead(id, read)",
+          "throws": "markAsRead is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "toggleFavorite(id)",
+          "throws": "toggleFavorite is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "markAllAsRead(feedId, folderName)",
+          "throws": "markAllAsRead is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "clearAllFavorites()",
+          "throws": "clearAllFavorites is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "saveFeed(feed)",
+          "throws": "saveFeed is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "deleteFeed(id)",
+          "throws": "deleteFeed is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "updateFeedLastUpdateTime(id, time)",
+          "throws": "updateFeedLastUpdateTime is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "incrementUnreadCount(id)",
+          "throws": "incrementUnreadCount is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "decrementUnreadCount(id)",
+          "throws": "decrementUnreadCount is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "resetUnreadCount(id)",
+          "throws": "resetUnreadCount is not implemented"
+        },
+        {
+          "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+          "function": "renameFolder(oldName, newName)",
+          "throws": "renameFolder is not implemented"
+        },
+        {
+          "file": "src-electron/domain/services/ArticleService.ts",
+          "function": "syncFeed(feedId)",
+          "body": "has TODO: 'Implement actual sync logic' — only fetches feed metadata, never actually syncs articles"
+        }
+      ]
+    },
+
+    "2_missing_store_properties": {
+      "title": "Missing store properties referenced in components (runtime errors)",
+      "severity": "critical",
+      "items": [
+        {
+          "file": "src/stores/systemDialogStore.ts",
+          "missing_properties": [
+            "showEditSubscriptionDialog",
+            "toggleEditSubscriptionDialog",
+            "editSubscriptionOldRssInfo",
+            "setEditSubscriptionOldRssInfo",
+            "showMoveFolderDialog",
+            "toggleMoveFolderDialog",
+            "currentFolderName",
+            "setMoveSubscriptionParams",
+            "toggleMoveSubscriptionDialog",
+            "showMoveSubscriptionDialog"
+          ],
+          "used_by": [
+            "EditSubscriptionDialog.vue",
+            "RssItemContextMenu.vue",
+            "MoveFolderDialog.vue"
+          ],
+          "impact": "Runtime undefined errors when clicking 'Edit' or 'Move' context menu items"
+        },
+        {
+          "file": "src/stores/rssInfoStore.ts",
+          "missing_properties": [
+            "editRssSubscription",
+            "moveFolder"
+          ],
+          "used_by": [
+            "EditSubscriptionDialog.vue (editRssSubscription)",
+            "MoveFolderDialog.vue (moveFolder)"
+          ],
+          "impact": "Runtime errors when saving edit or moving folders"
+        },
+        {
+          "file": "src/stores/favoriteStore.ts",
+          "missing_method": "getFavoritePosts()",
+          "used_by": "FavoritePage.vue line: const posts = await favoriteStore.getFavoritePosts()",
+          "impact": "Runtime error on FavoritePage — store has loadFavoritePosts() but not getFavoritePosts()"
+        }
+      ]
+    },
+
+    "3_api_not_connected_to_ui": {
+      "title": "API endpoints defined but not connected to UI",
+      "severity": "major",
+      "items": [
+        {
+          "api_channel": "article:getArticles",
+          "handler": "electron-main.ts",
+          "used_in_store": "articleStore.ts",
+          "ui_connection": "No page uses articleStore regularly — PostList uses legacy queryPostIndexByRssId directly"
+        },
+        {
+          "api_channel": "article:getArticle, toggleReadStatus, toggleFavorite, markAllAsRead, clearAllFavorites, getStats",
+          "handler": "electron-main.ts",
+          "ui_connection": "New Article API is defined and backed by articleStore, but PostListItem.vue has TODO: '实现标记已读/未读功能' — the UI only notifies but does NOT call the API"
+        },
+        {
+          "api_channel": "feed:getFeeds, getFeed, addFeed, removeFeed, syncFeed",
+          "handler": "electron-main.ts",
+          "used_in_store": "feedStore.ts",
+          "ui_connection": "feedStore exists but is not connected to any UI component — SubscriptionList uses legacy rssInfoStore"
+        },
+        {
+          "api_channel": "folder:*, folder:renameFolder",
+          "handler": "electron-main.ts",
+          "used_in_store": "folderStore.ts",
+          "ui_connection": "folderStore exists but is not used — AppDrawer/SubscriptionList uses legacy rssInfoStore with old addFolder/editFolder/removeFolder API"
+        },
+        {
+          "api_channel": "sync:getConfig, sync:updateConfig, sync:start, sync:getStatus, sync:startAuto, sync:stopAuto",
+          "handler": "electron-main.ts + SyncManager.ts",
+          "ui_connection": "SettingPage.vue references these but syncConfig.enabled defaults to false — auto-sync is effectively disabled by default with no onboarding prompt"
+        },
+        {
+          "api_channel": "search:searchPosts",
+          "handler": "electron-main.ts (routes to api.ts searchPosts -> SqliteUtil.searchPosts with FTS5)",
+          "ui_connection": "AppDrawer uses searchStore but search results do not trigger the global search — the '查看搜索结果' button (viewAllResults) only logs to console"
+        }
+      ]
+    },
+
+    "4_schema_mismatches": {
+      "title": "Database schema mismatch between old and new code paths",
+      "severity": "major",
+      "items": [
+        {
+          "detail": "post_info.favorite column",
+          "old_path": "src-electron/storage/sqlite.ts (createTable via db.exec) — NO favorite column",
+          "new_path": "src-electron/storage/SqliteHelper.ts (createTables via prepared statements) — HAS favorite INTEGER NOT NULL DEFAULT 0",
+          "impact": "If initDB() through sqlite.ts creates the table first, the favorite column is missing. SqliteHelper's init() may fail to add it since ALTER TABLE is not called. Favorite operations use article: API (toggleFavorite) but the column may not exist."
+        },
+        {
+          "detail": "favorite table vs post_info.favorite column",
+          "electronContract.ts": "Has addFavoritePost, removeFavoritePost, getFavoritePosts",
+          "favoriteStore.ts": "Uses electronAPI.getFavoritePosts(), addFavoritePost, removeFavoritePost",
+          "impl_backend": "electron-main.ts maps these to article: API — but ArticleRepositoryImpl.toggleFavorite() throws 'not implemented'",
+          "impact": "Favorites feature is completely broken end-to-end"
+        }
+      ]
+    },
+
+    "5_features_ui_not_implemented": {
+      "title": "Features mentioned in UI but not implemented",
+      "severity": "major",
+      "items": [
+        {
+          "feature": "Mark feed as read (folder context menu)",
+          "location": "FolderContextMenu.vue",
+          "detail": "onMarkedRead() — empty function body, no implementation"
+        },
+        {
+          "feature": "Mark feed as read (subscription context menu)",
+          "location": "RssItemContextMenu.vue",
+          "detail": "onMarkedRead() calls window.electronAPI.markRssAsRead() — but no such IPC channel exists in electron-main.ts"
+        },
+        {
+          "feature": "Edit subscription",
+          "location": "SubSubscriptionItemContextMenu.vue + RssItemContextMenu.vue",
+          "detail": "onOpenEditDialog() in SubSubscriptionItemContextMenu is empty. RssItemContextMenu.onEdit() references systemDialogStore properties that don't exist."
+        },
+        {
+          "feature": "Move subscription to folder",
+          "location": "RssItemContextMenu.vue + MoveFolderDialog.vue",
+          "detail": "onMoveToFolder() calls systemDialogStore methods that don't exist. MoveFolderDialog references moveFolder() on rssInfoStore that doesn't exist."
+        },
+        {
+          "feature": "Mark/unread toggle in PostListItem",
+          "location": "PostListItem.vue",
+          "detail": "toggleReadStatus() only shows a notify with TODO — never calls any API"
+        },
+        {
+          "feature": "Clear all data (danger zone)",
+          "location": "SettingPage.vue",
+          "detail": "confirmClearAllData() onOk has 'TODO: 实现清空数据逻辑' — never actually clears anything"
+        },
+        {
+          "feature": "Reset all settings (danger zone)",
+          "location": "SettingPage.vue",
+          "detail": "confirmResetSettings() onOk has 'TODO: 实现重置设置逻辑' — never actually resets"
+        },
+        {
+          "feature": "View all search results",
+          "location": "AppDrawer.vue",
+          "detail": "viewAllResults() only logs to console with TODO — no dedicated search results page or expanded view"
+        },
+        {
+          "feature": "Rename subscription (SubSubscriptionItemContextMenu)",
+          "location": "SubSubscriptionItemContextMenu.vue",
+          "detail": "onRename() — empty function body"
+        },
+        {
+          "feature": "Open home page from feed context menu",
+          "location": "SubSubscriptionItemContextMenu.vue",
+          "detail": "onOpenHomePage() — calls openLink but may fail silently if htmlUrl is empty"
+        },
+        {
+          "feature": "Estimated reading time display",
+          "location": "ContentReader.vue, ReadingProgressBar.vue",
+          "detail": "Reading progress and estimated time features are fully built out in stores/composables but ContentReader.vue is NOT actually used by Content.vue page — Content.vue does its own rendering"
+        },
+        {
+          "feature": "Keyboard shortcuts help",
+          "location": "KeyboardShortcutsDialog.vue, App.vue",
+          "detail": "KeyboardStore registers shortcuts but App.vue's createDefaultShortcuts has empty callbacks (onSettings, onNewSubscription do nothing useful). The actual keydown listener from useKeyboard composable is registered in App.vue."
+        },
+        {
+          "feature": "Reading progress bar",
+          "location": "ReadingProgressBar.vue, ContentReader.vue",
+          "detail": "ReadingProgressBar is a standalone component but is only used inside ContentReader.vue, which Content.vue does not use — it renders content directly"
+        }
+      ]
+    },
+
+    "6_error_states_not_handled": {
+      "title": "Error/empty/loading states issues",
+      "severity": "minor",
+      "items": [
+        {
+          "location": "PostList.vue",
+          "detail": "Has loading, error, and empty states with retry buttons — GOOD coverage"
+        },
+        {
+          "location": "Content.vue",
+          "detail": "Has loading spinner, error card, and fallback content — GOOD coverage"
+        },
+        {
+          "location": "FavoritePage.vue",
+          "detail": "Has loading, empty, and error states — GOOD coverage"
+        },
+        {
+          "location": "HomePage.vue",
+          "detail": "Has stats display but NO loading state for the initial data load — rssInfoStore.refresh() is called in store constructor but no loading indicator on HomePage"
+        },
+        {
+          "location": "SettingPage.vue",
+          "detail": "Has saving/syncing states but no loading state for initial loadSettings() — no skeleton/spinner while loading sync config from backend"
+        },
+        {
+          "location": "SubscriptionList.vue (AppDrawer)",
+          "detail": "No loading state — rssInfoStore.isLoading is never bound to the template. User clicks a feed but no spinner appears while data loads."
+        },
+        {
+          "location": "Global",
+          "detail": "No offline state handling anywhere — if Electron loses network, there are no 'offline' banners, retry-on-reconnect, or stale-data indicators"
+        }
+      ]
+    },
+
+    "7_accessibility_gaps": {
+      "title": "Accessibility gaps",
+      "severity": "minor",
+      "items": [
+        {
+          "detail": "q-tree in SubscriptionList.vue — no ARIA labels on tree nodes",
+          "file": "SubscriptionList.vue"
+        },
+        {
+          "detail": "Context menus (q-menu context-menu) — not keyboard-navigable with arrow keys",
+          "files": ["FolderContextMenu.vue", "RssItemContextMenu.vue", "SubSubscriptionItemContextMenu.vue"]
+        },
+        {
+          "detail": "PostListItem.vue — action buttons lack aria-labels",
+          "file": "PostListItem.vue"
+        },
+        {
+          "detail": "Content.vue — v-html content has no focus management when navigating between articles",
+          "file": "Content.vue"
+        },
+        {
+          "detail": "No focus trap in dialogs — q-dialog may not trap focus properly in all scenarios",
+          "files": ["AddSubscriptionDialog.vue", "SubscribeDialog.vue"]
+        },
+        {
+          "detail": "No keyboard shortcut list available via aria — KeyboardShortcutsDialog is a visual dialog only",
+          "file": "KeyboardShortcutsDialog.vue"
+        },
+        {
+          "detail": "LoadingOverlay.vue — no aria-live region to announce loading state to screen readers",
+          "file": "LoadingOverlay.vue"
+        },
+        {
+          "detail": "No skip-to-content or skip-to-main-navigation links",
+          "file": "AppLayout.vue"
+        },
+        {
+          "detail": "q-btn color contrast — some buttons use color classes without ensuring contrast (e.g. FolderContextMenu uses 'grey-8' on potentially white background)",
+          "files": ["FolderContextMenu.vue", "HomePage.vue"]
+        }
+      ]
+    },
+
+    "8_missing_crud": {
+      "title": "Missing CRUD operations",
+      "severity": "major",
+      "items": [
+        {
+          "operation": "Create subscription",
+          "status": "Implemented (AddSubscriptionDialog -> rssInfoStore.addRssSubscription -> api.ts addRssSubscription)"
+        },
+        {
+          "operation": "Read subscriptions",
+          "status": "Implemented (SubscriptionList -> rssInfoStore -> getRssInfoListFromDb)"
+        },
+        {
+          "operation": "Update subscription",
+          "status": "BROKEN — EditSubscriptionDialog exists but references systemDialogStore properties that don't exist. The store doesn't have editSubscriptionOldRssInfo or editRssSubscription."
+        },
+        {
+          "operation": "Delete subscription",
+          "status": "Partially implemented — removeRssSubscription exists but fails silently if folder/source doesn't exist"
+        },
+        {
+          "operation": "Create folder",
+          "status": "Implemented (AddFolderDialog -> rssInfoStore.addFolder)"
+        },
+        {
+          "operation": "Rename folder",
+          "status": "Implemented (EditFolderDialog -> rssInfoStore.editFolder)"
+        },
+        {
+          "operation": "Delete folder",
+          "status": "Implemented (FolderContextMenu -> rssInfoStore.removeFolder)"
+        },
+        {
+          "operation": "Move folder",
+          "status": "BROKEN — MoveFolderDialog references rssInfoStore.moveFolder() which doesn't exist. Also references systemDialogStore properties that don't exist."
+        },
+        {
+          "operation": "Move subscription to different folder",
+          "status": "NOT implemented — RssItemContextMenu.onMoveToFolder references store properties that don't exist"
+        },
+        {
+          "operation": "Toggle read status on post list item",
+          "status": "BROKEN — PostListItem.vue toggleReadStatus() only shows notify, never calls API"
+        },
+        {
+          "operation": "Mark all articles in a feed as read",
+          "status": "BROKEN — FolderContextMenu.onMarkedRead() is empty. RssItemContextMenu calls non-existent IPC channel markRssAsRead."
+        },
+        {
+          "operation": "Toggle favorite",
+          "status": "BROKEN — ArticleRepositoryImpl.toggleFavorite() throws 'not implemented'"
+        },
+        {
+          "operation": "Clear all favorites",
+          "status": "BROKEN — ArticleRepositoryImpl.clearAllFavorites() throws 'not implemented'"
+        },
+        {
+          "operation": "Edit subscription title/URL",
+          "status": "BROKEN — rssInfoStore.editRssSubscription doesn't exist. There's no API to update RSS metadata without re-parsing the feed."
+        }
+      ]
+    },
+
+    "9_missing_user_feedback": {
+      "title": "Missing user feedback",
+      "severity": "minor",
+      "items": [
+        {
+          "location": "AddFolderDialog.vue",
+          "detail": "Shows error notify on failure, but no success notification when folder is added successfully"
+        },
+        {
+          "location": "EditFolderDialog.vue",
+          "detail": "Shows error notify on failure, but no success notification"
+        },
+        {
+          "location": "SubscribeDialog.vue",
+          "detail": "No loading state shown during subscription (addRssSubscription is async but no loading indicator)"
+        },
+        {
+          "location": "Folder deletion (FolderContextMenu)",
+          "detail": "No confirmation dialog before deletion — deletes folder immediately"
+        },
+        {
+          "location": "Subscription deletion (SubSubscriptionItemContextMenu)",
+          "detail": "No confirmation dialog — deletes immediately"
+        },
+        {
+          "location": "PostListItem.vue scroll-to-top",
+          "detail": "FAB button appears but scroll position is tracked on post-list-container element, not the q-page — may not work correctly if scroll container is not the expected element"
+        },
+        {
+          "location": "Content.vue toolbar",
+          "detail": "No 'mark as read' / 'mark as unread' button considering the article is currently being viewed"
+        },
+        {
+          "location": "AppHeader.vue",
+          "detail": "Refresh button has no loading state and no visual feedback when clicked"
+        }
+      ]
+    },
+
+    "10_unused_dependencies": {
+      "title": "Unused or potentially unused dependencies",
+      "severity": "minor",
+      "items": [
+        {
+          "package": "@vueuse/core",
+          "used_in": "SubSubscriptionItemContextMenu.vue imports useClipboard — only usage",
+          "status": "Lightly used — only one component imports it. Could be replaced with native navigator.clipboard."
+        },
+        {
+          "package": "moment",
+          "used_in": "No import found in any .ts or .vue file",
+          "status": "UNUSED — No import or usage anywhere in src/ or src-electron/"
+        },
+        {
+          "package": "uuid",
+          "used_in": "ArticleService.ts generates ids manually, not using uuid",
+          "status": "UNUSED — No import or usage anywhere in the codebase"
+        },
+        {
+          "package": "@types/uuid",
+          "devDependency",
+          "status": "UNUSED — because uuid itself is unused"
+        },
+        {
+          "package": "xml2js",
+          "used_in": "Could be used in FeedParser.ts for RSS parsing",
+          "status": "Likely used — check rss/parser directory"
+        },
+        {
+          "package": "yarn",
+          "dependencies section",
+          "status": "BAD PRACTICE — yarn should not be a project dependency; it should be installed globally. This will cause issues in CI."
+        },
+        {
+          "package": "axios",
+          "used_in": "boot/axios.ts — Quasar boot file",
+          "status": "Boot file registers axios but no component actually imports/uses $axios or src/boot/axios"
+        }
+      ]
+    },
+
+    "11_dual_architecture_issues": {
+      "title": "Dual architecture / code duplication",
+      "severity": "major",
+      "items": [
+        {
+          "detail": "Two parallel data access layers",
+          "old_layer": "rssInfoStore + SourceManage + SqliteUtil (legacy — fully working but no favorites/read tracking)",
+          "new_layer": "folderStore + feedStore + articleStore + ArticleService + Repository pattern (modern — but 13 repository methods throw 'not implemented')",
+          "impact": "Neither layer is fully functional. Old layer CRUD works but can't toggle read/favorite. New layer has the API surface for these features but lacks implementation."
+        },
+        {
+          "detail": "Two SQLite helpers",
+          "old_helper": "src-electron/storage/sqlite.ts (SqliteUtil — has its own createTable, FTS5, search)",
+          "new_helper": "src-electron/storage/SqliteHelper.ts (SqliteHelper — has its own createTables, FTS5, read/write locks, queue)",
+          "impact": "SqliteUtil wraps SqliteHelper for some operations but has its own init/createTable too. Schema drift risk (favorite column exists in one but not the other)."
+        },
+        {
+          "detail": "Two Article model interfaces with different field names",
+          "src/common/models.ts": "id, guid, feedId, folderName, title, summary, content, link, pubDate, read, favorite, author?",
+          "src-electron/domain/models/Article.ts": "id, title, content, description, link, author, publishDate, updateTime, read, favorite, feedId, feedTitle, feedUrl, folderName, avatar?",
+          "impact": "Data mapping between layers is fragile — SqliteArticleRepository has manual mapPostIndexToArticle and mapContentToArticle that may lose or mis-map fields."
+        },
+        {
+          "detail": "Two subscription dialogs",
+          "SubscribeDialog.vue (old)": "Used in AppHeader.vue — simple form with url/name/folder",
+          "AddSubscriptionDialog.vue (new)": "Not used anywhere visible — more polished form with validations",
+          "impact": "Old dialog is used in header, new (better) one is orphaned. User sees the simpler SubscribeDialog, not AddSubscriptionDialog."
+        }
+      ]
+    },
+
+    "12_other_issues": {
+      "title": "Other issues",
+      "severity": "minor",
+      "items": [
+        {
+          "detail": "FavoritePage.vue imports favoriteStore but also maintains its own local favoritePosts ref — causes duplicate state",
+          "fix": "Should use store's favoritePosts directly instead of local copy"
+        },
+        {
+          "detail": "SearchComponent.vue is ORPHANED — defined in components/ but never imported anywhere in the app",
+          "impact": "All that polished search UI with history/hot-tags is dead code"
+        },
+        {
+          "detail": "ContentReader.vue is ORPHANED — defined in components/ but never imported by Content.vue or any other page",
+          "impact": "All the reading progress/bookmark/share UI is dead code"
+        },
+        {
+          "detail": "LoadingOverlay.vue is ORPHANED — defined in components/ but never imported by any page",
+          "impact": "The custom loading overlay is dead code"
+        },
+        {
+          "detail": "MoveFolderDialog.vue is ORPHANED — never imported by any parent component",
+          "impact": "The entire 'move folder' feature UI is unreachable dead code"
+        },
+        {
+          "detail": "ReadingProgressBar.vue — only used inside ContentReader.vue which is itself orphaned, making this doubly dead code",
+          "impact": "Reading progress tracking is completely disconnected from the actual reading experience"
+        },
+        {
+          "detail": "composables/useReadingExperience.ts references '../../src-electron/util/string' which is a relative path that may not resolve correctly from src/composables/",
+          "impact": "Build error possible"
+        },
+        {
+          "detail": "Router does NOT include a route for FavoritePage — /favorite path is not defined in routes.ts",
+          "impact": "FavoritePage is unreachable via navigation"
+        },
+        {
+          "detail": "No route to the search results page — viewAllResults() only console.logs",
+          "impact": "Users can only see 10 inline search results"
+        },
+        {
+          "detail": "devDependencies include @types/node ^12.20.21 but Node engine spec is ^18 || ^16 || ^14.19 — type definitions are outdated",
+          "impact": "TypeScript may not recognize newer Node.js APIs"
+        }
+      ]
+    }
+  }
+}

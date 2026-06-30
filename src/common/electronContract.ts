@@ -1,7 +1,5 @@
-import { ContentInfo } from 'src/common/ContentInfo';
-import { ErrorMsg } from 'src/common/ErrorMsg';
-import { PostIndexItem } from 'src-electron/storage/common';
-import { RssFolderItem, RssInfoNew } from 'src/common/RssInfoItem';
+import { ContentInfo, PostIndexItem, RssFolderItem, RssInfoNew } from 'src/common/models';
+import { ApiResponse, ErrorMsg } from 'src/common/ErrorMsg';
 import {
   Article,
   ArticleQueryParams,
@@ -11,22 +9,24 @@ import {
 } from 'src/common/models';
 
 export interface ElectronContract {
-  addRssSubscription: (obj: RssInfoNew) => Promise<void>;
-  removeRssSubscription: (folderName: string, rssUrl: string) => Promise<ErrorMsg>;
+  // --- Legacy RSS API (wrapped in ApiResponse) ---
+  addRssSubscription: (obj: RssInfoNew) => Promise<ApiResponse<void>>;
+  removeRssSubscription: (folderName: string, rssUrl: string) => Promise<ApiResponse<void>>;
   openLink: (url: string) => Promise<void>;
   close: () => void;
   minimize: () => void;
-  addFolder: (folderName: string) => Promise<ErrorMsg>;
-  removeFolder: (folderName: string) => Promise<ErrorMsg>;
-  importOpmlFile: () => Promise<ErrorMsg>;
+  addFolder: (folderName: string) => Promise<ApiResponse<void>>;
+  removeFolder: (folderName: string) => Promise<ApiResponse<void>>;
+  importOpmlFile: () => Promise<ApiResponse<void>>;
   dumpFolderToDb: (folderInfoListJson: string) => Promise<ErrorMsg>;
-  loadFolderFromDb: () => Promise<string>;
-  getRssInfoListFromDb: () => Promise<RssFolderItem[]>;
-  editFolder: (oldFolderName: string, newFolderName: string) => Promise<ErrorMsg>;
-  queryPostIndexByRssId: (rssId: string) => Promise<PostIndexItem[]>;
-  queryPostContentByGuid: (guid: string) => Promise<ContentInfo>;
-  fetchRssIndexList: (rssId: string) => Promise<ErrorMsg>;
+  loadFolderFromDb: () => Promise<ApiResponse<string>>;
+  getRssInfoListFromDb: () => Promise<ApiResponse<RssFolderItem[]>>;
+  editFolder: (oldFolderName: string, newFolderName: string) => Promise<ApiResponse<void>>;
+  queryPostIndexByRssId: (rssId: string) => Promise<ApiResponse<PostIndexItem[]>>;
+  queryPostContentByGuid: (guid: string) => Promise<ApiResponse<ContentInfo>>;
+  fetchRssIndexList: (rssId: string) => Promise<ApiResponse<void>>;
 
+  // --- New Article API ---
   getArticles: (params: ArticleQueryParams) => Promise<{ articles: Article[]; total: number }>;
   getArticle: (id: string) => Promise<Article>;
   toggleReadStatus: (id: string) => Promise<void>;
@@ -35,23 +35,27 @@ export interface ElectronContract {
   clearAllFavorites: () => Promise<void>;
   getArticleStats: () => Promise<ArticleStats>;
 
+  // --- New Feed API ---
   getFeeds: (folderName?: string) => Promise<FeedSource[]>;
   getFeed: (id: string) => Promise<FeedSource | null>;
   addFeed: (feedUrl: string, title?: string, folderName?: string) => Promise<void>;
   removeFeed: (id: string) => Promise<void>;
   syncFeed: (id: string) => Promise<void>;
 
+  // --- New Folder API ---
   getFolders: () => Promise<Folder[]>;
   getFolder: (name: string) => Promise<Folder | null>;
   addFolderV2: (name: string) => Promise<void>;
   removeFolderV2: (name: string) => Promise<void>;
   renameFolder: (oldName: string, newName: string) => Promise<void>;
 
+  // --- Favorites API ---
   getFavoritePosts: () => Promise<PostIndexItem[]>;
   addFavoritePost: (post: unknown) => Promise<void>;
   removeFavoritePost: (guid: string) => Promise<void>;
   isPostFavorite: (guid: string) => Promise<boolean>;
 
+  // --- Sync API ---
   syncGetConfig: () => Promise<unknown>;
   syncUpdateConfig: (config: unknown) => Promise<unknown>;
   syncStart: () => Promise<unknown>;
@@ -59,6 +63,7 @@ export interface ElectronContract {
   syncStartAuto: () => Promise<unknown>;
   syncStopAuto: () => Promise<unknown>;
 
+  // --- Search API ---
   searchPosts: (
     query: string,
     options?: {
@@ -66,6 +71,6 @@ export interface ElectronContract {
       dateFrom?: string;
       dateTo?: string;
       limit?: number;
-    }
-  ) => Promise<PostIndexItem[]>;
+    },
+  ) => Promise<ApiResponse<PostIndexItem[]>>;
 }

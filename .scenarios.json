@@ -1,0 +1,291 @@
+[
+  {
+    "name": "Feed Subscription Lifecycle — Add → Read → Remove",
+    "methods": ["positive", "state_transition", "boundary", "exception"],
+    "description": "Complete feed lifecycle: subscribe to a feed with valid URL → verify store reflects new feed → fetch and count posts → read article content by GUID → toggle read status (false→true) → attempt duplicate subscription (must reject) → unsubscribe and verify store cleanup (empty state). Covers all state transitions across the feed lifecycle via mocked IPC.",
+    "testFilePath": "test/e2e/subscription-lifecycle.test.ts",
+    "fixtures": {
+      "feeds": [
+        { "id": "feed-py", "title": "Python Blog", "feedUrl": "https://python.example/rss.xml", "htmlUrl": "https://python.example", "unread": 15, "avatar": "" },
+        { "id": "feed-hn", "title": "Hacker News", "feedUrl": "https://hnrss.org/frontpage", "htmlUrl": "https://news.ycombinator.com", "unread": 42, "avatar": "" }
+      ],
+      "posts": [
+        { "title": "Async Python Deep Dive", "guid": "post-001", "link": "https://python.example/async-deep-dive", "author": "Jane Dev", "updateTime": "2024-06-15 14:30:00", "read": false, "desc": "A comprehensive guide to asyncio patterns...", "rssId": "feed-py" },
+        { "title": "PEP 723 Update", "guid": "post-002", "link": "https://python.example/pep-723", "author": "Guido Fan", "updateTime": "2024-06-14 09:00:00", "read": false, "desc": "New packaging standards...", "rssId": "feed-py" }
+      ],
+      "folders": [
+        { "folderName": "Tech", "data": [], "children": [] }
+      ],
+      "edgeCases": {
+        "dupFeedUrl": "https://python.example/rss.xml",
+        "invalidUrl": "ftp://bad.example/feed.xml"
+      }
+    },
+    "assertions": [
+      { "type": "count", "expected": 1, "description": "After addFeed, rssFolderList[0].data has 1 feed" },
+      { "type": "text", "expected": "Python Blog", "description": "Feed title matches after subscription" },
+      { "type": "count", "expected": 2, "description": "queryPostIndexByRssId returns exactly 2 posts" },
+      { "type": "text", "expected": "Async Python Deep Dive", "description": "Post title matches expected content" },
+      { "type": "boolean", "expected": false, "description": "Post.read is false before toggleReadStatus" },
+      { "type": "boolean", "expected": true, "description": "After toggleReadStatus, post.read is true" },
+      { "type": "text", "expected": "Feed already exists", "description": "Duplicate subscription throws 'Feed already exists'" },
+      { "type": "count", "expected": 0, "description": "After removeFeed, store.rssFolderList is empty" },
+      { "type": "boolean", "expected": true, "description": "isLoading resets to false after removeFeed" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Feed URL with invalid protocol throws INVALID_PARAM" }
+    ]
+  },
+  {
+    "name": "Folder CRUD — Create → Rename → Move Feed → Delete",
+    "methods": ["positive", "equivalence_class", "state_transition", "exception"],
+    "description": "Full folder lifecycle through folderStore (v2 API): create 3 folders including one with CJK name → rename 'Technology' to 'Tech' → add a feed to 'Tech' → move feed to 'Science' (via removeFeed + addFeed) → delete empty 'Science' folder (must succeed) → delete 'Tech' with feed (must cascade feeds) → verify store.folders state after each transition. Tests exception paths: duplicate folder name, empty folder name, deleting non-existent folder.",
+    "testFilePath": "test/e2e/folder-crud.test.ts",
+    "fixtures": {
+      "folders": [
+        { "id": "f-1", "name": "Technology", "feedCount": 0, "parentId": null, "order": 0 },
+        { "id": "f-2", "name": "Science", "feedCount": 0, "parentId": null, "order": 1 },
+        { "id": "f-3", "name": "中文科技", "feedCount": 0, "parentId": null, "order": 2 }
+      ],
+      "feeds": [
+        { "id": "feed-go", "title": "Golang Weekly", "feedUrl": "https://golangweekly.com/rss", "htmlUrl": "https://golangweekly.com", "unread": 8, "avatar": "" }
+      ],
+      "treeAfterRename": [
+        { "folderName": "Tech", "data": [], "children": [] },
+        { "folderName": "Science", "data": [], "children": [] },
+        { "folderName": "中文科技", "data": [], "children": [] }
+      ],
+      "treeAfterAddFeed": [
+        { "folderName": "Tech", "data": [{ "id": "feed-go", "title": "Golang Weekly", "feedUrl": "https://golangweekly.com/rss", "htmlUrl": "https://golangweekly.com", "unread": 8 }], "children": [] },
+        { "folderName": "Science", "data": [], "children": [] },
+        { "folderName": "中文科技", "data": [], "children": [] }
+      ]
+    },
+    "assertions": [
+      { "type": "count", "expected": 3, "description": "folderStore.folders has 3 entries after creation" },
+      { "type": "text", "expected": "Technology", "description": "folderNames includes 'Technology'" },
+      { "type": "text", "expected": "中文科技", "description": "CJK folder name is preserved" },
+      { "type": "text", "expected": "Tech", "description": "After rename, folder name updates from 'Technology' to 'Tech'" },
+      { "type": "boolean", "expected": true, "description": "folderNames does not contain old name 'Technology' after rename" },
+      { "type": "count", "expected": 1, "description": "'Tech' folder.data has 1 feed after addFeed" },
+      { "type": "text", "expected": "Golang Weekly", "description": "Feed title in correct folder" },
+      { "type": "text", "expected": "Folder already exists", "description": "Duplicate folder creation throws error" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Empty folder name throws INVALID_PARAM" },
+      { "type": "count", "expected": 0, "description": "After deleting all folders, folderStore.folders is empty" }
+    ]
+  },
+  {
+    "name": "Favorite/Unfavorite Toggle and Bulk Clear",
+    "methods": ["state_transition", "boundary", "exception", "positive"],
+    "description": "Favorite state machine through favoriteStore: toggle favorite on normal post (false→true→false) → verify store.favoriteCount and favoritePosts length → toggle favorite on boundary case titles (500-char title, emoji title, CJK title, HTML-escaped title) → clearAllFavorites → verify empty state. Tests idempotency: calling toggleFavorite twice on same post returns to original state without errors.",
+    "testFilePath": "test/e2e/favorites.test.ts",
+    "fixtures": {
+      "posts": [
+        { "title": "Understanding Quarks", "guid": "guid-quarks", "link": "https://science.example/quarks", "author": "Dr. Particle", "updateTime": "2024-06-10 08:00:00", "read": false, "desc": "Deep dive into particle physics...", "rssId": "feed-sci" },
+        { "title": "日本語のタイトル — 测试文章标题 — 한국어 제목", "guid": "guid-cjk", "link": "https://example.com/cjk", "author": "多语言作者", "updateTime": "2024-06-11 12:30:00", "read": true, "desc": "多语言内容测试...", "rssId": "feed-test" },
+        { "title": "🔥🚀 Latest News — Breaking! 📰✨", "guid": "guid-emoji", "link": "https://example.com/emoji-news", "author": "News Bot", "updateTime": "2024-06-12 16:45:00", "read": false, "desc": "Emoji-heavy title test...", "rssId": "feed-test" },
+        { "title": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "guid": "guid-long-title", "link": "https://example.com/very-long-title", "author": "Long Author", "updateTime": "2024-06-13 07:00:00", "read": false, "desc": "Article with very long title...", "rssId": "feed-test" },
+        { "title": "<script>alert('xss')</script>", "guid": "guid-xss", "link": "https://example.com/xss-test", "author": "Hacker", "updateTime": "2024-06-14 10:00:00", "read": false, "desc": "HTML entity escaped title...", "rssId": "feed-test" }
+      ]
+    },
+    "assertions": [
+      { "type": "count", "expected": 0, "description": "favoritePosts initially empty" },
+      { "type": "boolean", "expected": true, "description": "toggleFavorite returns favorited=true for un-favorited post" },
+      { "type": "count", "expected": 1, "description": "After first favorite, favoritePosts length is 1" },
+      { "type": "count", "expected": 1, "description": "favoriteCount increments to 1" },
+      { "type": "boolean", "expected": false, "description": "toggleFavorite same post again returns favorited=false" },
+      { "type": "count", "expected": 0, "description": "After unfavorite, favoritePosts length back to 0" },
+      { "type": "count", "expected": 3, "description": "Favorite 3 boundary posts, favoritePosts length is 3" },
+      { "type": "text", "expected": "🔥🚀 Latest News — Breaking! 📰✨", "description": "Emoji title preserved in favorite list" },
+      { "type": "text", "expected": "日本語のタイトル — 测试文章标题 — 한국어 제목", "description": "CJK title preserved in favorite list" },
+      { "type": "count", "expected": 0, "description": "After clearAllFavorites, favoritePosts is empty" }
+    ]
+  },
+  {
+    "name": "OPML Import with Nested Folder Tree",
+    "methods": ["positive", "equivalence_class", "exception"],
+    "description": "OPML import flow: import folder tree (3 folders: 'Tech' with 2 feeds, 'News' with 3 feeds, 'Empty Folder' with 0) → verify rssFolderList matches expected tree → verify folderNameList includes all 3 names → verify unread counts aggregate correctly (Tech: 45, News: 22) → verify articleStats reflect total counts → import malformed OPML (empty file) → verify store handles error gracefully without corrupting previous state.",
+    "testFilePath": "test/e2e/opml-import.test.ts",
+    "fixtures": {
+      "opmlTree": [
+        { "folderName": "Tech", "data": [{ "id": "tech-001", "title": "Hacker News", "feedUrl": "https://hnrss.org/frontpage", "unread": 42 }, { "id": "tech-002", "title": "Lobsters", "feedUrl": "https://lobste.rs/rss", "unread": 3 }], "children": [] },
+        { "folderName": "News", "data": [{ "id": "news-001", "title": "BBC World", "feedUrl": "https://feeds.bbci.co.uk/news/world/rss.xml", "unread": 15 }, { "id": "news-002", "title": "Reuters", "feedUrl": "https://www.reuters.com/rss", "unread": 0 }, { "id": "news-003", "title": "AP News", "feedUrl": "https://www.apnews.com/rss", "unread": 7 }], "children": [] },
+        { "folderName": "Empty Folder", "data": [], "children": [] }
+      ],
+      "stats": { "totalArticles": 150, "unreadCount": 67, "favoriteCount": 12, "feedCount": 5, "folderCount": 3 }
+    },
+    "assertions": [
+      { "type": "count", "expected": 3, "description": "rssFolderList has 3 folders after OPML import" },
+      { "type": "text", "expected": "Empty Folder", "description": "Empty folder name preserved" },
+      { "type": "count", "expected": 2, "description": "'Tech' folder has 2 feeds" },
+      { "type": "count", "expected": 3, "description": "'News' folder has 3 feeds" },
+      { "type": "count", "expected": 0, "description": "'Empty Folder' has 0 feeds" },
+      { "type": "count", "expected": 67, "description": "unreadArticleCount matches sum across folders (42+3+15+0+7)" },
+      { "type": "count", "expected": 150, "description": "totalArticleCount matches ArticleStats" },
+      { "type": "boolean", "expected": true, "description": "folderNameList contains 'Tech', 'News', 'Empty Folder'" },
+      { "type": "boolean", "expected": true, "description": "store.error is null after successful import" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Importing empty OPML throws INVALID_PARAM, existing state preserved" }
+    ]
+  },
+  {
+    "name": "Search — Local Substring, Global FTS, History, Abort",
+    "methods": ["equivalence_class", "boundary", "state_transition", "exception"],
+    "description": "Full search flow through searchStore: local substring search across a post array (exact match, partial match, no match) → global FTS5 search via IPC (searchPosts) → mixed search with folder filter → empty query (must return empty/nothing) → single-character search (boundary: 'a') → search history tracking (last 10 searches) → abort controller: call search twice rapidly with different terms, verify only the second completes. Tests CJK and emoji query terms.",
+    "testFilePath": "test/e2e/search.test.ts",
+    "fixtures": {
+      "posts": [
+        { "title": "Async Python Deep Dive", "guid": "s-guid-1", "link": "https://py.example/1", "author": "Jane", "updateTime": "2024-06-15 10:00:00", "read": false, "desc": "Python concurrency patterns with asyncio, trio, and anyio", "rssId": "feed-py" },
+        { "title": "Rust Async/Await Tutorial", "guid": "s-guid-2", "link": "https://rs.example/1", "author": "Alice", "updateTime": "2024-06-14 09:00:00", "read": true, "desc": "Learn async Rust from scratch", "rssId": "feed-rs" },
+        { "title": "Go Channels Deep Dive", "guid": "s-guid-3", "link": "https://go.example/1", "author": "Bob", "updateTime": "2024-06-13 08:00:00", "read": false, "desc": "Understanding goroutines and channels", "rssId": "feed-go" },
+        { "title": "日本語のプログラミング記事", "guid": "s-guid-4", "link": "https://jp.example/1", "author": "太郎", "updateTime": "2024-06-12 07:00:00", "read": false, "desc": "日本発のプログラミング情報", "rssId": "feed-jp" },
+        { "title": "🔥 Best Practices 2024", "guid": "s-guid-5", "link": "https://ex.example/1", "author": "News", "updateTime": "2024-06-11 06:00:00", "read": false, "desc": "Top 10 best practices", "rssId": "feed-test" }
+      ],
+      "historyExpected": ["async", "Rust", "Go", "日本語", "fire emoji", "a", "zzz"]
+    },
+    "assertions": [
+      { "type": "count", "expected": 1, "description": "Local search 'Async' returns exactly 1 post" },
+      { "type": "text", "expected": "Async Python Deep Dive", "description": "Exact match title returned" },
+      { "type": "count", "expected": 2, "description": "Local search 'async' (case-insensitive) returns 2 posts (Python + Rust)" },
+      { "type": "count", "expected": 0, "description": "Search 'ZZZZZ' (no match) returns 0 results" },
+      { "type": "boolean", "expected": true, "description": "isSearching is false after search completes" },
+      { "type": "count", "expected": 1, "description": "Global FTS search via IPC for 'goroutines' returns 1 result" },
+      { "type": "text", "expected": "Go Channels Deep Dive", "description": "Global FTS returns correct match" },
+      { "type": "count", "expected": 1, "description": "CJK search 'プログラミング' returns 1 result" },
+      { "type": "count", "expected": 1, "description": "Single-char search 'a' (boundary) returns at least 1 match" },
+      { "type": "count", "expected": 0, "description": "Search with empty string returns 0 results (no-op)" }
+    ]
+  },
+  {
+    "name": "Reading Progress — Scroll Tracking and Auto Mark-Read",
+    "methods": ["state_transition", "boundary", "positive"],
+    "description": "Reading store state machine: startReading('article-1', 1500 words) → verify isReading=true, estimatedReadingTime=360s (ceil(1500/250*60)) → updateProgress to 0.5 (50%) → verify progress=50, markedAsRead=false → updateProgress to 0.9 (90%) → verify progress=90, markedAsRead=true (auto-crossed threshold 0.8) → stopReading → verify isReading=false → startReading for a second article concurrently → verify currentArticleId switches → getProgress for first article preserved in Map → clearProgress('article-1') → getProgress returns undefined. Tests estimateReadingTime with edge case wordCounts: 0, 1, 250, 999999.",
+    "testFilePath": "test/e2e/reading-progress.test.ts",
+    "fixtures": {
+      "articles": [
+        { "articleId": "article-001", "wordCount": 1500, "expectedMinutes": 6, "expectedSeconds": 360 },
+        { "articleId": "article-002", "wordCount": 250, "expectedMinutes": 1, "expectedSeconds": 60 },
+        { "articleId": "article-003", "wordCount": 0, "expectedSeconds": 0 },
+        { "articleId": "article-004", "wordCount": 999999, "expectedSeconds": 240000 }
+      ]
+    },
+    "assertions": [
+      { "type": "boolean", "expected": true, "description": "isReading is true after startReading" },
+      { "type": "count", "expected": 360, "description": "estimatedReadingTime for 1500 words at 250 wpm is 360s" },
+      { "type": "count", "expected": 50, "description": "updateProgress to scroll 0.5 sets progress=50" },
+      { "type": "boolean", "expected": false, "description": "markedAsRead is false at 50% scroll" },
+      { "type": "count", "expected": 90, "description": "updateProgress to scroll 0.9 sets progress=90" },
+      { "type": "boolean", "expected": true, "description": "markedAsRead becomes true when scroll >= 0.8" },
+      { "type": "boolean", "expected": false, "description": "isReading is false after stopReading" },
+      { "type": "text", "expected": "article-002", "description": "currentArticleId updates when reading new article" },
+      { "type": "count", "expected": 60, "description": "estimateReadingTime(250) returns 60s" },
+      { "type": "count", "expected": 0, "description": "estimateReadingTime(0) returns 0s" }
+    ]
+  },
+  {
+    "name": "Sync Progress — Batch Sync with Partial Failures",
+    "methods": ["positive", "exception", "state_transition", "boundary"],
+    "description": "SyncManager end-to-end flow via syncProgressStore: start syncAll of 3 sources → verify progress.isSyncing=true, totalSources=3, each source transitions pending→syncing→success/failed → one source fails (mock network error) → verify failureCount=1, successCount=2, completedCount=3 → progressPercent = round(3/3 * 100) = 100 → startPolling/stopPolling: verify isPolling flag transitions correctly → sync with 0 sources (boundary) → verify progressPercent returns 0. Tests the batch batching logic (5 concurrency) and progress state machine without real network.",
+    "testFilePath": "test/e2e/sync-progress.test.ts",
+    "fixtures": {
+      "sources": [
+        { "rss_id": "sync-001", "title": "Hacker News", "status": "pending" },
+        { "rss_id": "sync-002", "title": "BBC World", "status": "pending" },
+        { "rss_id": "sync-003", "title": "Slow Feed", "status": "pending" }
+      ],
+      "syncConfig": { "enabled": true, "interval": 30, "backgroundSync": true, "syncOnStartup": true, "notification": true },
+      "mockSyncResults": { "success": ["sync-001", "sync-002"], "failure": ["sync-003"] }
+    },
+    "assertions": [
+      { "type": "boolean", "expected": true, "description": "progress.isSyncing is true during sync" },
+      { "type": "count", "expected": 3, "description": "totalSources is 3" },
+      { "type": "count", "expected": 2, "description": "successCount is 2 after sync" },
+      { "type": "count", "expected": 1, "description": "failureCount is 1 (Slow Feed fails)" },
+      { "type": "count", "expected": 3, "description": "completedCount equals totalSources after all batches" },
+      { "type": "count", "expected": 100, "description": "progressPercent = 100 when completed=total" },
+      { "type": "text", "expected": "syncing", "description": "Current source starts in 'syncing' state" },
+      { "type": "text", "expected": "failed", "description": "Failed source ends in 'failed' state" },
+      { "type": "text", "expected": "success", "description": "Successful source ends in 'success' state" },
+      { "type": "boolean", "expected": false, "description": "isSyncing is false after sync completes" }
+    ]
+  },
+  {
+    "name": "IPC Security — Input Validation Layer",
+    "methods": ["negative", "boundary", "exception"],
+    "description": "Security validation at the electron-main IPC layer: SQL injection by feed URL ('; DROP TABLE post_info; --') → XSS by folder name (<script>alert('xss')</script>) → oversized URL (2000+ chars) → empty string folder name → whitespace-only folder name → invalid protocol (ftp://) → control characters in folder name (null byte) → article content exceeding 10MB size limit → oversize query (5000+ chars). All must be caught by IPC validators before reaching DB or service layer. Tests that error responses do NOT leak stack traces.",
+    "testFilePath": "test/e2e/ipc-security.test.ts",
+    "fixtures": {
+      "attackVectors": {
+        "sqlInjectionUrl": "'; DROP TABLE post_info; --",
+        "xssFolderName": "<script>alert('xss')</script>",
+        "oversizedUrl": "https://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nullByteFolder": "test\u0000folder",
+        "invalidProtocol": "ftp://invalid-protocol.example/feed.xml",
+        "emptyUrl": "",
+        "whitespaceUrl": "   \t\n  ",
+        "oversizedContentSizeMb": 11
+      }
+    },
+    "assertions": [
+      { "type": "text", "expected": "INVALID_PARAM", "description": "SQL injection URL throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "XSS folder name throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Oversized URL (>4096 chars) throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Null byte in folder name throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Invalid protocol (ftp) throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Empty URL throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Whitespace-only URL throws INVALID_PARAM" },
+      { "type": "text", "expected": "INVALID_PARAM", "description": "Oversized article content throws INVALID_PARAM" },
+      { "type": "boolean", "expected": true, "description": "Error messages do NOT contain 'Error:'' or stack traces" },
+      { "type": "count", "expected": 500, "description": "MAX_ARTICLES_PER_PAGE constraint enforces at most 500 results" }
+    ]
+  },
+  {
+    "name": "Dark Mode — nativeTheme Integration and Persistence",
+    "methods": ["state_transition", "positive", "boundary"],
+    "description": "Dark mode detection and toggling: detect system nativeTheme state (read-only) → simulate dark mode activation via electronAPI event → verify CSS/Quasar $q.dark mode toggles (class='body--dark' applied) → verify localStorage persistence of user preference → toggle back to light → verify class switches to 'body--light' → window title bar color respects nativeTheme.shouldUseDarkColors on Win32 → session restore: reload store, verify persisted preference loads. Tests at Windows-specific dark title bar code path.",
+    "testFilePath": "test/e2e/dark-mode.test.ts",
+    "fixtures": {
+      "themeMocks": {
+        "nativeThemeDark": { "shouldUseDarkColors": true },
+        "nativeThemeLight": { "shouldUseDarkColors": false }
+      }
+    },
+    "assertions": [
+      { "type": "boolean", "expected": true, "description": "$q.dark.isActive is true after dark mode toggle" },
+      { "type": "text", "expected": "body--dark", "description": "Document body has class 'body--dark' in dark mode" },
+      { "type": "text", "expected": "dark", "description": "localStorage key 'dark' is set to 'true'" },
+      { "type": "boolean", "expected": false, "description": "$q.dark.isActive is false after toggling back to light" },
+      { "type": "text", "expected": "body--light", "description": "Document body has class 'body--light' in light mode" },
+      { "type": "text", "expected": "false", "description": "localStorage 'dark' is 'false' in light mode" },
+      { "type": "boolean", "expected": true, "description": "Win32 title bar respects nativeTheme.shouldUseDarkColors" },
+      { "type": "boolean", "expected": true, "description": "Restored preference matches last saved state after reload" }
+    ]
+  },
+  {
+    "name": "Error Recovery — Network Failure, Parse Failure, Retry",
+    "methods": ["exception", "state_transition", "boundary", "negative"],
+    "description": "Error recovery flow across multiple failure modes: feed add fails with NETWORK_TIMEOUT → verify store.error='NETWORK_TIMEOUT' → retry with valid URL → verify store.error is null → feed fetch returns malformed XML → verify nothing crashes, store shows empty posts gracefully → add feed then remove it while sync is in progress → verify removal completes without deadlock → rapid-fire 10 IPC calls in sequence → verify no data corruption (each call returns expected results) → toggle read status on non-existent post GUID → verify error handling (not silent) → toggle favorite on non-existent post → verify error.",
+    "testFilePath": "test/e2e/error-recovery.test.ts",
+    "fixtures": {
+      "feeds": [
+        { "id": "feed-slow", "title": "Slow Feed", "feedUrl": "https://slow.example/rss.xml", "htmlUrl": "https://slow.example", "unread": 0, "avatar": "" },
+        { "id": "feed-fast", "title": "Fast Feed", "feedUrl": "https://fast.example/rss.xml", "htmlUrl": "https://fast.example", "unread": 5, "avatar": "" }
+      ],
+      "failureModes": {
+        "networkTimeout": "NETWORK_TIMEOUT: Feed fetch timed out",
+        "parseError": "PARSE_ERROR: Malformed XML at line 42",
+        "dbError": "DB_ERROR: SQLITE_BUSY: database is locked",
+        "nonExistentGuid": "guid-does-not-exist-999"
+      },
+      "malformedPostResult": []
+    },
+    "assertions": [
+      { "type": "text", "expected": "NETWORK_TIMEOUT", "description": "Feeds subscription with timeout error stores NETWORK_TIMEOUT" },
+      { "type": "boolean", "expected": true, "description": "store.error is not null after network failure" },
+      { "type": "boolean", "expected": false, "description": "isLoading resets to false after failure (no stuck loading)" },
+      { "type": "text", "expected": "Fast Feed", "description": "Retry subscription succeeds, feed title is correct" },
+      { "type": "boolean", "expected": false, "description": "store.error is null after retry succeeds" },
+      { "type": "boolean", "expected": false, "description": "isLoading is false after retry" },
+      { "type": "count", "expected": 0, "description": "Feed with parse failure returns empty post list (graceful)" },
+      { "type": "text", "expected": "Article not found", "description": "toggleReadStatus on non-existent GUID throws 'Article not found'" },
+      { "type": "boolean", "expected": true, "description": "rapid sequential IPC calls maintain correct call order and results" }
+    ]
+  }
+]

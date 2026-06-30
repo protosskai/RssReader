@@ -1,9 +1,7 @@
-import { fetchRssIndexList } from '../rss/api'
-import { SqliteUtil } from '../storage/sqlite'
-import { SourceManage } from '../rss/sourceManage'
-import { Notification } from 'electron'
-import path from 'path'
-import fs from 'fs'
+import { getArticleService } from '../infrastructure/di/Container';
+import { Notification } from 'electron';
+import path from 'path';
+import fs from 'fs';
 
 interface SyncConfig {
   enabled: boolean
@@ -22,6 +20,16 @@ interface SyncStats {
   lastSyncTime: Date
 }
 
+export interface SyncProgressInfo {
+  totalSources: number
+  completedCount: number
+  successCount: number
+  failureCount: number
+  isSyncing: boolean
+  currentSource: string | null
+  sources: Array<{ rssId: string; title: string; status: 'pending' | 'syncing' | 'success' | 'failed' }>
+}
+
 export class SyncManager {
   private static instance: SyncManager | null = null
   private timer: NodeJS.Timeout | null = null
@@ -34,12 +42,17 @@ export class SyncManager {
     notification: true
   }
   private isSyncing = false
-  private storageUtil: SqliteUtil
-  private sourceManager: SourceManage
+  private progressInfo: SyncProgressInfo = {
+    totalSources: 0,
+    completedCount: 0,
+    successCount: 0,
+    failureCount: 0,
+    isSyncing: false,
+    currentSource: null,
+    sources: []
+  }
 
   private constructor() {
-    this.storageUtil = SqliteUtil.getInstance()
-    this.sourceManager = SourceManage.getInstance()
     this.loadConfig()
   }
 
@@ -122,39 +135,63 @@ export class SyncManager {
 
     try {
       // 获取所有RSS源
-      const rssInfoList = await this.storageUtil.getRssInfoListFromDb()
-      stats.totalSources = rssInfoList.length
+      const service = getArticleService()
+      const allFeeds = await service.getFeeds()
+      stats.totalSources = allFeeds.length
 
       console.log(`[SyncManager] Found ${stats.totalSources} RSS sources to sync`)
 
+      // 初始化进度
+      this.progressInfo = {
+        totalSources: allFeeds.length,
+        completedCount: 0,
+        successCount: 0,
+        failureCount: 0,
+        isSyncing: true,
+        currentSource: null,
+        sources: allFeeds.map((s: any) => ({
+          rssId: s.id,
+          title: s.title,
+          status: 'pending' as const
+        }))
+      }
+
       // 并发同步，但限制并发数
       const concurrency = 5
-      const batches = this.createBatches(rssInfoList, concurrency)
+      const batches = this.createBatches(allFeeds, concurrency)
 
       for (const batch of batches) {
         const results = await Promise.allSettled(
           batch.map(async (source: any) => {
             try {
-              console.log(`[SyncManager] Syncing: ${source.title}`)
-              const result = await fetchRssIndexList(source.rss_id)
-              stats.successCount++
+              const srcProgress = this.progressInfo.sources.find(s => s.rssId === source.id)
+              if (srcProgress) { srcProgress.status = 'syncing'; this.progressInfo.currentSource = source.title }
 
-              // 统计新文章数量（这里简化处理）
-              if (result.success) {
-                stats.newArticlesCount += 1
-              }
+              console.log(`[SyncManager] Syncing: ${source.title}`)
+              await service.syncFeed(source.id)
+              stats.successCount++
+              this.progressInfo.successCount++
+              this.progressInfo.completedCount++
+
+              if (srcProgress) { srcProgress.status = 'success' }
+              stats.newArticlesCount += 1
+              this.progressInfo.currentSource = null
 
               return { success: true, source: source.title }
             } catch (error) {
+              const srcProgress = this.progressInfo.sources.find(s => s.rssId === source.id)
+              if (srcProgress) { srcProgress.status = 'failed' }
               stats.failureCount++
+              this.progressInfo.failureCount++
+              this.progressInfo.completedCount++
+              this.progressInfo.currentSource = null
               console.error(`[SyncManager] Failed to sync ${source.title}:`, error)
               return { success: false, source: source.title, error }
             }
           })
         )
 
-        // 显示每个批次的进度
-        results.forEach((result, index) => {
+        results.forEach((result) => {
           if (result.status === 'fulfilled') {
             const { success, source } = result.value
             console.log(`[SyncManager] ${success ? '✓' : '✗'} ${source}`)
@@ -179,6 +216,7 @@ export class SyncManager {
       throw error
     } finally {
       this.isSyncing = false
+      this.progressInfo.isSyncing = false
     }
   }
 
@@ -251,6 +289,10 @@ export class SyncManager {
       isSyncing: this.isSyncing,
       lastSyncTime: new Date()
     }
+  }
+
+  getProgress(): SyncProgressInfo {
+    return { ...this.progressInfo }
   }
 
   destroy() {

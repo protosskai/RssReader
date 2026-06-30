@@ -54,7 +54,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 
 interface Props {
   visible: boolean;
@@ -65,7 +64,7 @@ interface Props {
   cancellable?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   label: '加载中...',
   subLabel: '',
   progress: -1,
@@ -76,13 +75,6 @@ const props = withDefaults(defineProps<Props>(), {
 defineEmits<{
   cancel: [];
 }>();
-
-const label = computed(() => props.label);
-const subLabel = computed(() => props.subLabel);
-const showProgress = computed(() => props.showProgress);
-const progress = computed(() => props.progress);
-const cancellable = computed(() => props.cancellable);
-const visible = computed(() => props.visible);
 </script>
 
 <style lang="scss" scoped>

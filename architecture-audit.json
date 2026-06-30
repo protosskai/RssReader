@@ -1,0 +1,123 @@
+{
+  "architectureIssues": [
+    {
+      "file": "src-electron/electron-main.ts + src-electron/rss/api.ts + src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts + src-electron/domain/services/ArticleService.ts",
+      "severity": "critical",
+      "category": "dual-architecture",
+      "description": "Two parallel, mutually unaware architectures coexist: (1) Legacy path: rssInfoStore → electronAPI → IPC rss:* → api.ts → sourceManage/SqliteUtil → raw sqlite3. (2) New Article-centric path: favoriteStore/searchStore → electronAPI → IPC article:* → ArticleService → RepositoryImpl → SqliteUtil → raw sqlite3. Both access the same SQLite tables through completely different data models, with no synchronization or ownership boundary. Methods like addRssSubscription (legacy) exist alongside feed:addFeed (new) for the same logical operation.",
+      "suggestion": "Choose one ownership model. Recommend migrating the legacy `rss:*`, `addFolder`, `removeFolder`, and `editFolder` IPC handlers to use `ArticleService` behind the scenes, then deprecate `api.ts`'s standalone functions. The legacy path should become an adapter on top of the service layer."
+    },
+    {
+      "file": "src-electron/infrastructure/repositories/ArticleRepositoryImpl.ts",
+      "severity": "critical",
+      "category": "unimplemented-methods",
+      "description": "7 repository methods throw 'not implemented' despite being called by ArticleService and IPC handlers: SqliteArticleRepository.deleteArticle, markAsRead, toggleFavorite, markAllAsRead, clearAllFavorites, SqliteFeedRepository.saveFeed, deleteFeed, updateFeedLastUpdateTime, incrementUnreadCount, decrementUnreadCount, resetUnreadCount, SqliteFolderRepository.renameFolder. The `post_info` table has a `favorite` column but toggleFavorite doesn't update it. ArticleService.syncFeed has a TODO stub. This means ArticleService.toggleReadStatus will throw at runtime (it calls markAsRead which throws).",
+      "suggestion": "Implement all throwing methods immediately. The new architecture is unusable without them. The `toggleFavorite` method needs to UPDATE post_info SET favorite = 1/0 WHERE guid = ?. The `markAsRead` method needs UPDATE post_info SET read = ? WHERE guid = ?."
+    },
+    {
+      "file": "src-electron/storage/sqlite.ts",
+      "severity": "critical",
+      "category": "sql-injection",
+      "description": "Multiple SQL queries use string interpolation instead of parameterized queries: insertFolderInfo (line ~145-152), insertRssInfo (line ~170-174), queryFolderByFolderName (line ~227-231), checkPostInfoExist (line ~550-553), and others. This is a security vulnerability and can cause SQL errors with special characters in feed titles/URLs.",
+      "suggestion": "Replace ALL string interpolation SQL with parameterized queries using `?` placeholders (already done correctly in SqliteHelper.ts and some newer methods). Consider deprecating the legacy sqlite.ts in favor of SqliteHelper/SqliteUtilV2."
+    },
+    {
+      "file": "src/common/models.ts vs src-electron/domain/models/Article.ts vs src/common/RssInfoItem.ts vs src/common/PostInfoItem.ts vs src-electron/storage/common.ts",
+      "severity": "critical",
+      "category": "duplicate-type-models",
+      "description": "Five different type model files with overlapping/conflicting definitions: (1) src/common/models.ts has Article/FeedSource/Folder (2) src-electron/domain/models/Article.ts has different Article/FeedSource/Folder/ArticleFilter/ArticleStats (3) src/common/RssInfoItem.ts has RssFolderItem/RssInfoItem (4) src/common/PostInfoItem.ts has PostInfoItem (5) src-electron/storage/common.ts has PostIndexItem/SearchOptions. Article models differ between domains (e.g., src/common/models.ts Article has 'guid' field, domain Article has 'feedTitle'). The favoriteStore converts between types with ad-hoc map functions.",
+      "suggestion": "Define a single source of truth for domain models (recommend src-electron/domain/models/Article.ts). Remove src/common/models.ts. Make src/common/ types thin proxies or remove them. The IPC boundary should use a single shared type."
+    },
+    {
+      "file": "src-electron/rss/api.ts",
+      "severity": "high",
+      "category": "separation-of-concerns",
+      "description": "api.ts is a ~350+ line monolithic file mixing feed parsing (addRssSubscription), database queries (queryPostIndexByRssId, queryPostContentByGuid), folder management (addFolder, editFolder, removeFolder), OPML import, search, link opening, DB init, and utility functions. It imports from both legacy (sourceManage, SqliteUtil) and new (SqliteUtil) layers. This file should have been the router/dispatcher but instead contains all business logic.",
+      "suggestion": "Refactor api.ts into thin handler functions that delegate to either the legacy SourceManage+SqliteUtil or the new ArticleService. Each handler should be <10 lines. The actual business logic belongs in service/repository classes."
+    },
+    {
+      "file": "src-electron/rss/sourceManage.ts",
+      "severity": "high",
+      "category": "in-memory-state-conflict",
+      "description": "SourceManage is a singleton with mutable in-memory state (folderMap) that syncs to SQLite via dumpToDb/loadFromDb. When dumpToDb runs, it calls SqliteUtil.dumpFolderItemList which DELETES AND RE-INSERTS all folder_info and rss_info rows. Meanwhile, the ArticleService layer also reads from rss_info table. If a background sync happens while sourceManage writes, data corruption is possible.",
+      "suggestion": "Replace SourceManage's dump-to-DB with incremental CRUD operations instead of delete-all-and-reinsert. Or eliminate SourceManage's in-memory state entirely and read directly from DB."
+    },
+    {
+      "file": "src-electron/electron-preload.ts",
+      "severity": "high",
+      "category": "ipc-contract-fragmentation",
+      "description": "IPC channel names have inconsistent namespacing: rss:* (legacy), article:* (new article-centric), feed:* (new feed), folder:* (new folder), sync:* (sync), search:* (search), addFolder/editFolder/removeFolder (legacy, no prefix), openLink (no prefix), close/minimize (no prefix). New code uses folder:addFolder/folder:removeFolder/folder:renameFolder while legacy addFolder/editFolder/removeFolder serve the same folders with different signatures.",
+      "suggestion": "Align IPC channel names to the new namespaced convention (folder:*). Register legacy ipcMain handlers as aliases that delegate to the new handlers. Remove old names after migration."
+    },
+    {
+      "file": "src/stores/favoriteStore.ts",
+      "severity": "high",
+      "category": "inconsistent-store-pattern",
+      "description": "favoriteStore uses window.electronAPI directly instead of the electronClient proxy service (used by rssInfoStore). It also imports and calls useQuasar() inside the store for notifications, which couples the state management layer to UI framework internals. When toggleFavorite fails, it throws after already notifying (double error signaling). The IPC calls target article:* handlers but the store's return type is PostIndexItem[].",
+      "suggestion": "Use electronClient consistently. Remove useQuasar from store; return status and let UI components handle notifications. Align on the domain Article type or keep PostIndexItem with a clear adapter."
+    },
+    {
+      "file": "src-electron/storage/sqlite.ts",
+      "severity": "medium",
+      "category": "file-size",
+      "description": "sqlite.ts is ~700+ lines containing: table creation, index creation, FTS5 setup, CRUD for folders/RSS/posts, performance configurations, search with FTS5, and fallback LIKE search. This is a God class that touches every database concern. SqliteUtilV2 (~250 lines) exists separately but duplicates much of the same logic.",
+      "suggestion": "Split into: DDLManager (schema/creation), PostRepository, FolderRepository, RssRepository, SearchService. Deprecate legacy sqlite.ts methods in favor of SqliteHelper-based SqliteUtilV2 methods."
+    },
+    {
+      "file": "src-electron/storage/sqlite.ts",
+      "severity": "medium",
+      "category": "direct-callback-mix",
+      "description": "Some methods in sqlite.ts use the legacy callback-based this.db?.run()/all() pattern with Promise wrapping (e.g., queryFolderByFolderName, checkPostInfoExist, insertFolderInfo). Others use the newer this.dbHelper.all<T>() pattern. Both access the same database instance but the callback-based methods bypass SqliteHelper's read/write lock and operation queue, risking concurrent access issues.",
+      "suggestion": "Migrate all remaining callback-based methods to use this.dbHelper's all/run/get methods. This eliminates the SQL injection risk and ensures proper locking."
+    },
+    {
+      "file": "src/stores/rssInfoStore.ts",
+      "severity": "medium",
+      "category": "performance",
+      "description": "The executeAndRefresh pattern calls electronClient.getRssInfoListFromDb() after EVERY mutation (add, remove, edit, import). This triggers a full SourceManage.loadFromDb() → SqliteUtil.loadFolderItemList() → queries all folders and RSS sources → rebuilds in-memory state. For adding a single subscription, this does at least 3 SQL queries post-mutation.",
+      "suggestion": "Return the updated data from the mutation itself (e.g., after adding a subscription, return the new folder list from the same DB session). Or use optimistic local state updates and only refresh when explicitly needed."
+    },
+    {
+      "file": "src/stores/searchStore.ts",
+      "severity": "medium",
+      "category": "type-safety",
+      "description": "searchStore.ts imports PostIndexItem with an unresolved path alias: `from 'app/src-electron/storage/common'`. The store uses window.electronAPI.searchPosts() directly (like favoriteStore, not using electronClient). The global search path (performGlobalSearch) and local search path (performLocalSearch) have different search semantics but the same search() API surfaces both, with confusing overloads.",
+      "suggestion": "Import through a resolved alias (src-electron/storage/common). Use electronClient consistently. Split into separate searchLocal/searchGlobal methods if both paths are needed."
+    },
+    {
+      "file": "src-electron/rss/postListManeger.ts",
+      "severity": "medium",
+      "category": "typo",
+      "description": "Filename has a typo: 'Maneger' instead of 'Manager'. The class is PostManager but the file is postListManeger.ts. There's also a PostInfoObject interface and a postManager singleton export alongside PostManager.getInstance(), creating dual instances.",
+      "suggestion": "Rename to postListManager.ts. Remove the extraneous 'export const postManager = PostManager.getInstance()' singleton instance at module level (it exports both the class and an instance)."
+    },
+    {
+      "file": "src-electron/domain/services/ArticleService.ts",
+      "severity": "medium",
+      "category": "sync-gap",
+      "description": "ArticleService.syncFeed() has a TODO comment: 'Implement actual sync logic'. This means the new architecture cannot fetch RSS feeds. Legacy RSS fetching lives in api.ts's fetchRssIndexList → PostManager.getPostList → FeedParser. The new ArticleService has no access to these functions and no integration.",
+      "suggestion": "ArticleService.syncFeed should use FeedParser and PostManager. Add FeedParser dependency to the service or make it available through the DI container."
+    },
+    {
+      "file": "src-electron/electron-main.ts",
+      "severity": "low",
+      "category": "error-handling",
+      "description": "IPC handlers have inconsistent error handling: some wrap in try/catch with detailed logging (rss:queryPostIndexByRssId, rss:fetchRssIndexList, rss:getRssInfoListFromDb), others have bare async lambdas (openLink, close, minimize, addFolder, editFolder, removeFolder, folder:*, feed:*). There is no global IPC error boundary.",
+      "suggestion": "Create a unified IPC handler wrapper that catches errors, logs consistently, and returns a standardized error envelope. Apply it to all handlers."
+    },
+    {
+      "file": "src-electron/electron-main.ts",
+      "severity": "low",
+      "category": "dev-tools-leak",
+      "description": "mainWindow.webContents.openDevTools() is called unconditionally, not gated on dev mode. This will open DevTools in production builds.",
+      "suggestion": "Guard with process.env.NODE_ENV !== 'production' or use the Quasar electron dev flag."
+    },
+    {
+      "file": "src/boot/axios.ts",
+      "severity": "low",
+      "category": "dead-code",
+      "description": "The axios boot file configures an API client with a placeholder URL (https://api.example.com) and registers it globally via app.config.globalProperties. NetUtil.ts also has its own axios usage. No frontend code appears to use $api or $axios from this boot file. The NetUtil.ts axios import is separate.",
+      "suggestion": "Remove the boot/axios.ts if it's unused, or document its purpose. Move the shared axios config to a utility file if needed."
+    }
+  ]
+}

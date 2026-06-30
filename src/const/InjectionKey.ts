@@ -1,5 +1,5 @@
 import type {ComputedRef, InjectionKey, Ref} from 'vue'
-import {RssFolderItem} from "src/common/RssInfoItem";
+import {RssFolderItem} from "src/common/models";
 
 export const TOGGLE_LAYOUT_LEFT_DRAWER_REF = Symbol() as InjectionKey<Ref<boolean>> // Layout控制左侧抽屉的ref变量
 export const TOGGLE_LAYOUT_LEFT_DRAWER_FUNC = Symbol() as InjectionKey<() => void> // Layout控制左侧抽屉ref的方法

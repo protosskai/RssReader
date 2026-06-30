@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "project": "RssReader (Quasar Framework + Electron TypeScript/Vue)",
+    "root": "/Users/kai/project/RssReader",
+    "scannedAt": "2026-06-27T02:22:00Z",
+    "totalFiles": 77,
+    "totalLines": 14138,
+    "tsFiles": 50,
+    "tsLines": 7885,
+    "vueFiles": 27,
+    "vueLines": 6253
+  },
+  "summary": {
+    "totalIssues": 1030,
+    "byCategory": {
+      "type-safety": {
+        "count": 44,
+        "severity": "high",
+        "label": "Explicit `any` type annotations"
+      },
+      "null-undefined": {
+        "count": 9,
+        "severity": "high",
+        "label": "Non-null assertions / potential crash points"
+      },
+      "async-error": {
+        "count": 1,
+        "severity": "high",
+        "label": ".then() without .catch() in main process"
+      },
+      "console-log": {
+        "count": 84,
+        "severity": "low",
+        "label": "console.log statements in production code"
+      },
+      "commented-code": {
+        "count": 0,
+        "severity": "low",
+        "label": "Commented-out code blocks"
+      },
+      "magic-numbers": {
+        "count": 324,
+        "severity": "low",
+        "label": "Magic numbers and hardcoded literals"
+      },
+      "complex-function": {
+        "count": 8,
+        "severity": "medium",
+        "label": "Functions exceeding 50 lines"
+      },
+      "duplicate-definition": {
+        "count": 5,
+        "severity": "medium",
+        "label": "Type/interface definitions duplicated across files"
+      },
+      "missing-jsdoc": {
+        "count": 52,
+        "severity": "medium",
+        "label": "Exported APIs missing JSDoc/TSDoc"
+      },
+      "style-inconsistent": {
+        "count": 75,
+        "severity": "low",
+        "label": "Mixed indentation or semicolon conventions"
+      }
+    }
+  },
+  "findings": {
+    "typeSafety": {
+      "severity": "high",
+      "overview": "44 explicit `any` type annotations found across 12 files. Heavy concentration in FeedParser.ts and opmlUtil.ts where RSS/XML parsing loses type information. Catch blocks universally use `err: any` instead of `unknown`.",
+      "concentration": "FeedParser.ts: 16 any usages, opmlUtil.ts: 8, sqlite.ts: 4, folderStore.ts: 5 catch blocks",
+      "hotspots": [
+        {"file": "src-electron/rss/parser/FeedParser.ts", "lines": [129, 162, 182, 215, 235, 268, 297, 338, 377, 396, 414, 430, 445, 461], "pattern": "XML/JSON parse results typed as `any` — no typed schema for RSS feed variants"},
+        {"file": "src-electron/rss/opmlUtil.ts", "lines": [95, 113, 126, 148, 158, 174, 200], "pattern": "OPML XML parse results typed as `any`"},
+        {"file": "src-electron/storage/sqlite.ts", "lines": [939, 990], "pattern": "SQL query params typed as `any`"},
+        {"file": "src-electron/storage/SqliteHelper.ts", "lines": [237, 257, 277], "pattern": "SQL query params typed as `any`"},
+        {"file": "src/stores/folderStore.ts", "lines": [30, 46, 60, 71, 82], "pattern": "Catch block `err: any` — should be `unknown`"},
+        {"file": "src/stores/themeStore.ts", "line": 56, "pattern": "Quasar dark mode callback param `q: any`"},
+        {"file": "src/components/MoveFolderDialog.vue", "lines": [99, 101], "pattern": "Function params `folders: any`, `folderList: any`"},
+        {"file": "src/pages/Content.vue", "line": 69, "pattern": "Route param `rssId: any`"},
+        {"file": "src/pages/PostList.vue", "lines": [76, 125], "pattern": "Route param `rssId: any`, catch `err: any`"},
+        {"file": "src-electron/rss/utils.ts", "line": 16, "pattern": "Utility function param `obj: any`"},
+        {"file": "src-electron/rss/api.ts", "line": 325, "pattern": "Catch `e: any`"},
+        {"file": "src-electron/domain/services/ArticleService.ts", "lines": [27, 57], "pattern": "Event callback `data: any`"},
+        {"file": "src-electron/services/SyncManager.ts", "line": 136, "pattern": "RSS source variable typed as `any`"}
+      ],
+      "recommendation": "Create typed interfaces for all XML/JSON parse results. Replace `err: any` with `err: unknown` in catch blocks. Type route params properly with Vue Router generics."
+    },
+    "nullUndefined": {
+      "severity": "high",
+      "overview": "9 potential null/undefined crash points identified. Several non-null assertions (`!`) used in Electron main process that could crash at runtime if objects are undefined.",
+      "hotspots": [
+        {"file": "src-electron/electron-main.ts", "detail": "Multiple `!` non-null assertions on objects that could be undefined — e.g. window references, IPC handler objects"},
+        {"file": "src-electron/storage/sqlite.ts", "detail": "Database connection assumed non-null after initialization without guard checks"},
+        {"file": "src/pages/Content.vue", "detail": "Route params accessed without null/undefined guard before use"},
+        {"file": "src/pages/PostList.vue", "detail": "`rssItemId` route param used without undefined check before passing to API"}
+      ],
+      "recommendation": "Replace `!` assertions with optional chaining or explicit null checks. Add route param validation guards in onMounted."
+    },
+    "asyncErrorHandling": {
+      "severity": "high",
+      "overview": "1 file with uncaught promise (.then() without .catch()). The codebase primarily uses async/await with try/catch which is good overall.",
+      "hotspots": [
+        {"file": "src-electron/electron-main.ts", "detail": "1 `.then()` call without `.catch()` — unhandled promise rejection risk"}
+      ],
+      "recommendation": "Add `.catch()` handler or convert the lone `.then()` to async/await with try/catch."
+    },
+    "consoleLog": {
+      "severity": "low",
+      "overview": "84 console.log statements across 21 files. Heavy usage in development/debugging code. Most are structured as `[ModuleName] message` which suggests intentional debug logging.",
+      "topOffenders": [
+        {"file": "src-electron/storage/sqlite.ts", "count": 55, "pattern": "Extensive debug logging of every SQL operation"},
+        {"file": "src-electron/rss/api.ts", "count": 43, "pattern": "Step-by-step trace logging for IPC handlers"},
+        {"file": "src-electron/electron-main.ts", "count": 31, "pattern": "App lifecycle and dev server wait logging"},
+        {"file": "src-electron/rss/sourceManage.ts", "count": 12, "pattern": "Folder/source loading trace logging"},
+        {"file": "src/pages/PostList.vue", "count": 12, "pattern": "Sync step trace logging"},
+        {"file": "src-electron/services/SyncManager.ts", "count": 13, "pattern": "Sync lifecycle logging"},
+        {"file": "src-electron/net/NetUtil.ts", "count": 13, "pattern": "HTTP request trace logging"},
+        {"file": "src/stores/keyboardStore.ts", "count": 5, "pattern": "Shortcut registration logging"},
+        {"file": "src/stores/readingStore.ts", "count": 5, "pattern": "Reading session logging"},
+        {"file": "src/composables/useReadingExperience.ts", "count": 4, "pattern": "Reading lifecycle logging"}
+      ],
+      "recommendation": "Replace with structured logger or environment-gated logging. Consider a `DEBUG` flag or use electron-log for production-safe logging. At minimum, wrap all console.log in `if (process.env.NODE_ENV !== 'production')`."
+    },
+    "commentedCode": {
+      "severity": "low",
+      "overview": "No commented-out code blocks detected in the scanned files."
+    },
+    "magicNumbers": {
+      "severity": "low",
+      "overview": "324 magic numbers detected. These are concentrated in UI components (sizes, delays, positions) and SQLite operations (page sizes, batch limits).",
+      "examples": [
+        {"file": "src-electron/storage/sqlite.ts", "detail": "Numerous hardcoded pragma values, page sizes, timeout values"},
+        {"file": "src-electron/electron-main.ts", "detail": "Hardcoded retry counts (10), intervals (1000ms), window dimensions"},
+        {"file": "src/pages/SettingPage.vue", "detail": "Hardcoded CSS sizes, spacing values, animation durations"},
+        {"file": "src/components/SearchComponent.vue", "detail": "Hardcoded debounce delays, result limits, animation timings"},
+        {"file": "src/stores/rssInfoStore.ts", "detail": "Hardcoded pagination limits and fetch intervals"}
+      ],
+      "recommendation": "Extract magic numbers into named constants. File-specific constants files or config objects. CSS values should use design-token variables."
+    },
+    "complexFunctions": {
+      "severity": "medium",
+      "overview": "8 functions exceed 50 lines. These are concentrated in the composables layer and the RSS sync pipeline.",
+      "list": [
+        {"file": "src/composables/useReadingExperience.ts", "function": "useReadingExperience", "lines": 122, "complexity": "Very High", "detail": "Combines reading state, scroll tracking, progress persistence, auto-mark-read logic"},
+        {"file": "src-electron/net/NetUtil.ts", "function": "getUrl", "lines": 122, "complexity": "Very High", "detail": "HTTP fetching, caching, error handling, redirect following all in one function"},
+        {"file": "src/composables/useLoading.ts", "function": "useGlobalLoading", "lines": 101, "complexity": "High", "detail": "Multiple loading state machines, timeouts, and debounce logic"},
+        {"file": "src/composables/useKeyboard.ts", "function": "createDefaultShortcuts", "lines": 78, "complexity": "High", "detail": "Large object literal defining all keyboard shortcuts with their handlers"},
+        {"file": "src/composables/useReadingExperience.ts", "function": "useReadingSettings", "lines": 77, "complexity": "High", "detail": "Reading settings persistence, defaults, and reactive state initialization"},
+        {"file": "src/composables/useKeyboard.ts", "function": "useKeyboard", "lines": 71, "complexity": "High", "detail": "Keyboard event registration, shortcut matching, and lifecycle management"},
+        {"file": "src/components/EditSubscriptionDialog.vue", "function": "onSubmit", "lines": 62, "complexity": "Medium", "detail": "Form validation, API submission, error handling in one method"},
+        {"file": "src/pages/Content.vue", "function": "getContentById", "lines": 102, "complexity": "Very High", "detail": "Content fetching with retry logic, multiple API calls, error handling, loading states"}
+      ],
+      "recommendation": "Refactor functions over 60 lines. Extract retry/loading/error patterns into reusable composables. Break getPostListById into smaller focused functions."
+    },
+    "duplicateTypes": {
+      "severity": "medium",
+      "overview": "5 type/interface definitions are duplicated across two model files. The `src/common/models.ts` and `src-electron/domain/models/Article.ts` files define identical types.",
+      "duplicates": [
+        {"type": "Article", "files": ["src/common/models.ts", "src-electron/domain/models/Article.ts"]},
+        {"type": "ArticleFilter", "files": ["src/common/models.ts", "src-electron/domain/models/Article.ts"]},
+        {"type": "ArticleStats", "files": ["src/common/models.ts", "src-electron/domain/models/Article.ts"]},
+        {"type": "FeedSource", "files": ["src/common/models.ts", "src-electron/domain/models/Article.ts"]},
+        {"type": "Folder", "files": ["src/common/models.ts", "src-electron/domain/models/Article.ts"]}
+      ],
+      "recommendation": "Consolidate into a single shared types file. Import shared types in both layers instead of redefining. This prevents drift where one file gets updated but the other doesn't."
+    },
+    "jsDocCoverage": {
+      "severity": "medium",
+      "overview": "52 exported interfaces, types, functions, and classes lack JSDoc/TSDoc comments. Near-zero documentation on public APIs across the entire codebase.",
+      "poorlyDocumentedFiles": [
+        {"file": "src-electron/rss/api.ts", "coverage": "0%", "publicApis": 16, "documented": 0},
+        {"file": "src-electron/rss/opmlUtil.ts", "coverage": "0%", "publicApis": 5, "documented": 0},
+        {"file": "src-electron/infrastructure/Container.ts", "coverage": "0%", "publicApis": 5, "documented": 0},
+        {"file": "src-electron/rss/sourceManage.ts", "coverage": "0%", "publicApis": 3, "documented": 0},
+        {"file": "src-electron/util/string.ts", "coverage": "0%", "publicApis": 4, "documented": 0},
+        {"file": "src/composables/useReadingExperience.ts", "coverage": "0%", "publicApis": 3, "documented": 0},
+        {"file": "src/composables/useLoading.ts", "coverage": "0%", "publicApis": 3, "documented": 0},
+        {"file": "src-electron/rss/utils.ts", "coverage": "0%", "publicApis": 3, "documented": 0},
+        {"file": "src/composables/useKeyboard.ts", "coverage": "0%", "publicApis": 2, "documented": 0},
+        {"file": "src/common/util.ts", "coverage": "0%", "publicApis": 2, "documented": 0},
+        {"file": "src-electron/rss/postListManeger.ts", "coverage": "0%", "publicApis": 2, "documented": 0},
+        {"file": "src-electron/domain/services/ArticleService.ts", "coverage": "0%", "publicApis": 1, "documented": 0}
+      ],
+      "undocumentedInterfacesTypes": [
+        {"file": "src/electron.d.ts", "interface": "ElectronAPI"},
+        {"file": "src/common/electronContract.ts", "interface": "ElectronContract"},
+        {"file": "src/common/ContentInfo.ts", "interface": "ContentInfo"},
+        {"file": "src/common/ErrorMsg.ts", "interfaces": ["ErrorMsg", "ErrorData"]},
+        {"file": "src/common/RssInfoItem.ts", "interfaces": ["RssInfoItem", "RssInfoNew", "RssFolderItem"]},
+        {"file": "src/common/PostInfoItem.ts", "interface": "PostInfoItem"},
+        {"file": "src/common/models.ts", "interfaces": ["Article", "ArticleFilter", "ArticleStats", "FeedSource", "Folder", "ArticleQueryParams"]},
+        {"file": "src/stores/keyboardStore.ts", "interface": "KeyboardShortcut"},
+        {"file": "src/stores/readingStore.ts", "interface": "ReadingProgress"},
+        {"file": "src-electron/domain/repositories/Interfaces.ts", "interfaces": ["ArticleRepository", "FeedRepository", "FolderRepository", "RepositoryFactory"]},
+        {"file": "src-electron/domain/models/Article.ts", "interfaces": ["Article", "FeedSource", "Folder", "ArticleFilter", "ArticleStats"]},
+        {"file": "src-electron/rss/parser/FeedParser.ts", "interfaces": ["ParsedFeed", "ParsedFeedItem", "ParsedPost"]},
+        {"file": "src-electron/storage/common.ts", "interfaces": ["StorageUtil", "SearchOptions", "PostIndexItem"]}
+      ],
+      "recommendation": "Add TSDoc comments to all exported interfaces and public API functions. Focus first on IPC contract interfaces (ElectronContract, ElectronAPI) and domain model interfaces (Article, FeedSource, etc.) as they cross process boundaries."
+    },
+    "styleInconsistency": {
+      "severity": "low",
+      "overview": "75 style inconsistency issues found. Widespread mixed indentation (2-space vs 4-space) across 70+ files. Minor semicolon inconsistency in 10 files.",
+      "mixedIndentation": {
+        "severity": "low",
+        "count": 65,
+        "detail": "65 files mix 2-space and 4-space indentation. The codebase is predominantly 4-space but many files have substantial 2-space blocks.",
+        "representativeFiles": [
+          {"file": "src-electron/storage/sqlite.ts", "dominant": "4spaces (804)", "secondary": "2spaces (121)"},
+          {"file": "src/pages/SettingPage.vue", "dominant": "4spaces (549)", "secondary": "2spaces (155)"},
+          {"file": "src/components/SearchComponent.vue", "dominant": "2spaces (427)", "secondary": "4spaces (276)"},
+          {"file": "src-electron/rss/parser/FeedParser.ts", "dominant": "4spaces (316)", "secondary": "2spaces (125)"},
+          {"file": "src-electron/rss/sourceManage.ts", "dominant": "4spaces (243)", "secondary": "2spaces (79)"},
+          {"file": "src-electron/electron-main.ts", "dominant": "4spaces (231)", "secondary": "2spaces (140)"}
+        ]
+      },
+      "mixedSemicolons": {
+        "severity": "low",
+        "count": 10,
+        "detail": "10 files mix semicolon and no-semicolon styles. The codebase primarily uses semicolons.",
+        "files": ["articleStore.ts", "EditSubscriptionDialog.vue", "RssItemContextMenu.vue", "AppLayout.vue", "SettingPage.vue", "PostList.vue", "router/index.ts", "NetUtil.ts", "string.ts", "postListManeger.ts", "api.ts", "sourceManage.ts", "electron-main.ts", "SqliteUtilV2.ts", "SqliteHelper.ts", "sqlite.ts"]
+      },
+      "recommendation": "Standardize on 4-space indentation (current majority) and always-use-semicolons. Add Prettier config and format the entire codebase. Add pre-commit hook."
+    }
+  }
+}
