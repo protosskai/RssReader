@@ -155,6 +155,7 @@
 
 <script setup lang="ts">
 import {ref, onMounted} from "vue";
+import { electronClient } from "src/services/electronClient";
 import {useQuasar} from "quasar";
 import {switchPage, extractTextFromHtml, formatRelativeTime} from "src/common/util";
 import {useFavoriteStore} from "src/stores/favoriteStore";

@@ -19,6 +19,7 @@
 </template>
 <script setup lang="ts">
 import {RssInfoItem} from "src/common/models";
+import { electronClient } from "src/services/electronClient";
 import {useClipboard} from '@vueuse/core'
 import {ref} from "vue";
 import {useQuasar} from 'quasar'

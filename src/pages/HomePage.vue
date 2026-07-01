@@ -326,6 +326,7 @@
 
 <script setup lang="ts">
 import {SOFT_NAME, ADD_FOLDER, ADD_FEED, IMPORT_OPML, SETTING} from "src/const/string";
+import { electronClient } from "src/services/electronClient";
 import {useSystemDialogStore} from "stores/systemDialogStore";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {useThemeStore} from "stores/themeStore";
@@ -348,6 +349,17 @@ const isDataLoading = ref(true);
 const isRefreshing = ref(false);
 const isSyncing = ref(false);
 const dataError = ref<string | null>(null);
+const addingFeedId = ref<string | null>(null);
+
+// 推荐订阅源 — 首次安装引导
+const recommendedFeeds = [
+  { title: 'Hacker News', url: 'https://hnrss.org/frontpage', desc: '技术新闻与讨论社区，程序员必读' },
+  { title: 'BBC World', url: 'https://feeds.bbci.co.uk/news/world/rss.xml', desc: 'BBC 国际新闻，实时全球资讯' },
+  { title: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', desc: '科技、科学、艺术与文化深度报道' },
+  { title: 'NPR News', url: 'https://feeds.npr.org/1001/rss.xml', desc: '美国国家公共广播电台，深度新闻报道' },
+  { title: 'xkcd', url: 'https://xkcd.com/atom.xml', desc: '浪漫、讽刺、数学与语言的网络漫画' },
+  { title: 'Ars Technica', url: 'https://feeds.arstechnica.com/arstechnica/index', desc: '技术政策、科技新闻与分析' },
+];
 
 // 组件引用
 const shortcutsDialog = ref<InstanceType<typeof KeyboardShortcutsDialog> | null>(null)
@@ -400,6 +412,25 @@ const showKeyboardShortcuts = () => {
 // 打开设置页面
 const openSettings = () => {
   router.push('/setting');
+};
+
+// 一键添加推荐订阅源
+const addRecommendedFeed = async (feed: { title: string; url: string; desc: string }) => {
+  addingFeedId.value = feed.url;
+  try {
+    await rssInfoStore.addRssSubscription({ name: feed.title, rssUrl: feed.url });
+    $q.notify({ type: 'positive', message: `已添加: ${feed.title}`, position: 'top' });
+  } catch (err) {
+    const msg = (err as Error).message;
+    // 如果已存在则提示
+    if (msg.includes('already exists') || msg.includes('已存在')) {
+      $q.notify({ type: 'info', message: `${feed.title} 已订阅`, position: 'top' });
+    } else {
+      $q.notify({ type: 'negative', message: `添加失败: ${msg}`, position: 'top' });
+    }
+  } finally {
+    addingFeedId.value = null;
+  }
 };
 
 // 同步所有订阅源

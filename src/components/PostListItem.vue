@@ -147,6 +147,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { electronClient } from 'src/services/electronClient'
 import { switchPage, extractTextFromHtml } from 'src/common/util'
 import { PostIndexItem } from 'src/common/models'
 import { useQuasar } from 'quasar'

@@ -229,6 +229,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
+import { electronClient } from 'src/services/electronClient';
 import type { ContentInfo, PostIndexItem } from 'src/common/models';
 import { computed, onMounted, onUnmounted, ref, type Ref, watch } from 'vue';
 import { useQuasar } from 'quasar';

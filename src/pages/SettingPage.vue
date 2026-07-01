@@ -467,6 +467,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue';
+import { electronClient } from 'src/services/electronClient';
 import { useQuasar } from 'quasar';
 import { useThemeStore, type ThemeMode } from 'stores/themeStore';
 

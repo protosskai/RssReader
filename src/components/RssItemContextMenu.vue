@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
+import { electronClient } from "src/services/electronClient";
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {useSystemDialogStore} from "stores/systemDialogStore";
 import {useQuasar} from "quasar";

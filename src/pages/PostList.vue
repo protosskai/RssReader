@@ -193,6 +193,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
+import { electronClient } from "src/services/electronClient";
 import { computed, onMounted, onUnmounted, Ref, ref, watch, nextTick } from "vue";
 import PostListItem from "src/components/PostListItem.vue";
 import { useQuasar } from "quasar";

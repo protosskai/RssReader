@@ -129,6 +129,7 @@
 
 <script setup lang="ts">
 import { inject, ref } from 'vue';
+import { electronClient } from 'src/services/electronClient';
 import { TOGGLE_LAYOUT_LEFT_DRAWER_FUNC } from 'src/const/InjectionKey';
 import AddSubscriptionDialog from 'components/AddSubscriptionDialog.vue';
 import { switchPage } from 'src/common/util';
