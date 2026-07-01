@@ -384,6 +384,8 @@ app.whenReady().then(async () => {
 
 		// Initialize SyncManager (load saved config from disk, now safe after DB init)
 		syncManager.init();
+		// 3 秒后后台静默同步，不阻塞窗口创建
+		setTimeout(() => syncManager.startAutoSync(), 3000);
 	} catch (error) {
 		console.error("[electron-main] Failed to initialize database:", error);
 		throw error;
