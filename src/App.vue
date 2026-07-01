@@ -70,5 +70,15 @@ onMounted(() => {
   })
 
   console.log(`[App] Keyboard shortcuts initialized (${keyboard.shortcuts.length} shortcuts registered)`)
+
+  // 全局键盘监听 — 仅在非输入状态下触发快捷键
+  window.addEventListener('keydown', (event: KeyboardEvent) => {
+    // 如果焦点在 input/textarea/contenteditable 上，跳过快捷键处理
+    const tag = (event.target as HTMLElement)?.tagName?.toLowerCase();
+    const isInput = tag === 'input' || tag === 'textarea' || (event.target as HTMLElement)?.isContentEditable;
+    if (isInput) return;
+
+    keyboard.execute(event);
+  })
 })
 </script>

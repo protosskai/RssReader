@@ -484,6 +484,14 @@ watch(
       // Restart reading tracking with the actual content
       const text = newContent.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
       readingStore.startReading(postId, text.length);
+      // 恢复上次阅读位置
+      const progress = readingStore.getProgress(postId);
+      if (progress && progress.scrollPosition > 0) {
+        requestAnimationFrame(() => {
+          const target = progress.scrollPosition * (document.documentElement.scrollHeight - window.innerHeight);
+          window.scrollTo({ top: target });
+        });
+      }
     }
   }
 );

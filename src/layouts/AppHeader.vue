@@ -70,6 +70,15 @@
           </q-menu>
         </q-btn>
 
+        <!-- Search button — open sidebar & focus search -->
+        <q-btn
+          flat round color="white" icon="search"
+          @click="handleSearchClick"
+          aria-label="搜索文章"
+        >
+          <q-tooltip>搜索 (Ctrl+F)</q-tooltip>
+        </q-btn>
+
         <!-- Home button -->
         <q-btn
           flat round color="white" icon="home"

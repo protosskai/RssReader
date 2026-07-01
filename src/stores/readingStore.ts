@@ -1,6 +1,26 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+const STORAGE_KEY = 'rss_reader_reading_progress';
+
+function loadFromStorage(): Map<string, ReadingProgress> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const arr: ReadingProgress[] = JSON.parse(raw);
+      return new Map(arr.map((p) => [p.articleId, { ...p, lastReadAt: new Date(p.lastReadAt) }]));
+    }
+  } catch { /* ignore corrupt data */ }
+  return new Map();
+}
+
+function saveToStorage(progressMap: Map<string, ReadingProgress>): void {
+  try {
+    const arr = Array.from(progressMap.values());
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  } catch { /* quota exceeded */ }
+}
+
 export interface ReadingProgress {
   articleId: string
   progress: number // 0-100
@@ -13,8 +33,8 @@ export interface ReadingProgress {
 }
 
 export const useReadingStore = defineStore('reading', () => {
-  // 状态
-  const readingProgress = ref<Map<string, ReadingProgress>>(new Map())
+  // 状态 — 从 localStorage 恢复阅读进度
+  const readingProgress = ref<Map<string, ReadingProgress>>(loadFromStorage())
   const currentArticleId = ref<string | null>(null)
   const isReading = ref(false)
   const readingStartTime = ref<number | null>(null)
@@ -62,6 +82,7 @@ export const useReadingStore = defineStore('reading', () => {
         markedAsRead: false
       })
     }
+    saveToStorage(readingProgress.value);
   }
 
   /**
@@ -89,8 +110,8 @@ export const useReadingStore = defineStore('reading', () => {
       if (scrollPosition >= autoMarkAsReadThreshold && !existingProgress.markedAsRead) {
         existingProgress.markedAsRead = true
         console.log(`[readingStore] Article ${articleId} automatically marked as read`)
-        // 这里可以触发自动标记为已读的逻辑
       }
+      saveToStorage(readingProgress.value);
     }
   }
 
@@ -138,6 +159,7 @@ export const useReadingStore = defineStore('reading', () => {
       readingProgress.value.clear()
       console.log('[readingStore] Cleared all reading progress')
     }
+    saveToStorage(readingProgress.value);
   }
 
   /**

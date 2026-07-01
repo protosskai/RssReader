@@ -35,6 +35,7 @@ import {TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src
 import {useRoute} from "vue-router";
 import {useThemeStore} from "stores/themeStore";
 import {useQuasar} from "quasar";
+import { electronClient } from "src/services/electronClient";
 
 const route = useRoute();
 const $q = useQuasar();
@@ -81,6 +82,17 @@ onMounted(() => {
   // Initialize theme
   themeStore.initializeTheme();
   themeStore.listenToSystemThemeChange();
+
+  // Background silent sync — show cached content immediately, refresh in background
+  void (async () => {
+    try {
+      await electronClient.syncStart();
+      console.log('[AppLayout] Background sync completed');
+    } catch (e) {
+      // Silent: don't bother the user on first launch
+      console.warn('[AppLayout] Background sync (silent):', e);
+    }
+  })();
 
   // Register global keyboard handler
   window.addEventListener('keydown', handleKeydown);
