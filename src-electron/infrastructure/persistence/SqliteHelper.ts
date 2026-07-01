@@ -259,24 +259,25 @@ export class SqliteHelper {
 	/**
 	 * Create database indexes for query performance
 	 */
+	/**
+	 * Create database indexes for query performance.
+	 * All indexes depend only on tables already created in createTables(),
+	 * so they are safe to create in parallel.
+	 */
 	private async createIndexes(): Promise<void> {
-		const indexes = [
-			`CREATE INDEX IF NOT EXISTS idx_rss_info_rss_id ON rss_info(rss_id)`,
-			`CREATE INDEX IF NOT EXISTS idx_rss_info_folder_id ON rss_info(folder_id)`,
-			`CREATE INDEX IF NOT EXISTS idx_rss_info_update_time ON rss_info(update_time)`,
-			`CREATE INDEX IF NOT EXISTS idx_post_info_rss_id ON post_info(rss_id)`,
-			`CREATE INDEX IF NOT EXISTS idx_post_info_guid ON post_info(guid)`,
-			`CREATE INDEX IF NOT EXISTS idx_post_info_rss_id_update_time ON post_info(rss_id, update_time DESC)`,
-			`CREATE INDEX IF NOT EXISTS idx_post_info_read ON post_info(read)`,
-			`CREATE INDEX IF NOT EXISTS idx_post_info_author ON post_info(author)`,
-			`CREATE INDEX IF NOT EXISTS idx_post_info_link ON post_info(link)`,
-			`CREATE INDEX IF NOT EXISTS idx_folder_info_name ON folder_info(name)`,
-			`CREATE INDEX IF NOT EXISTS idx_folder_info_parent_id ON folder_info(parent_id)`,
-		];
-
-		for (const indexSql of indexes) {
-			await this.run(indexSql);
-		}
+		await Promise.all([
+			this.run(`CREATE INDEX IF NOT EXISTS idx_rss_info_rss_id ON rss_info(rss_id)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_rss_info_folder_id ON rss_info(folder_id)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_rss_info_update_time ON rss_info(update_time)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_post_info_rss_id ON post_info(rss_id)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_post_info_guid ON post_info(guid)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_post_info_rss_id_update_time ON post_info(rss_id, update_time DESC)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_post_info_read ON post_info(read)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_post_info_author ON post_info(author)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_post_info_link ON post_info(link)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_folder_info_name ON folder_info(name)`),
+			this.run(`CREATE INDEX IF NOT EXISTS idx_folder_info_parent_id ON folder_info(parent_id)`),
+		]);
 	}
 
 	/**
