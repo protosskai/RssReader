@@ -309,7 +309,8 @@ function createWindow() {
 	});
 
 	const appUrl = process.env.APP_URL;
-	console.log(`[electron-main] Loading URL: ${appUrl}`);
+	const isProduction = process.env.NODE_ENV === "production";
+	console.log(`[electron-main] Loading URL: ${appUrl} (production: ${isProduction})`);
 	// Set Content-Security-Policy header
 	mainWindow.webContents.session.webRequest.onHeadersReceived(
 		(details, callback) => {
@@ -326,8 +327,6 @@ function createWindow() {
 			});
 		},
 	);
-
-	const isProduction = process.env.NODE_ENV === "production";
 
 	if (isProduction) {
 		// Production: load the bundled index.html directly (no dev server)
