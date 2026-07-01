@@ -64,37 +64,6 @@ async function initDB(): Promise<void> {
 }
 
 // ============================================================
-// Global Error Handlers — prevent silent crashes
-// ============================================================
-
-process.on("unhandledRejection", (reason: unknown) => {
-	const msg = reason instanceof Error ? reason.message : String(reason);
-	console.error("[FATAL] Unhandled promise rejection:", msg);
-	try {
-		dialog.showErrorBox(
-			"应用程序发生错误",
-			`发生了一个未处理的错误：\n${msg}\n\n应用可能不稳定，建议重启。`,
-		);
-	} catch {
-		// dialog may not be available during shutdown
-	}
-});
-
-process.on("uncaughtException", (err: Error) => {
-	console.error("[FATAL] Uncaught exception:", err.message, err.stack);
-	try {
-		dialog.showErrorBox(
-			"应用程序崩溃",
-			`发生了一个致命错误：\n${err.message}\n\n应用即将退出。`,
-		);
-	} catch {
-		// ignore
-	}
-	// Give dialog time to show, then exit
-	setTimeout(() => app.quit(), 1000);
-});
-
-// ============================================================
 // IPC Security Layer — input validation, error wrapping,
 // URL/folder sanitization, content size limits
 // ============================================================
