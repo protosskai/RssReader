@@ -27,6 +27,37 @@ import {
 } from "src/common/ErrorMsg";
 import { OpmlParserAdapter } from "./infrastructure/parsing/OpmlParserAdapter";
 
+// ============================================================
+// Global Error Handlers — prevent silent crashes
+// ============================================================
+
+process.on("unhandledRejection", (reason: unknown) => {
+	const msg = reason instanceof Error ? reason.message : String(reason);
+	console.error("[FATAL] Unhandled promise rejection:", msg);
+	try {
+		dialog.showErrorBox(
+			"应用程序发生错误",
+			`发生了一个未处理的错误：\n${msg}\n\n应用可能不稳定，建议重启。`,
+		);
+	} catch {
+		// dialog may not be available during shutdown
+	}
+});
+
+process.on("uncaughtException", (err: Error) => {
+	console.error("[FATAL] Uncaught exception:", err.message, err.stack);
+	try {
+		dialog.showErrorBox(
+			"应用程序崩溃",
+			`发生了一个致命错误：\n${err.message}\n\n应用即将退出。`,
+		);
+	} catch {
+		// ignore
+	}
+	// Give dialog time to show, then exit
+	setTimeout(() => app.quit(), 1000);
+});
+
 /** Shorthand DB init — forwards to SqliteUtil singleton */
 async function initDB(): Promise<void> {
 	await SqliteUtil.getInstance().init();
@@ -310,7 +341,9 @@ function createWindow() {
 
 	const appUrl = process.env.APP_URL;
 	const isProduction = process.env.NODE_ENV === "production";
-	console.log(`[electron-main] Loading URL: ${appUrl} (production: ${isProduction})`);
+	console.log(
+		`[electron-main] Loading URL: ${appUrl} (production: ${isProduction})`,
+	);
 	// Set Content-Security-Policy header
 	mainWindow.webContents.session.webRequest.onHeadersReceived(
 		(details, callback) => {
