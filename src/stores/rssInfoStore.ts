@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import type { Ref } from 'vue';
-import { ApiResponse, unwrapOrThrow } from 'src/common/ErrorMsg';
-import { RssFolderItem, RssInfoItem, RssInfoNew } from 'src/common/models';
+import { type ApiResponse, unwrapOrThrow } from 'src/common/ErrorMsg';
+import type { RssFolderItem, RssInfoItem, RssInfoNew } from 'src/common/models';
 import { electronClient } from 'src/services/electronClient';
 import type { ArticleStats } from 'src/common/models';
 
@@ -146,7 +146,15 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     await executeAndRefresh(() => electronClient.importOpmlFile(), '导入OPML文件失败');
   };
 
-  void refresh();
+  /** Explicit initialization — call from component onMounted. Safe to call multiple times. */
+  const init = async () => {
+    try {
+      await refresh();
+    } catch (e) {
+      console.error('[rssInfoStore] init failed:', e);
+      // error.value already set by refresh()'s catch block
+    }
+  };
 
   return {
     rssFolderList,
@@ -161,6 +169,7 @@ export const useRssInfoStore = defineStore('rssInfo', () => {
     importOpmlFile,
     editFolder,
     refresh,
+    init,
     syncAll,
     totalArticleCount,
     unreadArticleCount,
