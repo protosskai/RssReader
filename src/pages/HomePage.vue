@@ -421,13 +421,11 @@ const refreshAllFeeds = async () => {
 const loadData = async () => {
   isDataLoading.value = true;
   dataError.value = null;
-  try {
-    await rssInfoStore.refresh();
-  } catch (err) {
-    dataError.value = (err as Error).message || '加载数据失败';
-  } finally {
-    isDataLoading.value = false;
-  }
+  // Use init() instead of raw refresh() — init() catches errors internally
+  // and sets rssInfoStore.error without throwing, avoiding unhandled rejections
+  await rssInfoStore.init();
+  dataError.value = rssInfoStore.error || null;
+  isDataLoading.value = false;
 };
 
 // 生命周期

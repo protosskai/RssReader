@@ -1,5 +1,7 @@
 <template>
-  <router-view />
+  <ErrorBoundary>
+    <router-view />
+  </ErrorBoundary>
   <KeyboardShortcutsDialog ref="shortcutsDialog" />
 </template>
 
@@ -8,6 +10,7 @@ import { onMounted, ref } from 'vue'
 import { useThemeStore } from './stores/themeStore'
 import { useKeyboard, createDefaultShortcuts, SHORTCUT_KEYS } from './composables/useKeyboard'
 import KeyboardShortcutsDialog from './components/KeyboardShortcutsDialog.vue'
+import ErrorBoundary from './components/ErrorBoundary.vue'
 
 const themeStore = useThemeStore()
 const keyboard = useKeyboard()

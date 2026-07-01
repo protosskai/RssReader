@@ -376,20 +376,22 @@ function createWindow() {
 // ============================================================
 
 app.whenReady().then(async () => {
-	// ---- Database init ----
-	try {
-		console.log("[electron-main] Initializing database…");
-		await initDB();
-		console.log("[electron-main] Database initialized successfully");
+	// ---- Database init (fire-and-forget, don't block window creation) ----
+	const dbReadyPromise = (async () => {
+		try {
+			console.log("[electron-main] Initializing database…");
+			await initDB();
+			console.log("[electron-main] Database initialized successfully");
 
-		// Initialize SyncManager (load saved config from disk, now safe after DB init)
-		syncManager.init();
-		// 3 秒后后台静默同步，不阻塞窗口创建
-		setTimeout(() => syncManager.startAutoSync(), 3000);
-	} catch (error) {
-		console.error("[electron-main] Failed to initialize database:", error);
-		throw error;
-	}
+			// Initialize SyncManager (load saved config from disk, now safe after DB init)
+			syncManager.init();
+			// 3 秒后后台静默同步，不阻塞窗口创建
+			setTimeout(() => syncManager.startAutoSync(), 3000);
+		} catch (error) {
+			console.error("[electron-main] Failed to initialize database:", error);
+			throw error;
+		}
+	})();
 
 	// ==================== Legacy RSS Handlers ====================
 
@@ -1064,6 +1066,9 @@ app.whenReady().then(async () => {
 	}
 
 	createWindow();
+
+	// Wait for database to finish initializing (runs in parallel with window creation)
+	await dbReadyPromise;
 });
 
 app.on("window-all-closed", () => {
