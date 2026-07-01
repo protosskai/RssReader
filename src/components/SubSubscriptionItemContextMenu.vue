@@ -45,7 +45,7 @@ interface ContextMenuItem {
 }
 
 const onOpenHomePage = () => {
-  window.electronAPI.openLink(props.rssInfo.htmlUrl)
+  electronClient.openLink(props.rssInfo.htmlUrl)
 }
 const onCopyFeedUrl = () => {
   feedUrl.value = props.rssInfo.feedUrl

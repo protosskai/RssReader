@@ -243,7 +243,7 @@ const openContentPage = (post: PostIndexItem) => {
 // 在浏览器中打开
 const openInBrowser = (post: PostIndexItem) => {
   if (post.link) {
-    window.electronAPI.openLink(post.link);
+    electronClient.openLink(post.link);
     
     // 自动标记为已读
     if (!post.read) {

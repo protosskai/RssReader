@@ -296,7 +296,7 @@ const toggleFavoriteHandler = async () => {
     try {
       const rssId = curContentInfo.value.rssId || '';
       const postIdStr = PostId as string || '';
-      await window.electronAPI.addFavorite(rssId, postIdStr);
+      await electronClient.addFavorite(rssId, postIdStr);
     } catch (err) {
       console.warn('[Content.vue] toggleFavorite error:', err);
     }
@@ -365,7 +365,7 @@ const getContentById = async (postIdToFetch: string): Promise<void> => {
   error.value = null;
 
   try {
-    const postIndex: PostIndexItem | null = await window.electronAPI.queryPostIndexByRssId(postIdToFetch);
+    const postIndex: PostIndexItem | null = await electronClient.queryPostIndexByRssId(postIdToFetch);
     console.log('[Content.vue] postIndex:', postIndex);
 
     if (!postIndex) {
@@ -374,7 +374,7 @@ const getContentById = async (postIdToFetch: string): Promise<void> => {
       return;
     }
 
-    const result = await window.electronAPI.queryPostContentByGuid(postIdToFetch);
+    const result = await electronClient.queryPostContentByGuid(postIdToFetch);
     console.log('[Content.vue] content result:', result);
 
     if (!result) {
@@ -436,19 +436,19 @@ const formatDate = (dateStr: string): string => {
 
 const openUrl = (url: string) => {
   if (url && typeof url === 'string' && url.trim()) {
-    window.electronAPI.openLink(url);
+    electronClient.openLink(url);
   }
 };
 
 const openInBrowser = () => {
   if (curContentInfo.value?.link) {
-    window.electronAPI.openLink(curContentInfo.value.link);
+    electronClient.openLink(curContentInfo.value.link);
   }
 };
 
 const shareArticle = () => {
   const url = curContentInfo.value?.link || window.location.href;
-  window.electronAPI.openLink(url);
+  electronClient.openLink(url);
 };
 
 // ── Keyboard shortcuts ──

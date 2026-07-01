@@ -60,8 +60,8 @@ const onRefresh = async () => {
       message: '正在刷新订阅...'
     });
     // 调用后端API刷新特定RSS订阅
-    if (window.electronAPI.fetchRssIndexList) {
-      await window.electronAPI.fetchRssIndexList(props.rssItem.id);
+    if (electronClient.fetchRssIndexList) {
+      await electronClient.fetchRssIndexList(props.rssItem.id);
       $q.notify({
         message: '订阅已更新',
         color: 'positive',
@@ -131,8 +131,8 @@ const onMarkedRead = async () => {
   try {
     showContextMenu.value = false;
     // 调用后端API将此订阅源的所有文章标记为已读
-    if (window.electronAPI.markRssAsRead) {
-      await window.electronAPI.markRssAsRead(props.rssItem.id);
+    if (electronClient.markRssAsRead) {
+      await electronClient.markRssAsRead(props.rssItem.id);
       $q.notify({
         message: '已标记所有文章为已读',
         color: 'positive',

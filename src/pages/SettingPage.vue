@@ -541,7 +541,7 @@ const loadSettings = async () => {
     }
 
     // 加载同步配置
-    const syncResult = await window.electronAPI.syncGetConfig()
+    const syncResult = await electronClient.syncGetConfig()
     if (syncResult) {
       Object.assign(syncConfig, syncResult)
     }
@@ -559,7 +559,7 @@ const loadSettings = async () => {
 // 更新同步配置
 const updateSyncConfig = async () => {
   try {
-    await window.electronAPI.syncUpdateConfig(syncConfig)
+    await electronClient.syncUpdateConfig(syncConfig)
     await refreshSyncStatus()
     $q.notify({
       type: 'positive',
@@ -579,7 +579,7 @@ const updateSyncConfig = async () => {
 // 刷新同步状态
 const refreshSyncStatus = async () => {
   try {
-    syncStatus.value = await window.electronAPI.syncGetStatus()
+    syncStatus.value = await electronClient.syncGetStatus()
   } catch (error) {
     console.error('获取同步状态失败:', error)
   }
@@ -612,7 +612,7 @@ const saveSettings = async () => {
 const syncAllFeeds = async () => {
   syncing.value = true;
   try {
-    const result = await window.electronAPI.syncStart()
+    const result = await electronClient.syncStart()
 
     if (result.success) {
       const { stats } = result

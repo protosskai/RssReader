@@ -198,7 +198,7 @@ const openContextMenu = (evt: MouseEvent) => {
  */
 const markAsRead = async () => {
   try {
-    await window.electronAPI.toggleReadStatus(props.postInfo.guid)
+    await electronClient.toggleReadStatus(props.postInfo.guid)
     props.postInfo.read = true
     animateToggle()
     emit('read-toggled', props.postInfo.guid)
@@ -221,7 +221,7 @@ const markAsRead = async () => {
 const toggleReadStatus = async () => {
   const currentState = props.postInfo.read
   try {
-    await window.electronAPI.toggleReadStatus(props.postInfo.guid)
+    await electronClient.toggleReadStatus(props.postInfo.guid)
     // The backend toggles server-side; mirror locally
     props.postInfo.read = !currentState
     animateToggle()
@@ -249,7 +249,7 @@ const toggleReadStatus = async () => {
  */
 const toggleFavorite = async () => {
   try {
-    const result = await window.electronAPI.toggleFavorite(props.postInfo.guid)
+    const result = await electronClient.toggleFavorite(props.postInfo.guid)
     isFavorite.value = result
     $q.notify({
       message: result ? '已收藏' : '已取消收藏',
@@ -272,7 +272,7 @@ const toggleFavorite = async () => {
  */
 const openInBrowser = () => {
   if (props.postInfo.link) {
-    window.electronAPI.openLink(props.postInfo.link)
+    electronClient.openLink(props.postInfo.link)
   }
 }
 

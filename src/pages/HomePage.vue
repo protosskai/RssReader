@@ -200,7 +200,41 @@
               aria-label="从 OPML 文件导入"
             />
           </div>
-          <div class="q-mt-lg">
+
+          <!-- 推荐订阅源 — 一键添加 -->
+          <div class="recommended-section q-mt-xl">
+            <div class="text-subtitle2 q-mb-sm" :class="isDarkMode ? 'text-grey-5' : 'text-grey-6'">
+              或者试试这些热门订阅源：
+            </div>
+            <div class="recommended-grid">
+              <q-card
+                v-for="feed in recommendedFeeds"
+                :key="feed.url"
+                flat
+                bordered
+                class="recommended-card"
+                :class="isDarkMode ? 'bg-dark' : 'bg-grey-1'"
+              >
+                <q-card-section horizontal class="q-pa-sm">
+                  <div class="column items-start flex-1">
+                    <div class="text-subtitle2 ellipsis">{{ feed.title }}</div>
+                    <div class="text-caption text-grey-6 ellipsis-2-lines">{{ feed.desc }}</div>
+                  </div>
+                  <q-btn
+                    flat
+                    round
+                    icon="add"
+                    size="sm"
+                    :loading="addingFeedId === feed.url"
+                    @click="addRecommendedFeed(feed)"
+                    aria-label="添加 {{ feed.title }}"
+                  />
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+
+          <div class="q-mt-md">
             <q-chip icon="rss_feed" outline :color="isDarkMode ? 'grey-5' : 'grey-7'" text-color="" dense>
               支持 RSS 2.0 / Atom 格式
             </q-chip>
@@ -373,7 +407,7 @@ const syncAllFeeds = async () => {
   isSyncing.value = true;
   syncProgressStore.startPolling(500);
   try {
-    const result: { success?: boolean; stats?: { successCount?: number; failureCount?: number }; error?: string } = await window.electronAPI.syncStart();
+    const result: { success?: boolean; stats?: { successCount?: number; failureCount?: number }; error?: string } = await electronClient.syncStart();
     syncProgressStore.stopPolling();
     await rssInfoStore.refresh();
     if (result?.success) {

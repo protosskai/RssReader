@@ -189,14 +189,14 @@ const openHomePage = () => {
 /** Close the Electron app */
 const closeApp = () => {
   if (process.env.MODE === 'electron') {
-    window.electronAPI.close();
+    electronClient.close();
   }
 };
 
 /** Minimize the Electron window */
 const minimize = () => {
   if (process.env.MODE === 'electron') {
-    window.electronAPI.minimize();
+    electronClient.minimize();
   }
 };
 </script>

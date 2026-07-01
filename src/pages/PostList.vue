@@ -275,7 +275,7 @@ const toggleMarkAllRead = async () => {
       // Mark all as unread: iterate individually (no bulk unread API available)
       for (const p of PostInfoList.value) {
         if (p.read) {
-          await window.electronAPI.toggleReadStatus(p.guid);
+          await electronClient.toggleReadStatus(p.guid);
         }
       }
       PostInfoList.value.forEach(p => { p.read = false; });
@@ -313,7 +313,7 @@ const toggleMarkAllRead = async () => {
 
     $q.loading.show({ message: '正在标记为已读...', boxClass: 'bg-grey-2 text-grey-9', spinnerColor: 'primary' });
     try {
-      await window.electronAPI.markAllAsRead({ feedId: rssId });
+      await electronClient.markAllAsRead({ feedId: rssId });
       PostInfoList.value.forEach(p => { p.read = true; });
       PostInfoList.value = [...PostInfoList.value];
       $q.loading.hide();
@@ -405,7 +405,7 @@ const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
       setTimeout(() => reject(new Error('同步RSS源超时，请检查网络连接或RSS源是否可用')), 60000);
     });
 
-    const syncPromise = window.electronAPI.fetchRssIndexList(rssItemId);
+    const syncPromise = electronClient.fetchRssIndexList(rssItemId);
     await Promise.race([syncPromise, syncTimeout]);
 
     console.log('[PostList.vue] Step 2: Querying article list (queryPostIndexByRssId)...');
@@ -414,7 +414,7 @@ const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
       setTimeout(() => reject(new Error('查询文章列表超时')), 30000);
     });
 
-    const queryPromise = window.electronAPI.queryPostIndexByRssId(rssItemId);
+    const queryPromise = electronClient.queryPostIndexByRssId(rssItemId);
     const result = await Promise.race([queryPromise, queryTimeout]);
 
     console.log('[PostList.vue] Articles count:', result.length);
