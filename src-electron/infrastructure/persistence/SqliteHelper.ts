@@ -62,12 +62,20 @@ class ReadWriteLock {
 	}
 }
 
-// 操作队列
+// 操作队列 — 最大队列深度，防止无界堆积
+const MAX_QUEUE_DEPTH = 100;
+
 class OperationQueue {
 	private queue: Array<() => Promise<any>> = [];
 	private processing = false;
 
 	async add<T>(operation: () => Promise<T>): Promise<T> {
+		if (this.queue.length >= MAX_QUEUE_DEPTH) {
+			return Promise.reject(
+				new Error(`OperationQueue overflow: ${this.queue.length} items queued`),
+			);
+		}
+
 		return new Promise((resolve, reject) => {
 			this.queue.push(async () => {
 				try {
@@ -84,6 +92,16 @@ class OperationQueue {
 		});
 	}
 
+	/**
+	 * Drain the operation queue sequentially.
+	 *
+	 * Each queued wrapper already resolves/rejects its own Promise (created
+	 * in add()). The try/catch here is a safety net to prevent the while loop
+	 * from breaking if a wrapper throws synchronously before its Promise settles.
+	 *
+	 * Deadlock safety: this method does NOT call add() from within an
+	 * operation, so re-entrant queue pushes cannot create circular waits.
+	 */
 	private async process() {
 		this.processing = true;
 
@@ -92,7 +110,8 @@ class OperationQueue {
 			try {
 				await operation();
 			} catch (error) {
-				console.error("Queue operation failed:", error);
+				console.error("[SqliteHelper] OperationQueue error:",
+					error instanceof Error ? error.message : String(error));
 			}
 		}
 

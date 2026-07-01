@@ -1,5 +1,5 @@
 import { getArticleService } from '../infrastructure/di/Container';
-import { Notification } from 'electron';
+import { Notification, app } from 'electron';
 import path from 'path';
 import fs from 'fs';
 
@@ -73,7 +73,6 @@ export class SyncManager {
 
   private getConfigPath(): string {
     // 使用electron的app.getPath获取用户数据目录
-    const { app } = require('electron')
     const userDataPath = app.getPath('userData')
     return path.join(userDataPath, 'sync-config.json')
   }
