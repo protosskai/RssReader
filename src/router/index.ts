@@ -32,5 +32,18 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
+  // Route guard: warn when running outside Electron but never block.
+  // All IPC methods are already protected by the noop proxy in electronClient.ts.
+  router.beforeEach((to, from, next) => {
+    const hasElectronAPI =
+      typeof window !== 'undefined' && 'electronAPI' in window;
+    if (!hasElectronAPI && to.name !== 'Home') {
+      console.warn(
+        `[Router] 非 Electron 环境，导航到 ${String(to.name)} (${to.path})`,
+      );
+    }
+    next();
+  });
+
   return router;
 });
