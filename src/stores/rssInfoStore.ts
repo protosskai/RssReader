@@ -172,6 +172,55 @@ export const useRssInfoStore = defineStore("rssInfo", () => {
 		);
 	};
 
+	/**
+	 * Edit an existing subscription.
+	 * Backend has no dedicated "edit" channel — implement as remove + re-add
+	 * when URL/folder/title change. Preserves posts only if feed URL is unchanged
+	 * and the feed id remains (we re-add with same feedUrl so sync reuses GUID).
+	 */
+	const editRssSubscription = async (payload: {
+		rssId: string;
+		title: string;
+		feedUrl: string;
+		htmlUrl?: string;
+		folderName: string;
+		oldFolderName?: string;
+	}) => {
+		const oldFolder = payload.oldFolderName || payload.folderName;
+		// Find old feedUrl from store
+		let oldFeedUrl = payload.feedUrl;
+		for (const folder of rssFolderList.value) {
+			const found = folder.data.find((f) => f.id === payload.rssId);
+			if (found) {
+				oldFeedUrl = found.feedUrl;
+				break;
+			}
+		}
+		await executeAndRefresh(async () => {
+			// Remove old then add with new metadata
+			await electronClient.removeRssSubscription(oldFolder, oldFeedUrl);
+			return electronClient.addRssSubscription({
+				feedUrl: payload.feedUrl,
+				title: payload.title,
+				folderName: payload.folderName || "默认",
+			});
+		}, "编辑RSS订阅失败");
+	};
+
+	/**
+	 * Nested folder move is not supported by the current backend schema
+	 * (folders are flat). Surface a clear error instead of a silent no-op.
+	 */
+	const moveFolder = async (
+		_folderName: string,
+		_targetParent?: string,
+	): Promise<{ success: boolean; msg?: string }> => {
+		return {
+			success: false,
+			msg: "当前版本暂不支持嵌套移动文件夹，请使用「重命名」或重新创建",
+		};
+	};
+
 	/** Explicit initialization — call from component onMounted. Safe to call multiple times. */
 	const init = async () => {
 		try {
@@ -189,6 +238,8 @@ export const useRssInfoStore = defineStore("rssInfo", () => {
 		aggregatedStats,
 		addRssSubscription,
 		removeRssSubscription,
+		editRssSubscription,
+		moveFolder,
 		folderNameList,
 		addFolder,
 		removeFolder,

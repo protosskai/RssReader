@@ -78,7 +78,7 @@ const systemDialogStore = useSystemDialogStore();
 const rssInfoStore = useRssInfoStore();
 const {addRssSubscription} = rssInfoStore;
 const {showAddSubscriptionDialog} = storeToRefs(systemDialogStore);
-const {toggleAddSubscriptionDialog, toggleAddFolderDialog} = systemDialogStore;
+const {toggleSubscriptionDialog: toggleAddSubscriptionDialog, toggleAddFolderDialog} = systemDialogStore;
 
 const rssInfoRef = reactive<RssInfoNew>({
   feedUrl: '',

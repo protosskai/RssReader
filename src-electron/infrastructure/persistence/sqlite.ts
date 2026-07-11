@@ -750,7 +750,7 @@ export class SqliteUtil implements StorageUtil {
 	async syncRssPostList(
 		rssId: string,
 		postInfoItemList: PostInfoItem[],
-	): Promise<ErrorMsg> {
+	): Promise<ErrorData<number>> {
 		const timestamp = new Date().toISOString();
 		console.log(`[${timestamp}] [sqlite.ts] syncRssPostList called`);
 		console.log(`[${timestamp}] [sqlite.ts] rssId:`, rssId);
@@ -825,6 +825,7 @@ export class SqliteUtil implements StorageUtil {
 			return {
 				success: true,
 				msg: "",
+				data: newArticleCount,
 			};
 		});
 	}
@@ -1004,6 +1005,12 @@ export class SqliteUtil implements StorageUtil {
 		);
 
 		try {
+			const trimmed = (query || "").trim();
+			// Empty query must NOT hit FTS MATCH — FTS5 throws: syntax error near ""
+			if (!trimmed) {
+				return { success: true, msg: "", data: [] };
+			}
+
 			// 检查并创建FTS表（如果不存在）
 			await this.ensureFtsTable();
 
@@ -1031,15 +1038,18 @@ export class SqliteUtil implements StorageUtil {
         JOIN folder_info f ON r.folder_id = f.id
         WHERE post_info_fts MATCH ?
       `;
-			const normalizedQuery = query
-				.trim()
+			const normalizedQuery = trimmed
 				.split(/\s+/)
 				.map((token) => token.replace(/["']/g, "").trim())
 				.filter((token) => token.length > 0)
 				.map((token) => `"${token}"`)
 				.join(" AND ");
 
-			const params: any[] = [normalizedQuery || query.trim()];
+			if (!normalizedQuery) {
+				return { success: true, msg: "", data: [] };
+			}
+
+			const params: any[] = [normalizedQuery];
 
 			// 添加文件夹过滤
 			if (folderId) {

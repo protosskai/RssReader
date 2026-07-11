@@ -186,7 +186,7 @@ export class SyncManager {
 							}
 
 							console.log(`[SyncManager] Syncing: ${source.title}`);
-							await service.syncFeed(source.id);
+							const newCount = await service.syncFeed(source.id);
 							stats.successCount++;
 							this.progressInfo.successCount++;
 							this.progressInfo.completedCount++;
@@ -194,7 +194,7 @@ export class SyncManager {
 							if (srcProgress) {
 								srcProgress.status = "success";
 							}
-							stats.newArticlesCount += 1;
+							stats.newArticlesCount += newCount;
 							this.progressInfo.currentSource = null;
 
 							return { success: true, source: source.title };

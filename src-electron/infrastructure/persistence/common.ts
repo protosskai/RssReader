@@ -32,7 +32,7 @@ export interface StorageUtil {
 	syncRssPostList: (
 		rssId: string,
 		postInfoItemList: PostInfoItem[],
-	) => Promise<ErrorMsg>;
+	) => Promise<ErrorData<number>>;
 	queryPostContentByGuid: (guid: string) => Promise<ErrorData<ContentInfo>>;
 	queryPostIndexByRssId: (rssId: string) => Promise<ErrorData<PostIndexItem[]>>;
 	searchPosts: (

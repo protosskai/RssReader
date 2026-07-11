@@ -81,11 +81,11 @@ const isDarkMode = computed(() => themeStore.isDarkMode)
 
 const progressColor = computed(() => {
   if (progress.value < 30) {
-    return '#4caf50' // 绿色
+    return 'var(--ink-tertiary)'
   } else if (progress.value < 70) {
-    return '#ff9800' // 橙色
+    return 'var(--ink-tertiary)'
   } else {
-    return '#f44336' // 红色
+    return 'var(--ink-primary)'
   }
 })
 
@@ -124,39 +124,27 @@ const handleMouseLeave = () => {
 <style lang="scss" scoped>
 .reading-progress-bar {
   position: fixed;
-  top: 0;
+  top: var(--ink-header-h, 48px);
   left: 0;
   right: 0;
-  z-index: 9999;
-  padding: 8px 16px 4px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  z-index: 40;
+  padding: 0;
+  background: transparent;
   cursor: pointer;
+  pointer-events: auto;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.95);
-    padding-bottom: 8px;
-  }
-
-  &.dark {
-    background: rgba(30, 30, 30, 0.9);
-
-    &:hover {
-      background: rgba(30, 30, 30, 0.95);
-    }
-  }
+  &.dark { background: transparent; }
 }
 
 .progress-track {
   height: v-bind(height)px;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--ink-border);
   border-radius: 2px;
   overflow: hidden;
   position: relative;
 
   .dark & {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--ink-border);
   }
 }
 

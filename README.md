@@ -2,6 +2,13 @@
 
 A Quasar Project
 
+## Refactoring governance
+
+Incremental refactoring in this legacy application is governed by the
+[RSS Reader Constitution](.specify/memory/constitution.md). Refactors preserve
+observable behavior by default, use independently reversible increments, and require
+test evidence before high-risk changes.
+
 ## Install the dependencies
 ```bash
 yarn

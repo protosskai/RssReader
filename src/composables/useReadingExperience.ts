@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useReadingStore } from '../stores/readingStore'
-import { extractTextFromHtml } from '../../src-electron/util/string'
+import { extractTextFromHtml } from 'src/common/util'
 
 /**
  * 阅读体验Composable
@@ -21,13 +21,50 @@ export const useReadingExperience = (articleId: string, content: string) => {
     return plainText.length
   }
 
+  /** Resolve the element that actually scrolls (window or nested layout container). */
+  const getScrollRoot = (): HTMLElement | Window => {
+    if (typeof document === 'undefined') return window
+    const candidates = [
+      document.scrollingElement as HTMLElement | null,
+      document.querySelector('.q-page-container') as HTMLElement | null,
+      document.querySelector('.layout-page-container') as HTMLElement | null,
+      document.documentElement,
+      document.body,
+    ].filter(Boolean) as HTMLElement[]
+
+    for (const el of candidates) {
+      const style = window.getComputedStyle(el)
+      const canScroll =
+        (style.overflowY === 'auto' || style.overflowY === 'scroll' || el === document.documentElement || el === document.body) &&
+        el.scrollHeight > el.clientHeight + 8
+      if (canScroll) return el
+    }
+    return window
+  }
+
+  const readScrollMetrics = () => {
+    const root = getScrollRoot()
+    if (root === window || root === document.documentElement || root === document.body) {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0
+      const docHeight = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        0,
+      )
+      return { scrollTop, docHeight }
+    }
+    const el = root as HTMLElement
+    return {
+      scrollTop: el.scrollTop,
+      docHeight: Math.max(el.scrollHeight - el.clientHeight, 0),
+    }
+  }
+
   /**
    * 更新阅读进度
    */
   const updateReadingProgress = () => {
-    const scrollTop = window.scrollY
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight
-    const scrollPercent = docHeight > 0 ? scrollTop / docHeight : 0
+    const { scrollTop, docHeight } = readScrollMetrics()
+    const scrollPercent = docHeight > 0 ? Math.min(1, scrollTop / docHeight) : 0
 
     scrollPosition.value = scrollPercent
     readingStore.updateProgress(articleId, scrollPercent)
@@ -72,20 +109,28 @@ export const useReadingExperience = (articleId: string, content: string) => {
    * 平滑滚动到顶部
    */
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
+    const root = getScrollRoot()
+    if (root === window) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      (root as HTMLElement).scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   /**
    * 平滑滚动到底部
    */
   const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth'
-    })
+    const root = getScrollRoot()
+    if (root === window) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      })
+    } else {
+      const el = root as HTMLElement
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+    }
   }
 
   /**
@@ -93,22 +138,33 @@ export const useReadingExperience = (articleId: string, content: string) => {
    * @param percent 百分比 (0-100)
    */
   const scrollToPercent = (percent: number) => {
-    const targetPosition = (percent / 100) * (document.documentElement.scrollHeight - window.innerHeight)
-    window.scrollTo({
-      top: targetPosition,
-      behavior: 'smooth'
-    })
+    const { docHeight } = readScrollMetrics()
+    const targetPosition = (percent / 100) * docHeight
+    const root = getScrollRoot()
+    if (root === window) {
+      window.scrollTo({ top: targetPosition, behavior: 'smooth' })
+    } else {
+      (root as HTMLElement).scrollTo({ top: targetPosition, behavior: 'smooth' })
+    }
   }
 
-  // 组件挂载时添加滚动监听
+  // 组件挂载时添加滚动监听（window + 可能的内部滚动容器）
   onMounted(() => {
     window.addEventListener('scroll', handleScroll, { passive: true })
+    const root = getScrollRoot()
+    if (root !== window && root instanceof HTMLElement) {
+      root.addEventListener('scroll', handleScroll, { passive: true })
+    }
     console.log(`[useReadingExperience] Scroll listener added for article: ${articleId}`)
   })
 
   // 组件卸载时移除滚动监听
   onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll)
+    const root = getScrollRoot()
+    if (root !== window && root instanceof HTMLElement) {
+      root.removeEventListener('scroll', handleScroll)
+    }
     stopReading()
     if (scrollTimeoutId) {
       clearTimeout(scrollTimeoutId)

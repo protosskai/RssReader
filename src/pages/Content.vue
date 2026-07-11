@@ -1,229 +1,99 @@
 <template>
-  <q-page class="content-page">
-    <!-- 阅读进度条 (fixed top bar - merged from ContentReader) -->
+  <q-page class="ink-reader">
     <ReadingProgressBar
       :article-id="postId"
       :show-estimated-time="true"
       :show-progress-bar="true"
     />
 
-    <!-- 工具栏 -->
-    <div class="toolbar" :class="{ 'dark': $q.dark.isActive }">
-      <q-btn icon="arrow_back" flat round @click="goBack">
-        <q-tooltip>返回 (Backspace)</q-tooltip>
+    <div class="ink-reader__toolbar">
+      <q-btn flat round dense icon="arrow_back" aria-label="Back" @click="goBack">
+        <q-tooltip>Back (Backspace)</q-tooltip>
       </q-btn>
-
       <q-space />
-
-      <!-- 收藏按钮 -->
       <q-btn
-        :icon="isFavorite ? 'bookmark' : 'bookmark_border'"
-        :color="isFavorite ? 'warning' : undefined"
-        flat
-        round
+        flat round dense
+        :icon="isFavorite ? 'star' : 'star_border'"
+        :color="isFavorite ? 'amber' : undefined"
         :disable="!curContentInfo.title"
-        :aria-label="isFavorite ? '取消收藏' : '添加收藏'"
         @click="toggleFavoriteHandler"
       >
-        <q-tooltip>{{ isFavorite ? '取消收藏' : '添加收藏' }}</q-tooltip>
+        <q-tooltip>{{ isFavorite ? 'Unfavorite' : 'Favorite' }}</q-tooltip>
       </q-btn>
       <q-separator vertical class="q-mx-xs" />
-
-      <!-- 字体控制 -->
-      <q-btn icon="text_decrease" flat round @click="decreaseFontSize">
-        <q-tooltip>减小字体</q-tooltip>
-      </q-btn>
-      <span class="q-mx-xs text-caption" :class="{ 'text-grey-4': $q.dark.isActive }">{{ fontSize }}%</span>
-      <q-btn icon="text_increase" flat round @click="increaseFontSize">
-        <q-tooltip>增大字体</q-tooltip>
-      </q-btn>
+      <q-btn flat round dense icon="text_decrease" @click="decreaseFontSize" />
+      <span class="ink-reader__fontpct ink-meta">{{ fontSize }}%</span>
+      <q-btn flat round dense icon="text_increase" @click="increaseFontSize" />
       <q-separator vertical class="q-mx-xs" />
-
-      <q-btn icon="open_in_new" flat round @click="openInBrowser" :disable="!curContentInfo.link">
-        <q-tooltip>在浏览器中打开 (F)</q-tooltip>
+      <q-btn flat round dense icon="open_in_new" :disable="!curContentInfo.link" @click="openInBrowser">
+        <q-tooltip>Open original (F)</q-tooltip>
       </q-btn>
     </div>
 
-    <!-- 主内容区 with transition -->
-    <transition
-      enter-active-class="animated fadeIn"
-      leave-active-class="animated fadeOut"
-      mode="out-in"
-      :duration="200"
-    >
-      <!-- 加载状态 - 骨架屏 -->
-      <div v-if="loading" key="loading" class="loading-container">
-        <div class="skeleton-wrapper" :class="{ 'dark': $q.dark.isActive }">
-          <div class="skeleton-line skeleton-title"></div>
-          <div class="skeleton-line skeleton-meta"></div>
-          <div class="skeleton-divider"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line short"></div>
-          <div class="skeleton-line"></div>
-          <div class="skeleton-line"></div>
+    <div class="ink-reader-measure ink-reader__stage">
+      <div v-if="loading" key="loading" class="ink-reader__skel">
+        <q-skeleton type="text" width="80%" height="32px" />
+        <q-skeleton type="text" width="40%" class="q-mt-md" />
+        <q-skeleton type="text" width="100%" class="q-mt-lg" />
+        <q-skeleton type="text" width="100%" class="q-mt-sm" />
+        <q-skeleton type="text" width="90%" class="q-mt-sm" />
+        <q-skeleton type="text" width="95%" class="q-mt-sm" />
+      </div>
+
+      <div v-else-if="error" key="error" class="ink-empty">
+        <q-icon name="mood_bad" size="48px" class="ink-empty__icon" color="negative" />
+        <h2 class="ink-empty__title">Couldn’t load article</h2>
+        <p class="ink-empty__desc">{{ error }}</p>
+        <div class="row q-gutter-sm justify-center">
+          <q-btn class="ink-btn-primary" unelevated no-caps icon="refresh" label="Retry" @click="retryLoad" />
+          <q-btn flat no-caps icon="arrow_back" label="Back" @click="goBack" />
         </div>
       </div>
 
-      <!-- 错误状态 -->
-      <div v-else-if="error" key="error" class="state-wrapper">
-        <q-card class="error-card" :class="{ 'dark-card': $q.dark.isActive }">
-          <q-card-section class="text-center">
-            <q-icon
-              name="mood_bad"
-              size="64px"
-              :color="$q.dark.isActive ? 'orange-4' : 'negative'"
-              class="q-mb-md"
-            />
-            <div class="text-h6" :class="$q.dark.isActive ? 'text-orange-4' : 'text-negative'">
-              加载失败
-            </div>
-            <p class="text-body2 q-mt-sm" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-7'">
-              {{ error }}
-            </p>
-            <div class="q-mt-lg q-gutter-sm">
-              <q-btn label="重试" color="primary" icon="refresh" @click="retryLoad" />
-              <q-btn
-                label="返回列表"
-                :color="$q.dark.isActive ? 'grey-4' : 'grey-7'"
-                flat
-                @click="goBack"
-                icon="arrow_back"
-              />
-            </div>
-          </q-card-section>
-        </q-card>
+      <div v-else-if="!curContentInfo.title && !loading" key="empty" class="ink-empty">
+        <q-icon name="auto_stories" size="48px" class="ink-empty__icon" />
+        <h2 class="ink-empty__title">No content</h2>
+        <p class="ink-empty__desc">This article has no body text.</p>
+        <q-btn flat no-caps icon="arrow_back" label="Back" @click="goBack" />
       </div>
 
-      <!-- 空内容状态 -->
-      <div v-else-if="!curContentInfo.title && !loading" key="empty" class="state-wrapper">
-        <q-card class="error-card" :class="{ 'dark-card': $q.dark.isActive }">
-          <q-card-section class="text-center">
-            <q-icon name="auto_stories" size="64px" color="grey-5" class="q-mb-md" />
-            <div class="text-h6 text-grey-6">暂无内容</div>
-            <p class="text-body2 text-grey-5 q-mt-sm">无法获取文章内容</p>
-            <q-btn label="返回列表" color="primary" flat @click="goBack" icon="arrow_back" class="q-mt-md" />
-          </q-card-section>
-        </q-card>
-      </div>
+      <article v-else key="content" class="ink-reader__article">
+        <header class="ink-reader__header">
+          <p v-if="curContentInfo.rssSource" class="ink-eyebrow ink-reader__source" @click="openUrl(curContentInfo.rssSource.htmlUrl)">
+            {{ curContentInfo.rssSource.name }}
+          </p>
+          <h1 class="ink-reader__title" @click="openUrl(curContentInfo.link)">
+            {{ curContentInfo.title }}
+          </h1>
+          <p class="ink-reader__meta ink-meta">
+            <span v-if="curContentInfo.author">{{ curContentInfo.author }}</span>
+            <span v-if="curContentInfo.author && curContentInfo.updateTime"> · </span>
+            <span v-if="curContentInfo.updateTime">{{ formatDate(curContentInfo.updateTime) }}</span>
+            <span v-if="estimatedTime"> · {{ estimatedTime }} read</span>
+          </p>
+        </header>
 
-      <!-- 文章内容 -->
-      <div v-else key="content" class="content-wrapper">
-        <!-- 文章头部信息 -->
-        <q-item class="article-header" :class="{ 'dark': $q.dark.isActive }">
-          <q-item-section>
-            <!-- RSS 来源 -->
-            <q-item-label
-              v-if="curContentInfo.rssSource"
-              lines="1"
-              class="text-subtitle1 source-label"
-              @click="openUrl(curContentInfo.rssSource.htmlUrl)"
-            >
-              <q-badge :color="$q.dark.isActive ? 'grey-8' : 'primary'" outline class="cursor-pointer">
-                {{ curContentInfo.rssSource.name }}
-              </q-badge>
-            </q-item-label>
+        <div
+          class="ink-reader__body"
+          :style="contentStyles"
+          v-html="sanitizeHtml(curContentInfo.content)"
+        />
 
-            <!-- 文章标题 -->
-            <q-item-label
-              lines="4"
-              class="article-title"
-              @click="openUrl(curContentInfo.link)"
-            >
-              {{ curContentInfo.title }}
-            </q-item-label>
-
-            <!-- 文章元信息 (含估计阅读时间) -->
-            <q-item-label lines="1" class="article-meta" v-if="curContentInfo.author || curContentInfo.updateTime">
-              <span v-if="curContentInfo.author" class="meta-item">
-                <q-icon name="person" size="14px" class="q-mr-xs" />
-                {{ curContentInfo.author }}
-              </span>
-              <span v-if="curContentInfo.updateTime" class="meta-item">
-                <q-icon name="schedule" size="14px" class="q-mr-xs" />
-                {{ formatDate(curContentInfo.updateTime) }}
-              </span>
-              <span v-if="estimatedTime" class="meta-item">
-                <q-icon name="timer" size="14px" class="q-mr-xs" />
-                预计阅读 {{ estimatedTime }}
-              </span>
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <q-separator :class="$q.dark.isActive ? 'dark-sep' : ''" />
-
-        <!-- 文章正文 (with fade transition on appear) -->
-        <transition appear enter-active-class="animated fadeIn">
-          <div
-            v-html="sanitizeHtml(curContentInfo.content)"
-            class="content-area"
-            :class="{ 'dark': $q.dark.isActive }"
-            :style="contentStyles"
-          ></div>
-        </transition>
-
-        <!-- 阅读统计 & 操作 (footer merged from ContentReader) -->
-        <div class="reader-footer" :class="{ 'dark': $q.dark.isActive }">
-          <div class="reading-stats">
-            <q-chip
-              v-if="progress > 0"
-              icon="timer"
-              :label="`已读 ${formatReadingTime}`"
-              color="primary"
-              text-color="white"
-              dense
-              size="12px"
-            />
-            <q-chip
-              v-if="progress > 0"
-              icon="view_list"
-              :label="`进度 ${Math.round(progress)}%`"
-              color="secondary"
-              text-color="white"
-              dense
-              size="12px"
-            />
-            <q-chip
-              v-else
-              icon="auto_stories"
-              label="开始阅读"
-              color="grey-5"
-              text-color="white"
-              dense
-              size="12px"
-            />
+        <footer class="ink-reader__footer">
+          <div class="ink-reader__stats">
+            <span v-if="progress > 0" class="ink-chip">{{ Math.round(progress) }}% read</span>
+            <span v-if="progress > 0" class="ink-chip ink-chip--muted">{{ formatReadingTime }}</span>
           </div>
-
-          <div class="reading-controls">
-            <q-btn flat round dense icon="keyboard_arrow_up" @click="scrollToTop">
-              <q-tooltip>回到顶部 (Home)</q-tooltip>
-            </q-btn>
-            <q-btn flat round dense icon="keyboard_arrow_down" @click="scrollToBottom">
-              <q-tooltip>到底部 (End)</q-tooltip>
-            </q-btn>
-            <q-btn
-              flat round dense
-              :icon="isFavorite ? 'bookmark' : 'bookmark_border'"
-              :color="isFavorite ? 'warning' : undefined"
-              @click="toggleFavoriteHandler"
-            >
-              <q-tooltip>{{ isFavorite ? '取消收藏' : '收藏文章' }}</q-tooltip>
-            </q-btn>
-            <q-btn flat round dense icon="share" @click="shareArticle">
-              <q-tooltip>在浏览器中打开</q-tooltip>
-            </q-btn>
+          <div class="ink-reader__footer-actions">
+            <q-btn flat dense round icon="keyboard_arrow_up" @click="scrollToTop" />
+            <q-btn flat dense round icon="keyboard_arrow_down" @click="scrollToBottom" />
+            <q-btn flat dense round :icon="isFavorite ? 'star' : 'star_border'" @click="toggleFavoriteHandler" />
+            <q-btn flat dense round icon="open_in_new" @click="shareArticle" />
           </div>
-        </div>
-
-        <!-- 底部留白 -->
-        <div class="content-spacer"></div>
-      </div>
-    </transition>
+        </footer>
+        <div class="ink-reader__spacer" />
+      </article>
+    </div>
   </q-page>
 </template>
 
@@ -247,9 +117,19 @@ const favoriteStore = useFavoriteStore();
 const readingStore = useReadingStore();
 const { settings: readingSettings } = useReadingSettings();
 
-const { RssId, PostId } = route.params;
-const rssId = String(RssId || '');
-const postId = String(PostId || '');
+// Prefer query (new), fall back to path params (legacy links)
+// Must be computed: guids are URLs and route changes on next/prev article
+const rssId = computed(() =>
+  String(route.query.rssId || route.params.RssId || ''),
+);
+const postId = computed(() => {
+  const raw = String(route.query.postId || route.params.PostId || '');
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+});
 
 // ── 加载 & 错误状态 ──
 const loading = ref(false);
@@ -282,43 +162,58 @@ const decreaseFontSize = () => {
 const isFavorite = ref(false);
 
 const toggleFavoriteHandler = async () => {
-  // Check if the favorite store method exists
-  if (favoriteStore.toggleFavorite) {
-    const newStatus = await favoriteStore.toggleFavorite(curContentInfo.value.rssId, PostId as string);
-    if (newStatus !== undefined) {
-      isFavorite.value = newStatus === 1;
-    } else {
-      // fallback: just toggle locally
-      isFavorite.value = !isFavorite.value;
-    }
-  } else {
-    // fallback for when we can't access the store method
-    isFavorite.value = !isFavorite.value;
-    try {
-      const rssId = curContentInfo.value.rssId || '';
-      const postIdStr = PostId as string || '';
-      await electronClient.addFavorite(rssId, postIdStr);
-    } catch (err) {
-      console.warn('[Content.vue] toggleFavorite error:', err);
-    }
+  const id = postId.value;
+  if (!id || !curContentInfo.value.title) return;
+
+  try {
+    // Single source of truth: article:toggleFavorite on post_info
+    const newFavorite = await electronClient.toggleFavorite(id);
+    isFavorite.value = !!newFavorite;
+
+    // Best-effort: refresh favorite list store so FavoritePage stays current
+    void favoriteStore.loadFavoritePosts().catch(() => undefined);
+
+    $q.notify({
+      type: isFavorite.value ? 'positive' : 'info',
+      message: isFavorite.value ? '已收藏' : '已取消收藏',
+      position: 'top',
+      timeout: 1200,
+    });
+  } catch (err) {
+    console.warn('[Content.vue] toggleFavorite error:', err);
+    $q.notify({
+      type: 'negative',
+      message: '收藏操作失败: ' + (err instanceof Error ? err.message : String(err)),
+      position: 'top',
+    });
   }
 };
+
+// Re-load when navigating between articles without unmounting
+watch(
+  postId,
+  async (nextId, prevId) => {
+    if (nextId && nextId !== prevId) {
+      await getContentById(nextId);
+    }
+  },
+);
 
 // ── 阅读进度追踪 (from ContentReader + useReadingExperience) ──
 
 const {
   startReading,
   stopReading,
-} = useReadingExperience(postId, ''); // content gets set after load
+} = useReadingExperience(postId.value, ''); // content gets set after load
 
 const progress = computed(() => {
-  if (!postId) return 0;
-  const p = readingStore.getProgress(postId);
+  if (!postId.value) return 0;
+  const p = readingStore.getProgress(postId.value);
   return p?.progress || 0;
 });
 
 const estimatedTime = computed(() => {
-  if (!postId || !curContentInfo.value.content) return '';
+  if (!postId.value || !curContentInfo.value.content) return '';
   const text = curContentInfo.value.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
   const wordCount = text.length;
   const seconds = readingStore.estimateReadingTime(wordCount);
@@ -329,15 +224,37 @@ const formatReadingTime = computed(() => {
   return readingStore.formatReadingTime(readingStore.currentReadingTime);
 });
 
+const getScrollRoot = (): HTMLElement | Window => {
+  if (typeof document === 'undefined') return window;
+  const candidates = [
+    document.scrollingElement as HTMLElement | null,
+    document.querySelector('.q-page-container') as HTMLElement | null,
+    document.documentElement,
+    document.body,
+  ].filter(Boolean) as HTMLElement[];
+  for (const el of candidates) {
+    if (el.scrollHeight > el.clientHeight + 8) return el;
+  }
+  return window;
+};
+
 const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const root = getScrollRoot();
+  if (root === window) window.scrollTo({ top: 0, behavior: 'smooth' });
+  else (root as HTMLElement).scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 const scrollToBottom = () => {
-  window.scrollTo({
-    top: document.documentElement.scrollHeight,
-    behavior: 'smooth',
-  });
+  const root = getScrollRoot();
+  if (root === window) {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  } else {
+    const el = root as HTMLElement;
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }
 };
 
 // ── 文章数据 ──
@@ -348,9 +265,9 @@ const curContentInfo: Ref<ContentInfo> = ref({
   author: '',
   updateTime: '',
   link: '',
-  rssId: rssId || '',
+  rssId: rssId.value || '',
   rssSource: {
-    rssId: rssId || '',
+    rssId: rssId.value || '',
     url: '',
     name: '',
     folder: '',
@@ -362,25 +279,22 @@ const curContentInfo: Ref<ContentInfo> = ref({
 const getContentById = async (postIdToFetch: string): Promise<void> => {
   console.log('[Content.vue] getContentById called with postId:', postIdToFetch);
 
+  if (!postIdToFetch || postIdToFetch === 'undefined' || postIdToFetch === 'null') {
+    error.value = '无效的文章 ID';
+    return;
+  }
+
   loading.value = true;
   error.value = null;
 
   try {
-    const postIndex: PostIndexItem | null = await electronClient.queryPostIndexByRssId(postIdToFetch);
-    console.log('[Content.vue] postIndex:', postIndex);
+    // Legacy API returns ApiResponse<ContentInfo> after secureInvoke unwraps the IPC envelope
+    const raw = await electronClient.queryPostContentByGuid(postIdToFetch);
+    const result = unwrapOrThrow(raw);
+    console.log('[Content.vue] content loaded:', result?.title);
 
-    if (!postIndex) {
-      error.value = '文章索引不存在';
-      loading.value = false;
-      return;
-    }
-
-    const result = await electronClient.queryPostContentByGuid(postIdToFetch);
-    console.log('[Content.vue] content result:', result);
-
-    if (!result) {
+    if (!result || !result.title) {
       error.value = '文章内容不存在';
-      loading.value = false;
       return;
     }
 
@@ -400,9 +314,28 @@ const getContentById = async (postIdToFetch: string): Promise<void> => {
     // 初始化收藏状态
     if (result.favorite !== undefined) {
       isFavorite.value = result.favorite === 1;
+    } else {
+      try {
+        isFavorite.value = await electronClient.isPostFavorite(postIdToFetch);
+      } catch {
+        isFavorite.value = false;
+      }
     }
 
     curContentInfo.value = result as ContentInfo;
+
+    // Single source of truth for open→read: idempotent set (never toggle).
+    // List click must not also call IPC toggle — concurrent toggles flip unread.
+    if (!result.read) {
+      void electronClient
+        .setReadStatus(postIdToFetch, true)
+        .then(() => {
+          if (curContentInfo.value) {
+            (curContentInfo.value as ContentInfo & { read?: number }).read = 1;
+          }
+        })
+        .catch(() => undefined);
+    }
   } catch (err: unknown) {
     console.error('[Content.vue] getContentById error:', err);
     error.value = err instanceof Error ? err.message : '加载文章失败';
@@ -412,7 +345,7 @@ const getContentById = async (postIdToFetch: string): Promise<void> => {
 };
 
 const goBack = () => {
-  const rssIdStr = rssId;
+  const rssIdStr = rssId.value;
   if (rssIdStr && rssIdStr !== 'search' && rssIdStr !== '' && rssIdStr !== 'undefined') {
     router.push({ name: 'PostList', params: { RssId: rssIdStr } });
   } else {
@@ -421,7 +354,7 @@ const goBack = () => {
 };
 
 const retryLoad = async () => {
-  await getContentById(postId);
+  await getContentById(postId.value);
 };
 
 const formatDate = (dateStr: string): string => {
@@ -480,25 +413,36 @@ const handleContentKeydown = (e: KeyboardEvent) => {
 watch(
   () => curContentInfo.value.content,
   (newContent) => {
-    if (newContent && postId && postId !== 'undefined') {
+    const id = postId.value;
+    if (newContent && id && id !== 'undefined') {
       // Restart reading tracking with the actual content
       const text = newContent.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-      readingStore.startReading(postId, text.length);
+      readingStore.startReading(id, text.length);
       // 恢复上次阅读位置
-      const progress = readingStore.getProgress(postId);
-      if (progress && progress.scrollPosition > 0) {
+      const savedProgress = readingStore.getProgress(id);
+      if (savedProgress && savedProgress.scrollPosition > 0) {
         requestAnimationFrame(() => {
-          const target = progress.scrollPosition * (document.documentElement.scrollHeight - window.innerHeight);
-          window.scrollTo({ top: target });
+          const root = getScrollRoot();
+          if (root === window) {
+            const max = Math.max(
+              document.documentElement.scrollHeight - window.innerHeight,
+              0,
+            );
+            window.scrollTo({ top: savedProgress.scrollPosition * max });
+          } else {
+            const el = root as HTMLElement;
+            const max = Math.max(el.scrollHeight - el.clientHeight, 0);
+            el.scrollTo({ top: savedProgress.scrollPosition * max });
+          }
         });
       }
     }
-  }
+  },
 );
 
 // ── Lifecycle ──
 onMounted(async () => {
-  console.log('[Content.vue] onMounted:', { RssId, PostId });
+  console.log('[Content.vue] onMounted:', { rssId: rssId.value, postId: postId.value });
 
   // 恢复字体大小
   const saved = localStorage.getItem('contentFontSize');
@@ -506,7 +450,7 @@ onMounted(async () => {
     fontSize.value = parseInt(saved, 10);
   }
 
-  await getContentById(postId);
+  await getContentById(postId.value);
 
   // 键盘快捷键
   document.addEventListener('keydown', handleContentKeydown);
@@ -514,395 +458,172 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleContentKeydown);
-  if (postId && postId !== 'undefined' && postId !== 'null') {
+  if (postId.value && postId.value !== 'undefined' && postId.value !== 'null') {
     stopReading();
   }
 });
 </script>
 
+
 <style scoped lang="scss">
-.content-page {
-  padding-left: 25px;
-  padding-right: 25px;
+.ink-reader {
+  min-height: calc(100vh - var(--ink-header-h));
+  background: var(--ink-surface);
+  color: var(--ink-on-surface);
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
 }
 
-// ── Toolbar ──
-.toolbar {
+.ink-reader__toolbar {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 8px 0;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 16px;
+  max-width: var(--ink-reader-max);
+  margin: 0 auto;
+  padding: 8px 20px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  background: #fff;
-  transition: all 0.3s ease;
-
-  &.dark {
-    background: #121212;
-    border-bottom-color: #333;
-  }
+  z-index: 50;
+  background: color-mix(in srgb, var(--ink-surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--ink-border);
 }
 
-// ── Loading skeleton ──
-.loading-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+.ink-reader__fontpct {
+  min-width: 40px;
+  text-align: center;
 }
 
-.skeleton-wrapper {
-  width: 100%;
-  max-width: 800px;
-  padding: 24px 16px;
-
-  .skeleton-line {
-    height: 16px;
-    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: 6px;
-    margin-bottom: 12px;
-    width: 100%;
-
-    &.short { width: 60%; }
-    &.skeleton-title {
-      height: 28px;
-      width: 75%;
-      margin-bottom: 16px;
-    }
-    &.skeleton-meta {
-      height: 14px;
-      width: 40%;
-      margin-bottom: 8px;
-    }
-  }
-
-  .skeleton-divider {
-    height: 1px;
-    background: #e0e0e0;
-    margin: 20px 0;
-  }
-
-  &.dark {
-    .skeleton-line {
-      background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
-    }
-    .skeleton-divider {
-      background: #333;
-    }
-  }
+.ink-reader__stage {
+  padding: 24px 20px 64px;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.ink-reader__header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--ink-border);
 }
 
-// ── State wrappers ──
-.state-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  width: 100%;
-}
-
-.error-card {
-  max-width: 450px;
-  width: 100%;
-
-  &.dark-card {
-    background: #1e1e1e;
-  }
-}
-
-// ── Content wrapper ──
-.content-wrapper {
-  width: 100%;
-}
-
-// ── Article header ──
-.article-header {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 16px 0;
-
-  &.dark {
-    .q-item__label {
-      color: #e0e0e0;
-    }
-  }
-}
-
-.source-label {
+.ink-reader__source {
   cursor: pointer;
+  margin-bottom: 12px;
+  color: var(--ink-tertiary);
+  &:hover { text-decoration: underline; }
 }
 
-.article-title {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: #333;
-  margin: 8px 0;
+.ink-reader__title {
+  font-family: var(--ink-font-serif);
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 12px;
+  color: var(--ink-primary);
   cursor: pointer;
-
-  &:hover {
-    color: $primary;
-  }
-
-  .dark & {
-    color: #e0e0e0;
-
-    &:hover {
-      color: #64b5f6;
-    }
-  }
+  &:hover { color: var(--ink-tertiary); }
 }
 
-.article-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 13px;
-  color: #888;
-  margin-top: 4px;
-
-  .dark & {
-    color: #aaa;
-  }
-
-  .meta-item {
-    display: inline-flex;
-    align-items: center;
-  }
+.ink-reader__meta {
+  margin: 0;
 }
 
-// ── Content area ──
-.content-area {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 16px 0;
-  font-size: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  transition: font-size 0.2s ease;
-  line-height: var(--reader-line-height, 1.8);
-  font-family: var(--reader-font-family, system-ui);
-  letter-spacing: 0.01em;
-  color: #333;
+.ink-reader__body {
+  font-family: var(--ink-font-serif);
+  font-size: 1.125rem; /* 18px base for optimal reading */
+  line-height: var(--ink-reader-lh);
+  color: var(--ink-on-surface);
+  word-break: break-word;
 
-  &.dark {
-    color: #e0e0e0;
+  :deep(p) { margin: 0 0 1.2em; }
+  :deep(h1), :deep(h2), :deep(h3), :deep(h4) {
+    font-family: var(--ink-font-serif);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin: 1.8em 0 0.8em;
+    color: var(--ink-primary);
   }
-
-  :deep(img) {
+  :deep(a) {
+    color: var(--ink-tertiary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  :deep(img), :deep(video), :deep(iframe) {
     max-width: 100%;
     height: auto;
-    border-radius: 8px;
-    margin: 16px 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: var(--ink-radius-md);
+    display: block;
+    margin: 1.5em auto; /* Center images elegantly */
   }
-
-  :deep(h1) {
-    font-size: 32px;
-    margin-top: 28px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #eee;
-    color: #333;
-
-    .dark & {
-      border-bottom-color: #333;
-      color: #e0e0e0;
-    }
+  :deep(figure) {
+    margin: 1.5em 0;
   }
-
-  :deep(h2) {
-    font-size: 24px;
-    margin-top: 24px;
-    margin-bottom: 12px;
-    color: #333;
-
-    .dark & { color: #e0e0e0; }
+  :deep(figcaption) {
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--ink-muted);
+    margin-top: 0.5em;
   }
-
-  :deep(h3) {
-    font-size: 18px;
-    margin-top: 20px;
-    margin-bottom: 8px;
-    color: #333;
-
-    .dark & { color: #e0e0e0; }
-  }
-
-  :deep(h4) { font-size: 16px; color: #333; .dark & { color: #e0e0e0; } }
-  :deep(h5) { font-size: 13px; color: #333; .dark & { color: #e0e0e0; } }
-  :deep(h6) { font-size: 10px; color: #333; .dark & { color: #e0e0e0; } }
-
-  :deep(a) {
-    color: $primary;
-    text-decoration: none;
-    &:hover { text-decoration: underline; }
-  }
-
-  :deep(p) {
-    margin-bottom: 1.2em;
-  }
-
-  :deep(pre) {
-    background: #f5f5f5;
-    padding: 16px;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin: 16px 0;
-    font-size: 0.9em;
-
-    .dark & { background: #1e1e1e; }
-  }
-
-  :deep(code) {
-    background: #f5f5f5;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.9em;
-
-    .dark & { background: #2d2d2d; }
-  }
-
   :deep(blockquote) {
-    border-left: 4px solid #1976d2;
-    margin: 16px 0;
-    padding: 8px 16px;
-    color: #666;
-    background: #f8f9fa;
-    border-radius: 0 4px 4px 0;
-
-    .dark & {
-      color: #aaa;
-      background: #1a1a2e;
-    }
+    margin: 1.5em 0;
+    padding: 0.5em 0 0.5em 1.2em;
+    border-left: 4px solid var(--ink-border);
+    color: var(--ink-secondary);
+    font-style: italic;
   }
-
-  :deep(table) {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 16px 0;
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px 12px;
-      text-align: left;
-
-      .dark & { border-color: #444; }
-    }
-
-    th {
-      background: #f5f5f5;
-      font-weight: 600;
-
-      .dark & { background: #2d2d2d; }
-    }
+  :deep(pre), :deep(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
   }
-
-  :deep(hr) {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 24px 0;
-
-    .dark & { border-top-color: #333; }
+  :deep(pre) {
+    background: var(--ink-neutral);
+    border: 1px solid var(--ink-border);
+    border-radius: var(--ink-radius-sm);
+    padding: 12px 14px;
+    overflow-x: auto;
   }
-
-  :deep(ul), :deep(ol) {
-    padding-left: 24px;
-    margin-bottom: 1.2em;
-  }
-
-  :deep(li) {
-    margin-bottom: 4px;
-  }
+  :deep(ul), :deep(ol) { padding-left: 1.4em; margin: 0 0 1.1em; }
+  :deep(li) { margin-bottom: 0.35em; }
 }
 
-// ── Reader footer (merged from ContentReader) ──
-.reader-footer {
-  position: sticky;
-  bottom: 0;
-  background: #fff;
-  border-top: 1px solid #e0e0e0;
-  padding: 12px 16px;
+.ink-reader__footer {
+  margin-top: 36px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ink-border);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 24px;
-  width: 100%;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  transition: all 0.3s ease;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
-  &.dark {
-    background: #1e1e1e;
-    border-top-color: #333;
-  }
+.ink-reader__stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-  .reading-stats {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .reading-controls {
-    display: flex;
-    gap: 4px;
+.ink-chip {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--ink-radius-full);
+  background: var(--ink-tertiary);
+  color: var(--ink-on-tertiary);
+  &--muted {
+    background: var(--ink-neutral);
+    color: var(--ink-secondary);
+    border: 1px solid var(--ink-border);
   }
 }
 
-.content-spacer {
-  height: 40px;
-  width: 100%;
+.ink-reader__footer-actions {
+  display: flex;
+  gap: 2px;
 }
 
-.dark-sep {
-  background: #333 !important;
-}
+.ink-reader__spacer { height: 48px; }
 
-// ── Responsive ──
-@media (max-width: 600px) {
-  .content-page {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .article-title {
-    font-size: 22px !important;
-  }
-
-  .content-area {
-    :deep(h1) { font-size: 24px; }
-    :deep(h2) { font-size: 20px; }
-    :deep(h3) { font-size: 16px; }
-  }
-
-  .reader-footer {
-    flex-direction: column;
-    gap: 8px;
-
-    .reading-stats,
-    .reading-controls {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-}
+.ink-reader__skel { padding: 24px 0; }
 </style>

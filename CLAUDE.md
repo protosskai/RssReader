@@ -6,6 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **Quasar Framework (Vue.js) + Electron** desktop RSS reader application. The app uses SQLite for local data storage and IPC (Inter-Process Communication) for renderer-main process communication.
 
+## Refactoring Governance
+
+All refactoring work MUST follow [the RSS Reader Constitution](.specify/memory/constitution.md).
+Preserve observable behavior unless a separate feature specification authorizes a
+change; make changes as independently testable, committable, and reversible
+increments; establish regression evidence before touching high-risk code.
+
 ## Common Development Commands
 
 ### Installation & Setup

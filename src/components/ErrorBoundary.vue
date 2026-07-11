@@ -13,7 +13,8 @@
       />
     </div>
   </div>
-  <slot v-else />
+  <!-- :key forces full remount of the app tree after retry -->
+  <slot v-else :key="remountKey" />
 </template>
 
 <script setup lang="ts">
@@ -21,18 +22,23 @@ import { ref, onErrorCaptured } from 'vue'
 
 const error = ref<Error | null>(null)
 const errorMessage = ref('发生了一个未知错误')
+const remountKey = ref(0)
 
-onErrorCaptured((err: Error) => {
+onErrorCaptured((err: Error, _instance, info) => {
   error.value = err
   errorMessage.value = err.message || '发生了一个未知错误'
-  console.error('[ErrorBoundary] captured:', err)
-  // 返回 false 阻止错误继续向上传播
+  console.error('[ErrorBoundary] captured:', err?.message, info, err?.stack)
   return false
 })
 
 const retry = () => {
   error.value = null
   errorMessage.value = '发生了一个未知错误'
+  remountKey.value += 1
+  // Hard navigation back to home if needed
+  if (!location.hash || location.hash === '#/__retry__') {
+    location.hash = '#/'
+  }
 }
 </script>
 

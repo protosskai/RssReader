@@ -2,6 +2,7 @@
  * useKeyboard — 键盘快捷键管理
  */
 import { ref, computed, type Ref } from "vue";
+import { useKeyboardStore } from '../stores/keyboardStore';
 
 export interface KeyboardShortcut {
 	id: string;
@@ -89,58 +90,33 @@ export function createDefaultShortcuts(
 }
 
 export function useKeyboard() {
-	const shortcuts: Ref<KeyboardShortcut[]> = ref([]);
-	const isEnabled = ref(true);
-	const enabledShortcuts = computed(() =>
-		shortcuts.value.filter((s) => isEnabled.value),
-	);
+	const store = useKeyboardStore();
+
+	const shortcuts = computed(() => store.shortcuts);
+	const isEnabled = computed({
+		get: () => store.isEnabled,
+		set: (val) => { store.isEnabled = val; }
+	});
+	const enabledShortcuts = computed(() => store.enabledShortcuts);
 
 	const register = (s: KeyboardShortcut) => {
-		if (!shortcuts.value.some((x) => x.id === s.id)) shortcuts.value.push(s);
+		store.registerShortcut(s);
 	};
 	const unregister = (id: string) => {
-		const i = shortcuts.value.findIndex((s) => s.id === id);
-		if (i > -1) shortcuts.value.splice(i, 1);
+		store.unregisterShortcut(id);
 	};
 
 	const execute = (event: KeyboardEvent) => {
-		if (!isEnabled.value) return;
-		const target = event.target as HTMLElement;
-		if (
-			(target.tagName === "INPUT" ||
-				target.tagName === "TEXTAREA" ||
-				target.contentEditable === "true") &&
-			!(event.ctrlKey && event.key === "f")
-		)
-			return;
-		const keys: string[] = [];
-		if (event.ctrlKey || event.metaKey) keys.push("ctrl");
-		if (event.altKey) keys.push("alt");
-		if (event.shiftKey) keys.push("shift");
-		keys.push(event.key.toLowerCase());
-		const matched = shortcuts.value.find(
-			(s) =>
-				s.keys.every((k) => keys.includes(k)) && s.keys.length === keys.length,
-		);
-		if (matched) {
-			event.preventDefault();
-			event.stopPropagation();
-			matched.action();
-		}
+		store.executeShortcut(event);
 	};
 
 	const registerShortcut = register;
 	const registerShortcuts = (list: KeyboardShortcut[]) => {
-		for (const s of list) register(s);
+		for (const s of list) store.registerShortcut(s);
 	};
-	const getHelp = () =>
-		shortcuts.value.map((s) => ({
-			label: s.label,
-			keys: s.keys.join("+").toUpperCase(),
-			description: s.description,
-		}));
+	const getHelp = () => store.getShortcutHelp();
 	const clearAll = () => {
-		shortcuts.value = [];
+		store.clearAllShortcuts();
 	};
 
 	return {

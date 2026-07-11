@@ -20,15 +20,10 @@
 <script setup lang="ts">
 import {RssInfoItem} from "src/common/models";
 import { electronClient } from "src/services/electronClient";
-import {useClipboard} from '@vueuse/core'
-import {ref} from "vue";
 import {useQuasar} from 'quasar'
 import {useRssInfoStore} from "stores/rssInfoStore";
 
 const $q = useQuasar()
-
-const feedUrl = ref('')
-const {copy, isSupported} = useClipboard({source: feedUrl})
 
 const props = defineProps<{
   rssInfo: RssInfoItem,
@@ -48,26 +43,39 @@ interface ContextMenuItem {
 const onOpenHomePage = () => {
   electronClient.openLink(props.rssInfo.htmlUrl)
 }
-const onCopyFeedUrl = () => {
-  feedUrl.value = props.rssInfo.feedUrl
-  if (isSupported.value) {
-    copy(feedUrl.value)
-    $q.notify({
-      message: '复制成功!'
-    })
-  } else {
-    $q.notify({
-      message: '当前浏览器不支持复制!',
-      icon: 'announcement'
-    })
+const onCopyFeedUrl = async () => {
+  const url = props.rssInfo.feedUrl
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = url
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    $q.notify({ message: '复制成功!', position: 'top' })
+  } catch {
+    $q.notify({ message: '复制失败', color: 'negative', position: 'top' })
   }
 }
 const onDeleted = async () => {
-  const errMsg = await removeRssSubscription(props.rssInfo.id)
-  if (!errMsg.success) {
+  try {
+    // store signature: (folderName, rssInfoItem) — throws on failure
+    await removeRssSubscription(props.folderName, props.rssInfo)
     $q.notify({
-      message: errMsg.msg,
-      icon: 'announcement'
+      message: '订阅已删除',
+      color: 'positive',
+      position: 'top',
+    })
+  } catch (error) {
+    $q.notify({
+      message: error instanceof Error ? error.message : '删除失败',
+      color: 'negative',
+      icon: 'announcement',
+      position: 'top',
     })
   }
 }

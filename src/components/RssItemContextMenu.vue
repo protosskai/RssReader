@@ -102,22 +102,30 @@ const onEdit = () => {
 const onDelete = async () => {
   try {
     // 弹出确认对话框
-    const confirmed = await $q.dialog({
+    $q.dialog({
       title: '确认删除',
       message: `确定要删除订阅 "${props.rssItem.title}" 吗？`,
       cancel: true,
       persistent: true
+    }).onOk(async () => {
+      try {
+        showContextMenu.value = false;
+        // store signature: (folderName, rssInfoItem)
+        await removeRssSubscription(props.folderName, props.rssItem);
+        $q.notify({
+          message: '订阅已删除',
+          color: 'positive',
+          position: 'top'
+        });
+      } catch (error) {
+        console.error('删除订阅失败:', error);
+        $q.notify({
+          message: '删除订阅失败',
+          color: 'negative',
+          position: 'top'
+        });
+      }
     });
-    
-    if (confirmed) {
-      showContextMenu.value = false;
-      await removeRssSubscription(props.rssItem.id);
-      $q.notify({
-        message: '订阅已删除',
-        color: 'positive',
-        position: 'top'
-      });
-    }
   } catch (error) {
     console.error('删除订阅失败:', error);
     $q.notify({
@@ -131,21 +139,15 @@ const onDelete = async () => {
 const onMarkedRead = async () => {
   try {
     showContextMenu.value = false;
-    // 调用后端API将此订阅源的所有文章标记为已读
-    if (electronClient.markRssAsRead) {
-      await electronClient.markRssAsRead(props.rssItem.id);
-      $q.notify({
-        message: '已标记所有文章为已读',
-        color: 'positive',
-        position: 'top'
-      });
-    } else {
-      $q.notify({
-        message: '标记已读功能暂未实现',
-        color: 'info',
-        position: 'top'
-      });
-    }
+    // Use article markAllAsRead API (markRssAsRead does not exist)
+    await electronClient.markAllAsRead({ feedId: props.rssItem.id });
+    $q.notify({
+      message: '已标记所有文章为已读',
+      color: 'positive',
+      position: 'top'
+    });
+    // Refresh sidebar unread counts
+    void rssInfoStore.refresh();
   } catch (error) {
     console.error('标记已读失败:', error);
     $q.notify({

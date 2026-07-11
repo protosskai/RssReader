@@ -16,9 +16,22 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/PostList.vue')
       },
       {
-        path: '/content/:RssId/:PostId',
+        // Use query params for article id — guids are often full URLs with / ? &
+        // e.g. https://news.ycombinator.com/item?id=123 which break path segments
+        path: '/content',
         name: 'Content',
         component: () => import('pages/Content.vue')
+      },
+      // Legacy path support (redirect to query form)
+      {
+        path: '/content/:RssId/:PostId(.*)',
+        redirect: (to) => ({
+          name: 'Content',
+          query: {
+            rssId: String(to.params.RssId || ''),
+            postId: String(to.params.PostId || ''),
+          },
+        }),
       },
       {
         path: '/setting',

@@ -1,17 +1,17 @@
 <template>
-  <q-page class="settings-page">
-    <div class="settings-container">
+  <q-page class="ink-settings">
+    <div class="ink-settings__panel">
       <!-- 设置页面标题 -->
-      <div class="settings-header">
-        <h2 class="settings-title">设置</h2>
-        <p class="settings-subtitle">自定义您的RSS阅读体验</p>
+      <div class="ink-settings__header">
+        <h2 class="ink-settings__title">Settings</h2>
+        <p class="ink-settings__sub">Preferences for reading, sync, and appearance</p>
       </div>
 
       <!-- 设置选项卡 -->
       <q-tabs
         v-model="tab"
         dense
-        class="settings-tabs"
+        class="ink-settings__tabs"
         active-color="primary"
         indicator-color="primary"
         align="left"
@@ -24,7 +24,7 @@
       </q-tabs>
 
       <!-- 设置内容区域 -->
-      <div class="settings-content">
+      <div class="ink-settings__content">
         <!-- 加载骨架屏 -->
         <div v-if="isLoading" class="settings-loading">
           <q-skeleton v-for="n in 6" :key="'setSk'+n" type="rect" class="q-mb-md skeleton-card"/>
@@ -450,7 +450,7 @@
       </div>
 
       <!-- 保存按钮 -->
-      <div class="settings-footer">
+      <div class="ink-settings__footer">
         <q-btn
           color="primary"
           label="保存设置"
@@ -590,19 +590,22 @@ const refreshSyncStatus = async () => {
 const saveSettings = async () => {
   saving.value = true;
   try {
-    // 保存到localStorage
     localStorage.setItem('appSettings', JSON.stringify(settings));
+
+    // 联动阅读页字体：设置里的 12–24px 映射为 contentFontSize 百分比（基准 14px = 100%）
+    const pct = Math.max(60, Math.min(200, Math.round((settings.fontSize / 14) * 100)));
+    localStorage.setItem('contentFontSize', String(pct));
 
     $q.notify({
       type: 'positive',
       message: '设置已保存',
-      position: 'top'
+      position: 'top',
     });
   } catch (error) {
     $q.notify({
       type: 'negative',
       message: '保存设置失败',
-      position: 'top'
+      position: 'top',
     });
   } finally {
     saving.value = false;
@@ -639,39 +642,127 @@ const syncAllFeeds = async () => {
   }
 };
 
-// 确认清空所有数据
+const DEFAULT_SETTINGS = {
+  language: 'zh-CN',
+  autoStart: false,
+  minimizeToTray: true,
+  fontSize: 14,
+  listDensity: 'comfortable',
+  desktopNotifications: true,
+  soundNotifications: false,
+  notificationsOnlyWhenHidden: true,
+  cacheSizeLimit: 500,
+  developerMode: false,
+};
+
+// 确认清空所有数据（订阅源 + 文章 + 收藏，保留本地应用设置）
 const confirmClearAllData = () => {
   $q.dialog({
     title: '确认操作',
-    message: '确定要清空所有数据吗？此操作不可撤销！',
-    cancel: true,
+    message: '将删除全部订阅源、文章与收藏，此操作不可撤销！是否继续？',
+    cancel: { label: '取消', flat: true, color: 'grey-7' },
+    ok: { label: '清空全部', color: 'negative', unelevated: true },
     persistent: true,
-    color: 'negative'
-  }).onOk(() => {
-    // TODO: 实现清空数据逻辑
-    $q.notify({
-      type: 'info',
-      message: '数据已清空',
-      position: 'top'
-    });
+  }).onOk(async () => {
+    $q.loading.show({ message: '正在清空数据...', spinnerColor: 'negative' });
+    try {
+      // 先清空收藏标记，再逐个删除订阅源（会级联删文章）
+      try {
+        await electronClient.clearAllFavorites();
+      } catch (e) {
+        console.warn('[Settings] clearAllFavorites:', e);
+      }
+
+      const feeds = await electronClient.getFeeds();
+      for (const feed of feeds || []) {
+        if (feed?.id) {
+          await electronClient.removeFeed(feed.id);
+        }
+      }
+
+      // 删除非默认文件夹
+      try {
+        const folders = await electronClient.getFolders();
+        for (const folder of folders || []) {
+          const name = (folder as { name?: string }).name;
+          if (name && name !== '默认') {
+            await electronClient.removeFolderV2(name);
+          }
+        }
+      } catch (e) {
+        console.warn('[Settings] remove folders:', e);
+      }
+
+      // 阅读进度等本地缓存
+      try {
+        localStorage.removeItem('readingProgress');
+        localStorage.removeItem('readingSettings');
+      } catch {
+        /* ignore */
+      }
+
+      $q.notify({
+        type: 'positive',
+        message: '所有订阅与文章数据已清空',
+        position: 'top',
+      });
+    } catch (error) {
+      console.error('[Settings] clearAllData failed:', error);
+      $q.notify({
+        type: 'negative',
+        message: `清空失败: ${error instanceof Error ? error.message : String(error)}`,
+        position: 'top',
+      });
+    } finally {
+      $q.loading.hide();
+    }
   });
 };
 
-// 确认重置设置
+// 确认重置设置（仅应用/同步偏好，不动订阅数据）
 const confirmResetSettings = () => {
   $q.dialog({
     title: '确认操作',
-    message: '确定要重置所有设置吗？',
-    cancel: true,
+    message: '将恢复默认应用设置与主题，不会删除订阅与文章。',
+    cancel: { label: '取消', flat: true, color: 'grey-7' },
+    ok: { label: '重置设置', color: 'negative', unelevated: true },
     persistent: true,
-    color: 'negative'
-  }).onOk(() => {
-    // TODO: 实现重置设置逻辑
-    $q.notify({
-      type: 'info',
-      message: '设置已重置',
-      position: 'top'
-    });
+  }).onOk(async () => {
+    try {
+      Object.assign(settings, { ...DEFAULT_SETTINGS });
+      localStorage.setItem('appSettings', JSON.stringify(settings));
+      localStorage.setItem('contentFontSize', '100');
+      localStorage.removeItem('themeMode');
+      themeStore.setMode('system');
+
+      // 同步配置恢复为安全默认（自动同步关闭，避免误刷）
+      Object.assign(syncConfig, {
+        enabled: false,
+        interval: 30,
+        backgroundSync: true,
+        systemTray: true,
+        syncOnStartup: true,
+        notification: true,
+      });
+      try {
+        await electronClient.syncUpdateConfig({ ...syncConfig });
+        await refreshSyncStatus();
+      } catch (e) {
+        console.warn('[Settings] reset sync config:', e);
+      }
+
+      $q.notify({
+        type: 'positive',
+        message: '设置已重置为默认',
+        position: 'top',
+      });
+    } catch (error) {
+      $q.notify({
+        type: 'negative',
+        message: `重置失败: ${error instanceof Error ? error.message : String(error)}`,
+        position: 'top',
+      });
+    }
   });
 };
 
@@ -685,247 +776,90 @@ onMounted(() => {
 });
 </script>
 
+
 <style lang="scss" scoped>
-.settings-page {
-  background: $grey-3;
-  min-height: 100vh;
-  padding: 20px;
-
-  .body--dark & {
-    background: $dark;
-  }
+.ink-settings {
+  min-height: calc(100vh - var(--ink-header-h));
+  background: var(--ink-neutral);
+  padding: var(--ink-space-xl) var(--ink-space-md);
 }
-
-.settings-container {
-  max-width: 900px;
+.ink-settings__panel {
+  max-width: 820px;
   margin: 0 auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--ink-surface);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-lg);
   overflow: hidden;
-
-  .body--dark & {
-    background: $dark-page;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
 }
-
-.settings-header {
-  padding: 32px 24px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.ink-settings__header {
+  padding: var(--ink-space-xl) var(--ink-space-lg) var(--ink-space-lg);
+  background: var(--ink-primary);
+  color: var(--ink-on-primary);
 }
-
-.settings-title {
+.ink-settings__title {
   margin: 0;
-  font-size: 28px;
+  font-family: var(--ink-font-serif);
+  font-size: 1.75rem;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink-on-primary);
 }
-
-.settings-subtitle {
+.ink-settings__sub {
   margin: 8px 0 0;
-  opacity: 0.9;
-  font-size: 14px;
+  opacity: 0.85;
+  font-size: 0.9rem;
+  color: var(--ink-on-primary);
 }
-
-.settings-tabs {
-  background: #fafafa;
-  border-bottom: 1px solid #e0e0e0;
-
-  .body--dark & {
-    background: #1e1e1e;
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-  }
-
-  :deep(.q-tab) {
-    min-height: 56px;
-    font-weight: 500;
-
-    .body--dark & {
-      color: $grey-5;
-    }
-  }
+.ink-settings__tabs {
+  padding: 0 var(--ink-space-md);
+  border-bottom: 1px solid var(--ink-border);
+  background: var(--ink-surface);
 }
-
-.settings-content {
-  padding: 24px;
+.ink-settings__content {
+  padding: var(--ink-space-lg);
+  background: var(--ink-neutral);
 }
-
-.settings-panel {
-  padding: 0;
+.settings-panel, .settings-panel .panel-header h3 {
+  font-family: var(--ink-font-serif);
+  color: var(--ink-primary);
 }
-
-.panel-header {
-  margin-bottom: 24px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e0e0e0;
-
-  .body--dark & {
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-  }
-
-  h3 {
-    margin: 0 0 8px;
-    font-size: 20px;
-    color: #333;
-
-    .body--dark & {
-      color: $grey-2;
-    }
-  }
-
-  p {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
-
-    .body--dark & {
-      color: $grey-6;
-    }
-  }
-}
-
+.panel-header p { color: var(--ink-secondary); font-size: 0.9rem; }
 .setting-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  background: var(--ink-surface) !important;
+  border: 1px solid var(--ink-border) !important;
+  border-radius: var(--ink-radius-md) !important;
+  margin-bottom: 12px;
+  box-shadow: none !important;
 }
-
-.settings-loading {
-  padding: 24px;
-
-  .skeleton-card {
-    height: 60px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-  }
-}
-
-.settings-error {
-  padding: 24px;
-}
-
 .setting-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
 }
-
-.setting-info {
-  flex: 1;
-  min-width: 0;
+.setting-title { font-weight: 600; color: var(--ink-primary); }
+.setting-description { font-size: 0.85rem; color: var(--ink-secondary); margin-top: 2px; }
+.ink-settings__footer {
+  padding: var(--ink-space-md) var(--ink-space-lg);
+  border-top: 1px solid var(--ink-border);
+  background: var(--ink-surface);
+  display: flex;
+  justify-content: flex-end;
 }
-
-.setting-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 4px;
-
-  .body--dark & {
-    color: $grey-2;
-  }
-}
-
-.setting-description {
-  font-size: 13px;
-  color: #666;
-
-  .body--dark & {
-    color: $grey-6;
-  }
-}
-
-.setting-control {
-  min-width: 200px;
-}
-
-.theme-preview {
-  margin-left: 12px;
-}
-
 .danger-zone {
-  margin-top: 32px;
-  border-color: #ffcdd2 !important;
-
-  .danger-zone-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: #d32f2f;
-  }
-
-  .danger-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .danger-btn {
-    flex: 1;
-    min-width: 150px;
-  }
+  border-color: color-mix(in srgb, var(--ink-negative) 35%, var(--ink-border)) !important;
 }
-
-.settings-footer {
-  padding: 24px;
-  background: #fafafa;
-  border-top: 1px solid #e0e0e0;
-  text-align: center;
-
-  .body--dark & {
-    background: #1e1e1e;
-    border-top-color: rgba(255, 255, 255, 0.12);
-  }
-}
-
-.sync-status {
+.danger-zone-header {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin-bottom: 12px;
+  color: var(--ink-negative);
+  font-weight: 600;
 }
-
-// 响应式设计
-@media (max-width: 768px) {
-  .settings-page {
-    padding: 12px;
-  }
-
-  .settings-header {
-    padding: 24px 16px 16px;
-  }
-
-  .settings-title {
-    font-size: 24px;
-  }
-
-  .settings-content {
-    padding: 16px;
-  }
-
-  .setting-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .setting-control {
-    width: 100%;
-  }
-
-  .danger-actions {
-    flex-direction: column;
-  }
-
-  .danger-btn {
-    width: 100%;
-  }
+.danger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 </style>

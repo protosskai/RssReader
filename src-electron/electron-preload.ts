@@ -32,6 +32,7 @@ const ALLOWED_CHANNELS = new Set<string>([
   'article:getArticles',
   'article:getArticle',
   'article:toggleReadStatus',
+  'article:setReadStatus',
   'article:toggleFavorite',
   'article:markAllAsRead',
   'article:clearAllFavorites',
@@ -57,6 +58,7 @@ const ALLOWED_CHANNELS = new Set<string>([
   'sync:updateConfig',
   'sync:start',
   'sync:getStatus',
+  'sync:getProgress',
   'sync:startAuto',
   'sync:stopAuto',
   // Search
@@ -68,8 +70,12 @@ type IpcEnvelope<T = unknown> = { error?: string; data?: T };
 /**
  * Securely invoke an IPC channel.
  * - Blocks unlisted channels (whitelist enforcement)
- * - Unwraps structured { error?, data? } responses from main process
+ * - Unwraps structured { error?, data? } responses from main process wrapHandler
  * - Throws the error message if `error` is present
+ *
+ * IMPORTANT: wrapHandler success path returns `{ data: T }` WITHOUT an `error` key.
+ * Checking only `'error' in raw` would miss the envelope and double-wrap results,
+ * breaking unwrapOrThrow in the renderer (response.success is undefined).
  */
 async function secureInvoke<T>(channel: string, ...args: unknown[]): Promise<T> {
   if (!ALLOWED_CHANNELS.has(channel)) {
@@ -78,11 +84,17 @@ async function secureInvoke<T>(channel: string, ...args: unknown[]): Promise<T> 
 
   const raw = (await ipcRenderer.invoke(channel, ...args)) as IpcEnvelope<T> | null | undefined;
 
-  // Handle the structured { error?, data? } envelope from main process
-  if (raw && typeof raw === 'object' && 'error' in raw) {
+  // wrapHandler envelope: { data?: T } or { error: string } (no ApiResponse.success field)
+  if (
+    raw &&
+    typeof raw === 'object' &&
+    !Array.isArray(raw) &&
+    ('data' in raw || 'error' in raw) &&
+    !('success' in raw)
+  ) {
     if (raw.error) {
       // Forward the sanitized error (stack traces already stripped on the main side)
-      throw new Error(raw.error);
+      throw new Error(typeof raw.error === 'string' ? raw.error : String(raw.error));
     }
     return raw.data as T;
   }
@@ -137,6 +149,8 @@ const electronAPI: ElectronContract = {
   getArticles: (params) => secureInvoke('article:getArticles', params),
   getArticle: (id) => secureInvoke('article:getArticle', id),
   toggleReadStatus: (id) => secureInvoke<void>('article:toggleReadStatus', id),
+  setReadStatus: (id, read) =>
+    secureInvoke<boolean>('article:setReadStatus', id, read),
   toggleFavorite: (id) => secureInvoke<boolean>('article:toggleFavorite', id),
   markAllAsRead: (params) => secureInvoke<void>('article:markAllAsRead', params),
   clearAllFavorites: () => secureInvoke<void>('article:clearAllFavorites'),
@@ -171,6 +185,7 @@ const electronAPI: ElectronContract = {
   syncUpdateConfig: (config) => secureInvoke('sync:updateConfig', config),
   syncStart: () => secureInvoke('sync:start'),
   syncGetStatus: () => secureInvoke('sync:getStatus'),
+  syncGetProgress: () => secureInvoke('sync:getProgress'),
   syncStartAuto: () => secureInvoke('sync:startAuto'),
   syncStopAuto: () => secureInvoke('sync:stopAuto'),
 

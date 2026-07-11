@@ -1,8 +1,10 @@
 import type { ElectronContract } from 'src/common/electronContract';
 
 let cachedClient: ElectronContract | null = null;
+let cachedNoop: ElectronContract | null = null;
 
-const isElectron = (): boolean => !!window?.electronAPI;
+const isElectron = (): boolean =>
+  typeof window !== 'undefined' && !!window?.electronAPI;
 
 const getClient = (): ElectronContract => {
   if (cachedClient) return cachedClient;
@@ -29,26 +31,34 @@ const buildNoopClient = (): ElectronContract => {
 
   const safeDefaults: Partial<Record<keyof ElectronContract, () => unknown>> = {
     // --- Legacy ---
-    addRssSubscription: () => noopPromise({ error: '非 Electron 环境', data: null }),
-    removeRssSubscription: () => noopPromise({ error: '非 Electron 环境', data: null }),
-    addFolder: () => noopPromise({ error: '非 Electron 环境', data: null }),
-    removeFolder: () => noopPromise({ error: '非 Electron 环境', data: null }),
-    importOpmlFile: () => noopPromise({ error: '非 Electron 环境', data: null }),
-    getRssInfoListFromDb: () => noopPromise({ error: '非 Electron 环境', data: [] }),
-    queryPostIndexByRssId: () => noopPromise({ error: '非 Electron 环境', data: [] }),
-    queryPostContentByGuid: () => noopPromise({ error: '非 Electron 环境', data: null }),
-    fetchRssIndexList: () => noopPromise({ error: '非 Electron 环境', data: null }),
+    addRssSubscription: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
+    removeRssSubscription: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
+    addFolder: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
+    removeFolder: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
+    importOpmlFile: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
+    getRssInfoListFromDb: () => noopPromise({ success: true, data: [] }),
+    queryPostIndexByRssId: () => noopPromise({ success: true, data: [] }),
+    queryPostContentByGuid: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
+    fetchRssIndexList: () => noopPromise({ success: true, data: undefined }),
     dumpFolderToDb: () => noopPromise({ success: false, msg: '非 Electron 环境' }),
-    loadFolderFromDb: () => noopPromise({ error: '非 Electron 环境', data: '[]' }),
-    editFolder: () => noopPromise({ error: '非 Electron 环境', data: null }),
+    loadFolderFromDb: () => noopPromise({ success: true, data: '[]' }),
+    editFolder: () => noopPromise({ success: false, error: { code: 'UNKNOWN_ERROR', message: '非 Electron 环境' } }),
     // --- Article API ---
     getArticles: () => noopPromise({ articles: [], total: 0 }),
-    getArticle: () => noopPromise(null),
+    getArticle: () => noopPromise(null as never),
     toggleReadStatus: () => noopPromise(),
+    setReadStatus: () => noopPromise(false),
     toggleFavorite: () => noopPromise(false),
     markAllAsRead: () => noopPromise(),
     clearAllFavorites: () => noopPromise(),
-    getArticleStats: () => noopPromise({ totalArticles: 0, unreadArticles: 0, favoriteArticles: 0, feedCount: 0, folderCount: 0 }),
+    getArticleStats: () =>
+      noopPromise({
+        totalArticles: 0,
+        unreadCount: 0,
+        favoriteCount: 0,
+        feedCount: 0,
+        folderCount: 0,
+      }),
     // --- Feed API ---
     getFeeds: () => noopPromise([]),
     getFeed: () => noopPromise(null),
@@ -69,12 +79,22 @@ const buildNoopClient = (): ElectronContract => {
     // --- Sync ---
     syncGetConfig: () => noopPromise({ enabled: false }),
     syncUpdateConfig: () => noopPromise({}),
-    syncStart: () => noopPromise({}),
-    syncGetStatus: () => noopPromise({ syncing: false }),
+    syncStart: () => noopPromise({ success: true, stats: { successCount: 0, failureCount: 0 } }),
+    syncGetStatus: () => noopPromise({ isSyncing: false }),
+    syncGetProgress: () =>
+      noopPromise({
+        totalSources: 0,
+        completedCount: 0,
+        successCount: 0,
+        failureCount: 0,
+        isSyncing: false,
+        currentSource: null,
+        sources: [],
+      }),
     syncStartAuto: () => noopPromise({}),
     syncStopAuto: () => noopPromise({}),
     // --- Search ---
-    searchPosts: () => noopPromise({ error: '非 Electron 环境', data: [] }),
+    searchPosts: () => noopPromise({ success: true, data: [] }),
   };
 
   return new Proxy({} as ElectronContract, {
@@ -88,12 +108,30 @@ const buildNoopClient = (): ElectronContract => {
   });
 };
 
-/** The real client (Electron) or a safe noop (browser/SSR). Never throws. */
-export const electronClient: ElectronContract = isElectron()
-  ? new Proxy({} as ElectronContract, {
-      get: (_, key: keyof ElectronContract) => {
+/**
+ * Electron IPC client that resolves the real API lazily on each access.
+ * Avoids locking into noop when the module is evaluated before preload injects
+ * window.electronAPI (or during HMR). Never throws for missing API — falls
+ * back to safe noop defaults.
+ */
+export const electronClient: ElectronContract = new Proxy({} as ElectronContract, {
+  get: (_target, key: keyof ElectronContract) => {
+    if (isElectron()) {
+      try {
         const client = getClient();
-        return client[key];
-      },
-    })
-  : buildNoopClient();
+        const value = client[key];
+        if (typeof value === 'function') {
+          return (value as (...args: unknown[]) => unknown).bind(client);
+        }
+        return value;
+      } catch (e) {
+        console.warn('[electronClient] Failed to resolve real client:', e);
+      }
+    }
+
+    if (!cachedNoop) {
+      cachedNoop = buildNoopClient();
+    }
+    return cachedNoop[key];
+  },
+});

@@ -1,192 +1,99 @@
 <template>
-  <q-page class="column items-start" style="width: 100%; min-height: 100dvh; padding: 16px;">
-    <!-- ========== 加载状态 - 骨架屏 ========== -->
-    <transition name="fade-switch" mode="out-in">
-      <div v-if="loading" key="loading" class="full-width">
-        <div v-for="n in 5" :key="'skel'+n" class="post-skeleton">
-          <q-card flat bordered>
-            <q-card-section>
-              <q-skeleton type="text" width="70%" class="text-h6"/>
-              <q-skeleton type="text" width="40%" class="q-mt-sm"/>
-            </q-card-section>
-            <q-separator/>
-            <q-card-section>
-              <q-skeleton type="text" width="100%"/>
-              <q-skeleton type="text" width="100%" class="q-mt-sm"/>
-              <q-skeleton type="text" width="60%" class="q-mt-sm"/>
-            </q-card-section>
-            <q-card-section>
-              <q-skeleton type="rect" width="80px" height="36px" class="rounded-borders"/>
-            </q-card-section>
-          </q-card>
-        </div>
-        <div class="text-caption text-center q-mt-md"
-          :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">
-          正在加载文章...
-        </div>
-      </div>
-
-      <!-- ========== 错误状态 ========== -->
-      <div v-else-if="error" key="error" class="full-width row justify-center">
-        <q-card class="error-card" style="max-width: 480px; width: 100%;">
-          <q-card-section>
-            <div class="text-h6 text-negative q-mb-md">
-              <q-icon name="error" size="24px" class="q-mr-sm"/>
-              加载失败
-            </div>
-            <p class="text-body2">{{ error }}</p>
-            <div class="q-mt-md">
-              <q-btn label="重试" color="primary" @click="retryLoad" class="q-mr-sm" icon="refresh"/>
-              <q-btn label="返回" color="grey-7" flat @click="goBack" icon="home"/>
-            </div>
-            <div class="q-mt-md" :class="'text-caption ' + ($q.dark.isActive ? 'text-grey-5' : 'text-grey-6')">
-              <p>💡 如果问题持续，请尝试：</p>
-              <ul class="q-pl-md q-my-sm">
-                <li>检查网络连接</li>
-                <li>稍后重试（RSS源可能暂时不可用）</li>
-                <li>在开发者工具中查看详细错误信息</li>
-              </ul>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- ========== 空状态 ========== -->
-      <div v-else-if="PostInfoList.length === 0" key="empty" class="full-width column items-center" style="padding: 40px;">
-        <q-icon name="rss_feed" size="80px" :color="$q.dark.isActive ? 'grey-6' : 'grey-4'"/>
-        <p class="text-subtitle1 q-mt-md" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-6'">
-          此订阅源暂无文章
-        </p>
-        <p class="text-caption q-mt-sm" :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
-          可能原因：初次订阅、同步失败或该源暂时无更新
-        </p>
-        <div class="q-mt-md q-gutter-sm">
-          <q-btn label="刷新订阅" color="primary" @click="retryLoad" icon="refresh"/>
-          <q-btn label="返回首页" color="grey-7" flat @click="goBack" icon="home"/>
-        </div>
-      </div>
-
-      <!-- ========== 文章列表主区域 ========== -->
-      <div v-else key="content" class="column" style="flex: 1; min-height: 0; width: 100%;">
-        <!-- 搜索和操作栏 -->
-        <div class="toolbar-row q-mb-md">
-          <q-input
-            v-model="searchQuery"
-            outlined
-            dense
-            placeholder="搜索文章标题、作者... (按 / 聚焦)"
-            class="search-input"
-            clearable
-            ref="searchInputRef"
-          >
-            <template #prepend>
-              <q-icon name="search"/>
-            </template>
-            <template #append>
-              <q-icon v-if="searchQuery" name="clear" class="cursor-pointer" @click="searchQuery = ''"/>
-            </template>
-          </q-input>
-
-          <!-- 全部已读 / 全部未读 按钮 -->
-          <q-btn
-            :label="isFeedRead ? '全部未读' : '全部已读'"
-            :color="isFeedRead ? 'warning' : 'primary'"
-            flat
-            :disable="!hasPosts"
-            @click="toggleMarkAllRead"
-            size="sm"
-            :icon="isFeedRead ? 'undo' : 'done_all'"
-          >
-            <q-tooltip>
-              {{ isFeedRead ? '将所有文章标为未读' : `将所有文章标为已读 (${unreadCount} 篇未读)` }}
-            </q-tooltip>
-          </q-btn>
-
-          <q-btn
-            icon="refresh"
-            color="primary"
-            flat
-            :loading="loading"
-            @click="retryLoad"
-            size="sm"
-          >
-            <q-tooltip>刷新 (r)</q-tooltip>
-          </q-btn>
-        </div>
-
-        <!-- 搜索无结果 -->
-        <transition name="fade-switch">
-          <div v-if="filteredPosts.length === 0 && searchQuery" key="no-results"
-               class="full-width column items-center" style="flex: 1; padding: 40px;">
-            <q-icon name="search_off" size="64px" :color="$q.dark.isActive ? 'grey-7' : 'grey-4'"/>
-            <p class="text-subtitle1 q-mt-md" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">
-              未找到匹配的文章
-            </p>
-            <p class="text-caption" :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
-              尝试其他关键词
-            </p>
+  <q-page class="ink-postlist">
+    <div class="ink-stage ink-postlist__inner">
+      <transition name="ink-fade" mode="out-in">
+        <div v-if="loading" key="loading" class="ink-postlist__skel">
+          <div v-for="n in 6" :key="'s'+n" class="ink-skel-row">
+            <q-skeleton type="text" width="70%" />
+            <q-skeleton type="text" width="40%" class="q-mt-sm" />
+            <q-skeleton type="text" width="90%" class="q-mt-sm" />
           </div>
-        </transition>
+          <p class="ink-meta text-center q-mt-md">Loading articles…</p>
+        </div>
 
-        <!-- 虚拟滚动文章列表 -->
-        <template v-if="filteredPosts.length > 0">
-          <div
-            ref="virtualScrollContainerRef"
-            class="virtual-scroll-wrapper"
-            :class="$q.dark.isActive ? 'dark' : ''"
-          >
-            <q-virtual-scroll
-              ref="virtualScrollRef"
-              :items="filteredPosts"
-              :virtual-scroll-item-size="144"
-              :virtual-scroll-slice-size="20"
-              :virtual-scroll-slice-ratio-before="0.5"
-              :virtual-scroll-slice-ratio-after="0.5"
-              style="height: 100%; width: 100%;"
-              @virtual-scroll="onVirtualScroll"
+        <div v-else-if="error" key="error" class="ink-empty">
+          <q-icon name="error_outline" size="48px" class="ink-empty__icon" color="negative" />
+          <h2 class="ink-empty__title">Couldn’t load feed</h2>
+          <p class="ink-empty__desc">{{ error }}</p>
+          <div class="row q-gutter-sm justify-center">
+            <q-btn class="ink-btn-primary" unelevated no-caps icon="refresh" label="Retry" @click="retryLoad" />
+            <q-btn flat no-caps icon="home" label="Home" @click="goBack" />
+          </div>
+        </div>
+
+        <div v-else-if="PostInfoList.length === 0" key="empty" class="ink-empty">
+          <q-icon name="rss_feed" size="48px" class="ink-empty__icon" />
+          <h2 class="ink-empty__title">No articles yet</h2>
+          <p class="ink-empty__desc">This feed has no cached posts. Try refreshing, or check the source later.</p>
+          <div class="row q-gutter-sm justify-center">
+            <q-btn class="ink-btn-primary" unelevated no-caps icon="refresh" label="Refresh" @click="retryLoad" />
+            <q-btn flat no-caps icon="home" label="Home" @click="goBack" />
+          </div>
+        </div>
+
+        <div v-else key="content" class="ink-postlist__content">
+          <div class="ink-postlist__toolbar">
+            <q-input
+              v-model="searchQuery"
+              outlined dense clearable
+              placeholder="Filter titles… (/)"
+              class="ink-postlist__search"
+              ref="searchInputRef"
             >
-              <template #default="{ item, index }">
-                <div
-                  :key="item.guid"
-                  :class="[
-                    'virtual-scroll-item',
-                    { 'selected-post': selectedIndex === index }
-                  ]"
-                >
-                  <post-list-item
-                    :post-info="item"
-                    :rss-id="rssId"
-                    @read-toggled="onReadToggled"
-                  />
-                </div>
-              </template>
-            </q-virtual-scroll>
+              <template #prepend><q-icon name="search" size="18px" /></template>
+            </q-input>
+            <q-btn
+              dense no-caps outline
+              class="ink-outline-btn"
+              :label="isFeedRead ? 'Mark all unread' : 'Mark all read'"
+              :disable="!hasPosts"
+              @click="toggleMarkAllRead"
+            />
+            <q-btn dense flat round icon="refresh" :loading="loading" @click="retryLoad" aria-label="Refresh" />
           </div>
 
-          <!-- 文章计数 -->
-          <transition name="fade">
-            <div v-if="filteredPosts.length > 0" class="post-count text-caption q-mt-sm"
-              :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-6'">
-              {{ filteredPosts.length }} / {{ PostInfoList.length }} 篇文章
-              <span v-if="unreadCount > 0" class="text-primary"> · {{ unreadCount }} 未读</span>
-            </div>
-          </transition>
-        </template>
-      </div>
-    </transition>
+          <div v-if="filteredPosts.length === 0 && searchQuery" class="ink-empty" style="padding: 48px 16px">
+            <q-icon name="search_off" size="40px" class="ink-empty__icon" />
+            <h2 class="ink-empty__title">No matches</h2>
+            <p class="ink-empty__desc">Try another keyword.</p>
+          </div>
 
-    <!-- 滚动到顶部按钮 -->
-    <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <transition name="scale-fade">
-        <q-btn
-          v-if="showScrollToTop"
-          fab
-          icon="keyboard_arrow_up"
-          color="primary"
-          @click="scrollToTop"
-          aria-label="滚动到顶部"
-        />
+          <template v-if="filteredPosts.length > 0">
+            <div ref="virtualScrollContainerRef" class="ink-postlist__scroll">
+              <q-virtual-scroll
+                ref="virtualScrollRef"
+                :items="filteredPosts"
+                :virtual-scroll-item-size="64"
+                :virtual-scroll-slice-size="24"
+                style="height: 100%; width: 100%;"
+                @virtual-scroll="onVirtualScroll"
+              >
+                <template #default="{ item, index }">
+                  <div
+                    :key="item.guid"
+                    class="ink-postlist__item"
+                    :class="{ 'ink-postlist__item--selected': selectedIndex === index }"
+                  >
+                    <post-list-item
+                      :post-info="item"
+                      :rss-id="rssId"
+                      @read-toggled="onReadToggled"
+                    />
+                  </div>
+                </template>
+              </q-virtual-scroll>
+            </div>
+            <p class="ink-meta ink-postlist__count">
+              {{ filteredPosts.length }} / {{ PostInfoList.length }} articles
+              <span v-if="unreadCount > 0"> · {{ unreadCount }} unread</span>
+            </p>
+          </template>
+        </div>
       </transition>
+    </div>
+
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+      <q-btn v-if="showScrollToTop" fab icon="keyboard_arrow_up" class="ink-btn-primary" @click="scrollToTop" aria-label="Scroll to top" />
     </q-page-sticky>
   </q-page>
 </template>
@@ -198,7 +105,7 @@ import { computed, onMounted, onUnmounted, Ref, ref, watch, nextTick } from "vue
 import PostListItem from "src/components/PostListItem.vue";
 import { useQuasar } from "quasar";
 import { PostIndexItem } from "src/common/models";
-import { switchPage } from "src/common/util";
+import { unwrapOrThrow } from "src/common/ErrorMsg";
 
 const $q = useQuasar();
 const route = useRoute();
@@ -273,10 +180,10 @@ const toggleMarkAllRead = async () => {
     // Show loading indicator for potentially slow bulk operation
     $q.loading.show({ message: '正在标记为未读...', boxClass: 'bg-grey-2 text-grey-9', spinnerColor: 'warning' });
     try {
-      // Mark all as unread: iterate individually (no bulk unread API available)
+      // Mark all as unread: idempotent setReadStatus (never toggle — avoids flip races)
       for (const p of PostInfoList.value) {
         if (p.read) {
-          await electronClient.toggleReadStatus(p.guid);
+          await electronClient.setReadStatus(p.guid, false);
         }
       }
       PostInfoList.value.forEach(p => { p.read = false; });
@@ -369,7 +276,10 @@ const handleKeydown = (e: KeyboardEvent) => {
     e.preventDefault();
     const post = filteredPosts.value[selectedIndex.value];
     if (post) {
-      switchPage('Content', { RssId: rssId, PostId: post.guid });
+      void router.push({
+        name: 'Content',
+        query: { rssId, postId: post.guid },
+      });
     }
   } else if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
@@ -392,7 +302,14 @@ const scrollToSelectedInVirt = () => {
 };
 
 // ---- Data Loading ----
-const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
+/**
+ * Load posts from local DB first (instant), then refresh feed in background.
+ * Legacy IPC methods return ApiResponse — must unwrap before use.
+ */
+const getPostListById = async (
+  rssItemId: string,
+  options: { forceSync?: boolean } = {},
+): Promise<PostIndexItem[]> => {
   console.log('[PostList.vue] getPostListById called with rssItemId:', rssItemId);
   loading.value = true;
   error.value = null;
@@ -400,26 +317,49 @@ const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
   currentVirtIndex.value = 0;
 
   try {
-    console.log('[PostList.vue] Step 1: Syncing RSS feed (fetchRssIndexList)...');
+    // 1) Always read local cache first for a responsive UI
+    const cachedRaw = await electronClient.queryPostIndexByRssId(rssItemId);
+    const cached = unwrapOrThrow(cachedRaw);
+    console.log('[PostList.vue] Cached articles:', cached.length);
 
-    const syncTimeout = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('同步RSS源超时，请检查网络连接或RSS源是否可用')), 60000);
-    });
+    // Show cache immediately if we have data and are not force-syncing for empty feed
+    if (cached.length > 0 && !options.forceSync) {
+      loading.value = false;
+      // Background silent sync — then refresh list
+      void (async () => {
+        try {
+          await Promise.race([
+            electronClient.fetchRssIndexList(rssItemId),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('sync timeout')), 60000),
+            ),
+          ]);
+          const freshRaw = await electronClient.queryPostIndexByRssId(rssItemId);
+          const fresh = unwrapOrThrow(freshRaw);
+          PostInfoList.value = fresh;
+          console.log('[PostList.vue] Background sync updated list:', fresh.length);
+        } catch (syncErr) {
+          console.warn('[PostList.vue] Background sync failed (cache kept):', syncErr);
+        }
+      })();
+      return cached;
+    }
 
-    const syncPromise = electronClient.fetchRssIndexList(rssItemId);
-    await Promise.race([syncPromise, syncTimeout]);
+    // 2) Empty cache or force refresh — sync then query
+    console.log('[PostList.vue] Syncing RSS feed then querying…');
+    await Promise.race([
+      electronClient.fetchRssIndexList(rssItemId),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error('同步RSS源超时，请检查网络连接或RSS源是否可用')),
+          60000,
+        ),
+      ),
+    ]);
 
-    console.log('[PostList.vue] Step 2: Querying article list (queryPostIndexByRssId)...');
-
-    const queryTimeout = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('查询文章列表超时')), 30000);
-    });
-
-    const queryPromise = electronClient.queryPostIndexByRssId(rssItemId);
-    const result = await Promise.race([queryPromise, queryTimeout]);
-
+    const freshRaw = await electronClient.queryPostIndexByRssId(rssItemId);
+    const result = unwrapOrThrow(freshRaw);
     console.log('[PostList.vue] Articles count:', result.length);
-
     return result;
   } catch (err: unknown) {
     console.error('[PostList.vue] Error loading post list:', err);
@@ -432,7 +372,7 @@ const getPostListById = async (rssItemId: string): Promise<PostIndexItem[]> => {
 };
 
 const retryLoad = async () => {
-  PostInfoList.value = await getPostListById(rssId);
+  PostInfoList.value = await getPostListById(rssId, { forceSync: true });
 };
 
 const scrollToTop = () => {
@@ -444,175 +384,92 @@ const scrollToTop = () => {
 
 // ---- Lifecycle ----
 onMounted(async () => {
-  PostInfoList.value = await getPostListById(rssId);
-
   document.addEventListener('keydown', handleKeydown);
+  PostInfoList.value = await getPostListById(String(route.params.RssId || rssId));
 });
+
+// Re-load when navigating between feeds (same component instance possible)
+watch(
+  () => String(route.params.RssId || ''),
+  async (id, prev) => {
+    if (id && id !== prev) {
+      PostInfoList.value = await getPostListById(id);
+    }
+  },
+);
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown);
 });
 </script>
 
+
 <style scoped lang="scss">
-/* ==========================================
-   Loading skeleton
-   ========================================== */
-.post-skeleton {
-  width: 100%;
-  margin-bottom: 12px;
-  animation: pulse 1.5s ease-in-out infinite;
-  border-radius: 6px;
-  overflow: hidden;
+.ink-postlist {
+  min-height: calc(100vh - var(--ink-header-h));
+  background: var(--ink-neutral);
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+.ink-postlist__inner {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--ink-header-h) - 32px);
+  max-width: 820px;
 }
-
-/* ==========================================
-   Virtual scroll container
-   ========================================== */
-.virtual-scroll-wrapper {
+.ink-postlist__skel { width: 100%; }
+.ink-skel-row {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--ink-border);
+}
+.ink-postlist__content {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
   width: 100%;
-  overflow: hidden;
-  border-radius: 8px;
-  background: transparent;
-
-  &.dark {
-    // Dark mode subtle background for the scroll area
-    :deep(.q-virtual-scroll) {
-      scrollbar-color: #555 transparent;
-    }
-  }
-
-  :deep(.q-virtual-scroll) {
-    // Custom scrollbar
-    &::-webkit-scrollbar {
-      width: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: transparent;
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: rgba(128, 128, 128, 0.3);
-      border-radius: 4px;
-      &:hover {
-        background: rgba(128, 128, 128, 0.5);
-      }
-    }
-  }
-
-  :deep(.q-virtual-scroll__padding) {
-    // Ensure padding areas don't show visible borders
-    pointer-events: none;
-  }
 }
-
-.virtual-scroll-item {
-  padding: 2px 0;
-
-  &.selected-post {
-    > :deep(.post-item) .q-card {
-      border: 2px solid var(--q-primary);
-      box-shadow: 0 0 0 1px var(--q-primary);
-      border-radius: 8px;
-    }
-  }
-}
-
-/* ==========================================
-   Toolbar
-   ========================================== */
-.toolbar-row {
+.ink-postlist__toolbar {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  flex-shrink: 0;
-
-  .search-input {
-    flex: 1;
-    max-width: 480px;
+  align-items: center;
+  margin-bottom: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 8px 0;
+  background: var(--ink-neutral);
+  border-bottom: 1px solid var(--ink-border);
+}
+.ink-postlist__search {
+  flex: 1;
+  min-width: 180px;
+  :deep(.q-field__control) {
+    background: var(--ink-surface);
+    border-radius: var(--ink-radius-sm);
   }
 }
-
-/* ==========================================
-   Post count footer
-   ========================================== */
-.post-count {
-  text-align: center;
-  flex-shrink: 0;
+.ink-outline-btn {
+  border-color: var(--ink-border) !important;
+  color: var(--ink-primary) !important;
+  background: var(--ink-surface) !important;
 }
-
-/* ==========================================
-   Transitions
-   ========================================== */
-.fade-switch-enter-active,
-.fade-switch-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+.ink-postlist__scroll {
+  flex: 1;
+  min-height: 420px;
+  height: calc(100vh - 220px);
+  background: var(--ink-surface);
+  border-radius: var(--ink-radius-sm);
+  overflow: hidden;
+  padding: 0;
 }
-.fade-switch-enter-from {
-  opacity: 0;
-  transform: translateY(12px);
+.ink-postlist__item--selected {
+  /* Selection styling is now fully delegated to PostListItem.vue */
 }
-.fade-switch-leave-to {
-  opacity: 0;
-  transform: translateY(-12px);
+.ink-postlist__count {
+  margin-top: 10px;
+  text-align: right;
 }
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.scale-fade-enter-active {
-  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.scale-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-.scale-fade-enter-from {
-  opacity: 0;
-  transform: scale(0.6);
-}
-.scale-fade-leave-to {
-  opacity: 0;
-  transform: scale(0.6);
-}
-
-/* ==========================================
-   Responsive
-   ========================================== */
-@media (max-width: 600px) {
-  .toolbar-row {
-    flex-direction: column;
-    align-items: stretch;
-
-    .search-input {
-      max-width: 100%;
-    }
-  }
-
-  .virtual-scroll-wrapper {
-    :deep(.q-virtual-scroll) {
-      &::-webkit-scrollbar {
-        width: 4px;
-      }
-    }
-  }
-}
-
-@media (min-width: 1200px) {
-  .toolbar-row .search-input {
-    max-width: 560px;
-  }
-}
+.ink-fade-enter-active { transition: opacity 0.15s ease; }
+.ink-fade-enter-from { opacity: 0; }
+.ink-fade-leave-active { transition: none; display: none; }
 </style>

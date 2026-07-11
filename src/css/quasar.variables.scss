@@ -1,25 +1,26 @@
-// Quasar SCSS (& Sass) Variables
-// --------------------------------------------------
-// To customize the look and feel of this app, you can override
-// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+// ============================================================
+// Inkline — Quasar theme bridge from DESIGN.md tokens
+// Source of truth: /DESIGN.md (colors.primary/secondary/tertiary/…)
+// ============================================================
 
-// Check documentation for full list of Quasar variables
+$primary   : #111111; // Deep Black
+$secondary : #6e6e73; // Apple Slate
+$accent    : #007aff; // macOS Blue
 
-// Your own variables (that are declared here) and Quasar's own
-// ones will be available out of the box in your .vue/.scss/.sass files
+$dark      : #1c1c1e;
+$dark-page : #000000;
 
-// It's highly recommended to change the default colors
-// to match your app's branding.
-// Tip: Use the "Theme Builder" on Quasar's documentation website.
+$positive  : #34c759;
+$negative  : #ff3b30;
+$info      : #007aff;
+$warning   : #ff9500;
 
-$primary   : #1976D2;
-$secondary : #26A69A;
-$accent    : #9C27B0;
+// Quasar shape — architectural sharpness (rounded.sm / md)
+$generic-border-radius       : 4px;
+$button-border-radius        : 4px;
+$chip-border-radius          : 9999px;
 
-$dark      : #1D1D1D;
-$dark-page : #121212;
-
-$positive  : #21BA45;
-$negative  : #C10015;
-$info      : #31CCEC;
-$warning   : #F2C037;
+// Typography stacks (loaded via index.html)
+$typography-font-family      : 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+$button-font-size            : 14px;
+$button-font-weight          : 500;

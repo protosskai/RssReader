@@ -21,7 +21,7 @@ export interface ArticleRepository {
   clearAllFavorites(): Promise<void>;
 
   // 同步一组文章（批量保存，只插入不存在的文章）
-  syncArticles(feedId: string, posts: import('../../infrastructure/persistence/common').PostInfoItem[]): Promise<void>;
+  syncArticles(feedId: string, posts: import('../../infrastructure/persistence/common').PostInfoItem[]): Promise<number>;
 
   // 统计信息
   getArticleStats(): Promise<ArticleStats>;

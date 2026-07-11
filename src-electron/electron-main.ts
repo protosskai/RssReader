@@ -80,6 +80,8 @@ const MAX_SEARCH_RESULTS = 200;
 /** Max string parameter length (protection against buffer-bloat) */
 const MAX_STRING_PARAM = 4096;
 const MAX_ID_PARAM = 512;
+/** Article guids are often long URLs */
+const MAX_GUID_PARAM = 2048;
 const MAX_FOLDER_NAME = 256;
 const MAX_QUERY_LENGTH = 1024;
 
@@ -151,12 +153,29 @@ function validateFolderName(name: unknown): asserts name is string {
 	}
 }
 
-/** Validate a generic id — alphanumeric-safe, no traversal */
+/** Validate a generic id — alphanumeric-safe, no traversal (UUIDs / feed ids) */
 function validateId(id: unknown, label: string): asserts id is string {
 	validateString(id, label, MAX_ID_PARAM);
 	const n = id as string;
 	if (/[<>:"/\\|?*\x00-\x1f]/.test(n)) {
 		throw new Error(`INVALID_PARAM: ${label} contains invalid characters`);
+	}
+}
+
+/**
+ * Validate article GUID / post id.
+ * RSS guids are often full URLs (https://example.com/item?id=1) — must allow
+ * : / ? & = # % etc. Still block control chars and null bytes.
+ */
+function validateGuid(id: unknown, label = "guid"): asserts id is string {
+	validateString(id, label, MAX_GUID_PARAM);
+	const n = id as string;
+	if (/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(n)) {
+		throw new Error(`INVALID_PARAM: ${label} contains control characters`);
+	}
+	// Soft path-traversal guard for non-URL guids
+	if (!/^https?:\/\//i.test(n) && n.includes("..")) {
+		throw new Error(`INVALID_PARAM: ${label} contains path traversal sequence`);
 	}
 }
 
@@ -230,6 +249,10 @@ try {
 	/* intentionally empty */
 }
 
+function getAppUrl(): string {
+	return process.env.APP_URL || "http://localhost:9000";
+}
+
 let mainWindow: BrowserWindow | undefined;
 
 /**
@@ -239,7 +262,7 @@ async function waitForDevServer(
 	maxRetries = 30,
 	retryDelay = 1000,
 ): Promise<void> {
-	const appUrl = process.env.APP_URL || "http://localhost:9000";
+	const appUrl = getAppUrl();
 	let serverUrl: URL;
 	try {
 		serverUrl = new URL(appUrl);
@@ -304,11 +327,16 @@ function createWindow() {
 			contextIsolation: true,
 			nodeIntegration: false,
 			sandbox: true,
-			preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+			// Quasar sets QUASAR_ELECTRON_PRELOAD in `quasar dev -m electron`;
+			// fall back for Playwright / direct electron launches.
+			preload: path.resolve(
+				__dirname,
+				process.env.QUASAR_ELECTRON_PRELOAD || "electron-preload.js",
+			),
 		},
 	});
 
-	const appUrl = process.env.APP_URL;
+	const appUrl = getAppUrl();
 	const isProduction = process.env.NODE_ENV === "production";
 	console.log(
 		`[electron-main] Loading URL: ${appUrl} (production: ${isProduction})`,
@@ -342,9 +370,9 @@ function createWindow() {
 
 	// Dev: only open DevTools when NODE_ENV is NOT production
 	// This ensures DevTools are never exposed to end users in production builds
-	if (process.env.NODE_ENV !== "production") {
-		mainWindow.webContents.openDevTools();
-	}
+	// if (process.env.NODE_ENV !== "production") {
+	// 	mainWindow.webContents.openDevTools();
+	// }
 
 	mainWindow.on("closed", () => {
 		mainWindow = undefined;
@@ -439,7 +467,7 @@ app.whenReady().then(async () => {
 	ipcMain.handle(
 		"rss:queryPostContentByGuid",
 		wrapHandler(async (postId: unknown) => {
-			validateId(postId, "guid");
+			validateGuid(postId, "guid");
 			console.log(
 				"[electron-main] rss:queryPostContentByGuid called with guid:",
 				postId,
@@ -722,7 +750,7 @@ app.whenReady().then(async () => {
 	ipcMain.handle(
 		"article:getArticle",
 		wrapHandler(async (id: unknown) => {
-			validateId(id, "id");
+			validateGuid(id, "id");
 			const result = await articleService.getArticle(id);
 			if (result) {
 				return clampContent(result);
@@ -734,16 +762,28 @@ app.whenReady().then(async () => {
 	ipcMain.handle(
 		"article:toggleReadStatus",
 		wrapHandler(async (id: unknown) => {
-			validateId(id, "id");
+			validateGuid(id, "id");
 			await articleService.toggleReadStatus(id);
 			return undefined;
+		}),
+	);
+
+	// Idempotent mark read/unread — preferred for open-article path
+	ipcMain.handle(
+		"article:setReadStatus",
+		wrapHandler(async (id: unknown, read: unknown) => {
+			validateGuid(id, "id");
+			if (typeof read !== "boolean") {
+				throw new Error("INVALID_PARAM: read must be a boolean");
+			}
+			return await articleService.setReadStatus(id, read);
 		}),
 	);
 
 	ipcMain.handle(
 		"article:toggleFavorite",
 		wrapHandler(async (id: unknown) => {
-			validateId(id, "id");
+			validateGuid(id, "id");
 			return await articleService.toggleFavorite(id);
 		}),
 	);
@@ -895,7 +935,20 @@ app.whenReady().then(async () => {
 				0,
 				MAX_ARTICLES_PER_PAGE,
 			);
-			return result.articles;
+			// Map Article → PostIndexItem shape expected by FavoritePage / store
+			return result.articles.map((article) => ({
+				title: article.title,
+				guid: article.id || article.guid,
+				link: article.link,
+				author: article.author || "",
+				updateTime:
+					article.updateTime instanceof Date
+						? article.updateTime.toISOString()
+						: String(article.updateTime || article.pubDate || ""),
+				read: article.read,
+				desc: article.description || article.summary || "",
+				rssId: article.feedId,
+			}));
 		}),
 	);
 
@@ -907,45 +960,25 @@ app.whenReady().then(async () => {
 			}
 			const p = post as Record<string, unknown>;
 			const id = (p.guid ?? p.id) as unknown;
-			validateId(id, "guid");
-			// Convert PostIndexItem to Article and toggle favorite
-			const desc = typeof p.desc === "string" ? p.desc : "";
-			const dateStr = p.updateTime ? String(p.updateTime) : "";
-			const article: Article = {
-				id: String(id),
-				guid: String(id),
-				title: typeof p.title === "string" ? p.title : "",
-				content: typeof p.content === "string" ? clampSummary(p.content) : "",
-				description: desc,
-				summary: desc,
-				link: typeof p.link === "string" ? p.link : "",
-				author: typeof p.author === "string" ? p.author : "",
-				pubDate: dateStr,
-				publishDate: dateStr ? new Date(dateStr) : new Date(),
-				updateTime: dateStr ? new Date(dateStr) : new Date(),
-				read: Boolean(p.read),
-				favorite: true,
-				feedId: (p.rssId as string) || "",
-				feedTitle: "",
-				feedUrl: "",
-				folderName: "",
-			};
-			return await articleService.toggleFavorite(article.id);
+			validateGuid(id, "guid");
+			// Idempotent: set favorite = true (do NOT toggle)
+			return await articleService.setFavorite(String(id), true);
 		}),
 	);
 
 	ipcMain.handle(
 		"article:removeFavoritePost",
 		wrapHandler(async (guid: unknown) => {
-			validateId(guid, "guid");
-			return await articleService.toggleFavorite(guid);
+			validateGuid(guid, "guid");
+			// Idempotent: set favorite = false (do NOT toggle)
+			return await articleService.setFavorite(String(guid), false);
 		}),
 	);
 
 	ipcMain.handle(
 		"article:isPostFavorite",
 		wrapHandler(async (guid: unknown) => {
-			validateId(guid, "guid");
+			validateGuid(guid, "guid");
 			const article = await articleService.getArticle(guid);
 			return article?.favorite || false;
 		}),
@@ -980,6 +1013,11 @@ app.whenReady().then(async () => {
 	ipcMain.handle(
 		"sync:getStatus",
 		wrapHandler(() => syncManager.getStatus()),
+	);
+
+	ipcMain.handle(
+		"sync:getProgress",
+		wrapHandler(() => syncManager.getProgress()),
 	);
 
 	ipcMain.handle(

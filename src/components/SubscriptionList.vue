@@ -188,39 +188,21 @@
                 <q-item-label
                   :lines="1"
                   class="feed-title"
-                  :class="{ 'text-weight-medium': prop.node.data.unread > 0 }"
+                  :class="{ 'text-weight-bold': prop.node.data.unread > 0 }"
                 >
                   {{ prop.node.data.title }}
-                  <!-- Unread count badge next to title -->
-                  <q-badge
-                    v-if="prop.node.data.unread > 0"
-                    :color="$q.dark.isActive ? 'red-4' : 'red'"
-                    text-color="white"
-                    :label="formatUnread(prop.node.data.unread)"
-                    class="q-ml-sm feed-unread-badge"
-                    size="sm"
-                    :title="`${prop.node.data.unread} 篇未读`"
-                  />
-                </q-item-label>
-                <q-item-label
-                  class="conversation__summary feed-meta"
-                  caption
-                >
-                  <span v-if="prop.node.data.unread !== 0" class="unread-meta">
-                    <q-icon name="mark_chat_unread" :color="$q.dark.isActive ? 'red-4' : 'red-6'" size="12px" />
-                    {{ prop.node.data.unread }} 篇未读
-                  </span>
-                  <span v-else class="read-meta">
-                    <q-icon name="check_circle" color="grey-5" size="12px" />
-                    已读
-                  </span>
                 </q-item-label>
               </q-item-section>
 
-              <q-item-section side class="feed-side">
-                <q-item-label caption class="feed-time">
-                  {{ prop.node.data.lastUpdateTime }}
-                </q-item-label>
+              <q-item-section side class="feed-side" v-if="prop.node.data.unread > 0">
+                <q-badge
+                  color="primary"
+                  text-color="white"
+                  :label="formatUnread(prop.node.data.unread)"
+                  class="feed-unread-badge"
+                  size="sm"
+                  :title="`${prop.node.data.unread} 篇未读`"
+                />
               </q-item-section>
 
               <sub-subscription-item-context-menu
@@ -240,7 +222,7 @@ import { computed, inject, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import { RSS_FOLDER_LIST_REF } from "src/const/InjectionKey";
 import SubSubscriptionItemContextMenu from "components/SubSubscriptionItemContextMenu.vue";
-import { switchPage } from "src/common/util";
+import { useRouter } from "vue-router";
 import FolderContextMenu from "components/FolderContextMenu.vue";
 import RssIcon from "components/RssIcon.vue";
 import { useRssInfoStore } from "stores/rssInfoStore";
@@ -254,8 +236,9 @@ const emit = defineEmits<{
 const RssFolderList = inject(RSS_FOLDER_LIST_REF);
 const rssStore = useRssInfoStore();
 
-// ── Quasar ───────────────────────────────────────────────────────
+// ── Quasar / Router ──────────────────────────────────────────────
 const $q = useQuasar();
+const router = useRouter();
 
 // ── State ────────────────────────────────────────────────────────
 const expandedKeys = ref<string[]>([]);
@@ -356,267 +339,69 @@ const formatUnread = (count: number): string => {
 };
 
 // ── Navigation ───────────────────────────────────────────────────
-const openPostList = (RssId: number) => {
-  switchPage('PostList', { RssId });
+const openPostList = (RssId: string | number) => {
+  void router.push({ name: 'PostList', params: { RssId: String(RssId) } });
 };
 </script>
 
 <style lang="scss" scoped>
-// ============================
-// Layout
-// ============================
+/* Inkline rail list */
 .subscription-list {
   min-height: 100px;
+  font-family: var(--ink-font-sans);
+  color: var(--ink-on-surface);
 }
-
-// ============================
-// Loading
-// ============================
-.tree-loading {
-  padding: 16px;
+.tree-loading { padding: var(--ink-space-md); }
+.tree-empty, .tree-error {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 16px; text-align: center; min-height: 200px; color: var(--ink-secondary);
 }
-
-// ============================
-// Empty & Error
-// ============================
-.tree-empty,
-.tree-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 16px;
-  text-align: center;
-  min-height: 200px;
-}
-
-.empty-content,
-.error-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-// ============================
-// Toolbar / Controls
-// ============================
+.empty-content, .error-content { display: flex; flex-direction: column; align-items: center; }
 .tree-controls {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin-bottom: 8px !important;
-
-  :deep(.q-separator) {
-    height: 18px;
-    margin: 0 4px;
-  }
+  display: flex; align-items: center; gap: 2px; padding: 4px 8px;
+  border-bottom: 1px solid var(--ink-border); margin-bottom: 8px !important;
+  :deep(.q-separator) { height: 18px; margin: 0 4px; background: var(--ink-border); }
+  :deep(.q-btn) { color: var(--ink-secondary); }
 }
-
 .total-unread-badge {
-  font-size: 11px;
-  padding: 1px 6px;
-  min-width: 18px;
-  text-align: center;
+  font-size: 11px; padding: 1px 6px; min-width: 18px; text-align: center;
+  background: var(--ink-tertiary) !important;
 }
-
-// ============================
-// Folder Header
-// ============================
 .folder-header {
-  .folder-avatar {
-    min-width: 28px;
-    padding-right: 4px;
-  }
-
+  .folder-avatar { min-width: 28px; padding-right: 4px; }
   .folder-label {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--ink-secondary);
   }
+  :deep(.q-icon) { color: var(--ink-secondary) !important; }
 }
-
-// ============================
-// Feed Items
-// ============================
 .feed-item {
-  border-radius: 6px;
-  margin: 1px 4px;
-  padding: 4px 8px;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  outline: none;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-
-  &:focus-visible {
-    background-color: rgba(0, 0, 0, 0.06);
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
-  }
-
+  border-radius: var(--ink-radius-sm); margin: 1px 8px; padding: 2px 8px;
+  min-height: 32px;
+  transition: background-color 0.15s ease; outline: none; cursor: pointer;
+  border-left: none;
+  &:hover { background-color: var(--ink-surface-raised); }
+  &:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink-tertiary) 40%, transparent); }
   &.feed-item-unread {
-    background-color: rgba(255, 76, 76, 0.04);
-    border-left: 2px solid rgba(255, 76, 76, 0.35);
-
-    &:hover {
-      background-color: rgba(255, 76, 76, 0.08);
-    }
+    background-color: transparent;
+    &:hover { background-color: var(--ink-surface-raised); }
   }
-
-  .feed-avatar {
-    min-width: 32px;
-    padding-right: 4px;
-  }
-
+  .feed-avatar { min-width: 24px; padding-right: 8px; }
   .feed-title {
-    font-size: 13px;
-    line-height: 1.4;
-
-    .feed-unread-badge {
-      font-size: 10px;
-      padding: 0 5px;
-      vertical-align: middle;
-    }
+    font-size: 13px; line-height: 1.2; font-weight: 400; color: var(--ink-primary);
   }
-
-  .feed-meta {
-    font-size: 11px;
-    margin-top: 2px;
-
-    .unread-meta {
-      color: #e53935;
-    }
-
-    .read-meta {
-      color: #9e9e9e;
-    }
-  }
-
-  .feed-side {
-    min-width: 50px;
-
-    .feed-time {
-      font-size: 10px;
-      white-space: nowrap;
-      color: #bdbdbd;
-    }
+  .feed-unread-badge { 
+    font-size: 11px; padding: 2px 6px; border-radius: 12px; background: var(--ink-tertiary) !important; font-weight: 600;
   }
 }
-
-// ============================
-// Dark Mode
-// ============================
-.body--dark {
-  .tree-controls {
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .feed-item {
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.06);
-    }
-
-    &:focus-visible {
-      background-color: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.4);
-    }
-
-    &.feed-item-unread {
-      background-color: rgba(255, 138, 128, 0.06);
-      border-left-color: rgba(255, 138, 128, 0.45);
-
-      &:hover {
-        background-color: rgba(255, 138, 128, 0.1);
-      }
-    }
-
-    .feed-meta {
-      .unread-meta {
-        color: #ef9a9a;
-      }
-    }
-
-    .feed-time {
-      color: #616161;
-    }
-  }
-
-  .folder-header {
-    .folder-label {
-      color: #e0e0e0;
-    }
-  }
+.feed-tree {
+  padding: 0 4px 16px;
+  :deep(.q-tree__node-header) { border-radius: var(--ink-radius-sm); }
+  :deep(.q-tree__node-header:hover) { background: transparent; }
 }
-
-// ============================
-// Transitions
-// ============================
-.fade-up-enter-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-up-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.fade-up-enter-from {
-  opacity: 0;
-  transform: translateY(12px);
-}
-
-.fade-up-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-.fade-in-enter-active {
-  transition: opacity 0.25s ease;
-}
-
-.fade-in-leave-active {
-  transition: opacity 0.15s ease;
-}
-
-.fade-in-enter-from,
-.fade-in-leave-to {
-  opacity: 0;
-}
-
-.slide-fade-enter-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.slide-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.slide-fade-enter-from {
-  opacity: 0;
-  transform: translateX(-8px);
-}
-
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateX(8px);
-}
-
-.badge-pop-enter-active {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
-}
-
-.badge-pop-leave-active {
-  transition: transform 0.15s ease, opacity 0.1s ease;
-}
-
-.badge-pop-enter-from {
-  transform: scale(0.5);
-  opacity: 0;
-}
-
-.badge-pop-leave-to {
-  transform: scale(1.3);
-  opacity: 0;
-}
+.unread-badge { background: var(--ink-tertiary) !important; }
+.fade-up-enter-active, .fade-in-enter-active, .slide-fade-enter-active { transition: opacity 0.15s ease; }
+.fade-up-enter-from, .fade-in-enter-from, .slide-fade-enter-from { opacity: 0; }
+.badge-pop-enter-active { transition: transform 0.15s ease; }
+.badge-pop-enter-from { transform: scale(0.8); }
 </style>

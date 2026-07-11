@@ -30,6 +30,8 @@ export interface ElectronContract {
   getArticles: (params: ArticleQueryParams) => Promise<{ articles: Article[]; total: number }>;
   getArticle: (id: string) => Promise<Article>;
   toggleReadStatus: (id: string) => Promise<void>;
+  /** Idempotent mark read/unread (preferred when opening articles). */
+  setReadStatus: (id: string, read: boolean) => Promise<boolean>;
   toggleFavorite: (id: string) => Promise<boolean>;
   markAllAsRead: (params?: { feedId?: string; folderName?: string }) => Promise<void>;
   clearAllFavorites: () => Promise<void>;
@@ -60,6 +62,7 @@ export interface ElectronContract {
   syncUpdateConfig: (config: unknown) => Promise<unknown>;
   syncStart: () => Promise<unknown>;
   syncGetStatus: () => Promise<unknown>;
+  syncGetProgress: () => Promise<unknown>;
   syncStartAuto: () => Promise<unknown>;
   syncStopAuto: () => Promise<unknown>;
 

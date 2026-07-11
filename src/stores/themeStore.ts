@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { useQuasar } from 'quasar'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
@@ -8,28 +7,33 @@ interface ThemeState {
   isDark: boolean
 }
 
+/**
+ * Theme store — never calls useQuasar() inside actions.
+ * useQuasar requires an active component instance; pinia actions
+ * (and media-query listeners) often run outside setup and would throw
+ * "Cannot destructure property 'proxy' of getCurrentInstance()".
+ * Dark mode is applied via document class; AppLayout also syncs $q.dark.
+ */
 export const useThemeStore = defineStore('theme', {
   state: (): ThemeState => ({
     mode: 'system',
-    isDark: false
+    isDark: false,
   }),
 
   getters: {
     currentMode: (state) => state.mode,
-    isDarkMode: (state) => state.isDark
+    isDarkMode: (state) => state.isDark,
   },
 
   actions: {
     initializeTheme() {
-      const savedMode = localStorage.getItem('themeMode') as ThemeMode
-      if (savedMode) {
+      const savedMode = localStorage.getItem('themeMode') as ThemeMode | null
+      if (savedMode === 'light' || savedMode === 'dark' || savedMode === 'system') {
         this.mode = savedMode
-        this.applyTheme()
       } else {
-        // 默认跟随系统
         this.mode = 'system'
-        this.detectSystemTheme()
       }
+      this.applyTheme()
     },
 
     setMode(mode: ThemeMode) {
@@ -49,19 +53,9 @@ export const useThemeStore = defineStore('theme', {
     },
 
     applyTheme() {
-      // 检查是否在浏览器环境中
-      if (typeof window === 'undefined') return
-
-      // 尝试获取Quasar实例
-      let $q: any = null
-      try {
-        $q = useQuasar()
-      } catch (e) {
-        console.warn('[themeStore] useQuasar not available, using document class')
-      }
+      if (typeof window === 'undefined' || typeof document === 'undefined') return
 
       let isDark = false
-
       if (this.mode === 'system') {
         isDark = this.detectSystemTheme()
       } else {
@@ -70,42 +64,49 @@ export const useThemeStore = defineStore('theme', {
 
       this.isDark = isDark
 
-      // 使用Quasar或原生方法设置暗色模式
-      if ($q && $q.dark) {
-        $q.dark.set(isDark)
-      } else {
-        // 回退到原生方法
-        document.documentElement.classList.toggle('dark', isDark)
-      }
+      // Native class toggles (body + html for Quasar body--dark compatibility)
+      document.documentElement.classList.toggle('body--dark', isDark)
+      document.documentElement.classList.toggle('dark', isDark)
+      document.body.classList.toggle('body--dark', isDark)
+      document.body.classList.toggle('dark', isDark)
 
-      // 设置meta主题色
       this.updateMetaThemeColor(isDark)
+
+      // Best-effort Quasar dark sync without useQuasar()
+      try {
+        const q = (window as unknown as { $q?: { dark?: { set: (v: boolean) => void } } }).$q
+        if (q?.dark?.set) {
+          q.dark.set(isDark)
+        }
+      } catch {
+        /* ignore */
+      }
     },
 
     detectSystemTheme(): boolean {
-      if (typeof window !== 'undefined') {
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (typeof window !== 'undefined' && window.matchMedia) {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
       }
       return false
     },
 
     updateMetaThemeColor(isDark: boolean) {
-      if (typeof document !== 'undefined') {
-        const metaThemeColor = document.querySelector('meta[name=theme-color]')
-        if (metaThemeColor) {
-          metaThemeColor.setAttribute('content', isDark ? '#121212' : '#ffffff')
-        }
+      if (typeof document === 'undefined') return
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', isDark ? '#121212' : '#ffffff')
       }
     },
 
     listenToSystemThemeChange() {
-      if (typeof window !== 'undefined') {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (typeof window === 'undefined' || !window.matchMedia) return
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', () => {
           if (this.mode === 'system') {
             this.applyTheme()
           }
         })
-      }
-    }
-  }
+    },
+  },
 })

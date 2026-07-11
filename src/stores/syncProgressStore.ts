@@ -38,8 +38,8 @@ export const useSyncProgressStore = defineStore('syncProgress', () => {
 
   const fetchProgress = async () => {
     try {
-      const data = await (electronClient as any).getSyncProgress?.();
-      if (data) {
+      const data = await electronClient.syncGetProgress();
+      if (data && typeof data === 'object') {
         progress.value = data as SyncProgressData;
       }
     } catch (err) {

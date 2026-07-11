@@ -575,7 +575,7 @@ const handleResultClick = (post: PostIndexItem) => {
   emit('resultClick', post)
   router.push({
     name: 'Content',
-    params: { RssId: rssId, PostId: post.guid },
+    query: { rssId, postId: post.guid },
   })
 }
 

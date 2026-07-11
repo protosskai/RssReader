@@ -17,6 +17,11 @@ import type {
 } from "../../domain/models/Article";
 import { SqliteUtil } from "./sqlite";
 import type { PostIndexItem, PostInfoItem } from "./common";
+import {
+	beautyStr,
+	extractTextFromHtml,
+	parseBase64ToString,
+} from "src-electron/util/string";
 
 export class SqliteArticleRepository implements ArticleRepository {
 	private storage: SqliteUtil;
@@ -25,7 +30,9 @@ export class SqliteArticleRepository implements ArticleRepository {
 		this.storage = SqliteUtil.getInstance();
 	}
 
-	private mapPostIndexToArticle(post: PostIndexItem): Article {
+	private mapPostIndexToArticle(
+		post: PostIndexItem & { favorite?: boolean },
+	): Article {
 		return {
 			id: post.guid,
 			guid: post.guid,
@@ -39,7 +46,7 @@ export class SqliteArticleRepository implements ArticleRepository {
 			publishDate: new Date(post.updateTime),
 			updateTime: new Date(post.updateTime),
 			read: post.read,
-			favorite: false,
+			favorite: !!post.favorite,
 			feedId: post.rssId || "",
 			feedTitle: "",
 			feedUrl: "",
@@ -86,38 +93,142 @@ export class SqliteArticleRepository implements ArticleRepository {
 		};
 	}
 
+	/**
+	 * List articles with optional filters.
+	 * - With keyword: full-text search (FTS5)
+	 * - Without keyword: direct SQL (never call FTS with empty query — FTS5 errors)
+	 */
 	async getArticles(
 		filter?: ArticleFilter,
 		offset = 0,
 		limit = 50,
 	): Promise<{ articles: Article[]; total: number }> {
-		const result = await this.storage.searchPosts(filter?.keyword || "", {
-			limit: offset + limit,
-			dateFrom: filter?.startDate ?? undefined,
-			dateTo: filter?.endDate ?? undefined,
-		});
+		const keyword = (filter?.keyword || "").trim();
 
-		if (!result.success) {
-			throw new Error(result.msg);
+		// Keyword search path — FTS only when query is non-empty
+		if (keyword) {
+			const result = await this.storage.searchPosts(keyword, {
+				limit: Math.max(offset + limit, limit),
+				dateFrom: filter?.startDate ?? undefined,
+				dateTo: filter?.endDate ?? undefined,
+			});
+
+			if (!result.success) {
+				throw new Error(result.msg || "搜索失败");
+			}
+
+			let articles = result.data.map((post) => this.mapPostIndexToArticle(post));
+
+			if (filter?.read !== undefined) {
+				articles = articles.filter((a) => a.read === filter.read);
+			}
+			if (filter?.favorite !== undefined) {
+				articles = articles.filter((a) => a.favorite === filter.favorite);
+			}
+			if (filter?.feedId) {
+				articles = articles.filter((a) => a.feedId === filter.feedId);
+			}
+			if (filter?.folderName) {
+				// searchPosts already joins folder; folderName filter applied if present on post
+			}
+
+			const total = articles.length;
+			return {
+				articles: articles.slice(offset, offset + limit),
+				total,
+			};
 		}
 
-		let articles = result.data.map((post) => this.mapPostIndexToArticle(post));
-
-		if (filter?.read !== undefined) {
-			articles = articles.filter((article) => article.read === filter.read);
-		}
+		// Direct SQL path — list by feed / favorite / read / folder
+		const helper = this.storage.getHelper();
+		const where: string[] = [];
+		const params: unknown[] = [];
 
 		if (filter?.feedId) {
-			articles = articles.filter((article) => article.feedId === filter.feedId);
+			where.push("p.rss_id = ?");
+			params.push(filter.feedId);
+		}
+		if (filter?.read !== undefined) {
+			where.push("p.read = ?");
+			params.push(filter.read ? 1 : 0);
+		}
+		if (filter?.favorite !== undefined) {
+			where.push("p.favorite = ?");
+			params.push(filter.favorite ? 1 : 0);
+		}
+		if (filter?.folderName) {
+			where.push("f.name = ?");
+			params.push(filter.folderName);
+		}
+		if (filter?.startDate) {
+			where.push("p.update_time >= ?");
+			params.push(filter.startDate);
+		}
+		if (filter?.endDate) {
+			where.push("p.update_time <= ?");
+			params.push(filter.endDate);
 		}
 
-		const total = articles.length;
-		const paged = articles.slice(offset, offset + limit);
+		const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
-		return {
-			articles: paged,
-			total,
-		};
+		const countRow = await helper.get<{ c: number }>(
+			`
+			SELECT COUNT(*) as c
+			FROM post_info p
+			LEFT JOIN rss_info r ON p.rss_id = r.rss_id
+			LEFT JOIN folder_info f ON r.folder_id = f.id
+			${whereSql}
+			`,
+			params,
+		);
+		const total = countRow?.c ?? 0;
+
+		const rows = await helper.all<{
+			title: string;
+			guid: string;
+			link: string;
+			content: string;
+			author: string;
+			update_time: string;
+			read: number;
+			favorite: number;
+			rss_id: string;
+		}>(
+			`
+			SELECT p.title, p.guid, p.link, p.content, p.author, p.update_time,
+			       p.read, p.favorite, p.rss_id
+			FROM post_info p
+			LEFT JOIN rss_info r ON p.rss_id = r.rss_id
+			LEFT JOIN folder_info f ON r.folder_id = f.id
+			${whereSql}
+			ORDER BY p.update_time DESC
+			LIMIT ? OFFSET ?
+			`,
+			[...params, limit, offset],
+		);
+
+		const articles: Article[] = (rows || []).map((row) => {
+			let desc = "";
+			try {
+				desc = parseBase64ToString(row.content || "");
+				desc = beautyStr(extractTextFromHtml(desc), 100);
+			} catch {
+				desc = (row.content || "").slice(0, 100);
+			}
+			return this.mapPostIndexToArticle({
+				title: row.title,
+				guid: row.guid,
+				link: row.link,
+				author: row.author || "",
+				updateTime: row.update_time || "",
+				read: row.read === 1,
+				desc,
+				rssId: row.rss_id,
+				favorite: row.favorite === 1,
+			});
+		});
+
+		return { articles, total };
 	}
 
 	async getArticleById(id: string): Promise<Article | null> {
@@ -182,25 +293,28 @@ export class SqliteArticleRepository implements ArticleRepository {
 		if (!article) {
 			throw new Error(`文章不存在: ${id}`);
 		}
+		return this.setFavorite(id, !article.favorite);
+	}
 
-		const newFavoriteState = !article.favorite;
+	/** Explicitly set favorite flag (idempotent). */
+	async setFavorite(id: string, favorite: boolean): Promise<boolean> {
 		const helper = this.storage.getHelper();
 		try {
 			await helper.run("UPDATE post_info SET favorite = ? WHERE guid = ?", [
-				newFavoriteState ? 1 : 0,
+				favorite ? 1 : 0,
 				id,
 			]);
 		} catch (error) {
 			console.error(
-				"[ArticleRepository] Failed to toggle favorite:",
+				"[ArticleRepository] Failed to set favorite:",
 				id,
 				error,
 			);
 			throw new Error(
-				`切换收藏状态失败: ${error instanceof Error ? error.message : String(error)}`,
+				`设置收藏状态失败: ${error instanceof Error ? error.message : String(error)}`,
 			);
 		}
-		return newFavoriteState;
+		return favorite;
 	}
 
 	async getUnreadArticles(feedId?: string): Promise<Article[]> {
@@ -262,11 +376,12 @@ export class SqliteArticleRepository implements ArticleRepository {
 		}
 	}
 
-	async syncArticles(feedId: string, posts: PostInfoItem[]): Promise<void> {
+	async syncArticles(feedId: string, posts: PostInfoItem[]): Promise<number> {
 		const result = await this.storage.syncRssPostList(feedId, posts);
 		if (!result.success) {
 			throw new Error(result.msg);
 		}
+		return result.data ?? 0;
 	}
 
 	async getArticleStats(): Promise<ArticleStats> {

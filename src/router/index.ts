@@ -32,6 +32,12 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
+  // Expose globally so switchPage never hits a null import binding
+  // (Vite can create dual module instances for src/router in some cases)
+  if (typeof window !== 'undefined') {
+    (window as unknown as { __APP_ROUTER__?: Router }).__APP_ROUTER__ = router;
+  }
+
   // Route guard: warn when running outside Electron but never block.
   // All IPC methods are already protected by the noop proxy in electronClient.ts.
   router.beforeEach((to, from, next) => {

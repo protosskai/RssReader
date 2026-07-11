@@ -1,23 +1,101 @@
-// app global css in SCSS form
+// ============================================================
+// Inkline global styles — DESIGN.md token → CSS custom properties
+// ============================================================
 
-/* ===================== Accessibility ===================== */
+:root {
+  /* Colors (light) */
+  --ink-primary: #111111;
+  --ink-secondary: #666666;
+  --ink-tertiary: #007aff;
+  --ink-tertiary-hover: #0056b3;
+  --ink-neutral: #f5f5f7;
+  --ink-surface: #ffffff;
+  --ink-surface-raised: #ffffff;
+  --ink-on-primary: #ffffff;
+  --ink-on-tertiary: #ffffff;
+  --ink-on-surface: #111111;
+  --ink-border: #e5e5ea;
+  --ink-muted: #999999;
+  --ink-positive: #34c759;
+  --ink-negative: #ff3b30;
+  --ink-warning: #ffcc00;
+  --ink-scrim: rgba(0, 0, 0, 0.4);
+  --ink-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-/* Focus indicators for keyboard navigation */
+  /* Typography */
+  --ink-font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --ink-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --ink-display-size: 2rem;
+  --ink-h1-size: 1.5rem;
+  --ink-h2-size: 1.25rem;
+  --ink-body-lg: 1rem;
+  --ink-body-md: 0.9375rem;
+  --ink-body-sm: 0.8125rem;
+  --ink-label: 0.75rem;
+  --ink-meta: 0.6875rem;
+  --ink-reader-lh: 1.6;
+
+  /* Spacing & shape */
+  --ink-space-xs: 2px;
+  --ink-space-sm: 4px;
+  --ink-space-md: 8px;
+  --ink-space-lg: 16px;
+  --ink-space-xl: 24px;
+  --ink-space-2xl: 32px;
+  --ink-radius-sm: 4px;
+  --ink-radius-md: 6px;
+  --ink-radius-lg: 8px;
+  --ink-radius-full: 9999px;
+  --ink-reader-max: 700px;
+  --ink-shell-rail: 260px;
+  --ink-header-h: 44px;
+}
+
+/* Dark mode */
+.body--dark,
+html.body--dark,
+body.dark {
+  --ink-primary: #ffffff;
+  --ink-secondary: #999999;
+  --ink-tertiary: #0a84ff;
+  --ink-tertiary-hover: #409cff;
+  --ink-neutral: #1e1e1e;
+  --ink-surface: #000000;
+  --ink-surface-raised: #1c1c1e;
+  --ink-on-primary: #000000;
+  --ink-on-tertiary: #ffffff;
+  --ink-on-surface: #ffffff;
+  --ink-border: #333333;
+  --ink-muted: #666666;
+  --ink-scrim: rgba(0, 0, 0, 0.6);
+  --ink-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Base ---------- */
+html, body, #q-app {
+  font-family: var(--ink-font-sans);
+  background: var(--ink-neutral);
+  color: var(--ink-on-surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--ink-tertiary) 22%, transparent);
+  color: inherit;
+}
+
 *:focus-visible {
-  outline: 2px solid #1976d2 !important;
+  outline: 2px solid var(--ink-tertiary) !important;
   outline-offset: 2px;
 }
 
-/* Ensure focus rings are visible in dark mode */
-.body--dark *:focus-visible {
-  outline-color: #64b5f6 !important;
-}
-
-/* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -25,30 +103,244 @@
   }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* ---------- Quasar overrides — kill Material blue chrome ---------- */
+.q-btn {
+  font-family: var(--ink-font-sans);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  border-radius: var(--ink-radius-sm);
 }
 
-/* Better focus styling for interactive elements */
-.q-btn:focus-visible,
-.q-input :focus-visible,
-.q-select :focus-visible,
-.q-checkbox :focus-visible,
-.q-toggle :focus-visible,
-a:focus-visible {
-  outline: 2px solid #1976d2;
-  outline-offset: 2px;
-  border-radius: 4px;
+.q-btn--unelevated.bg-primary,
+.q-btn.bg-primary {
+  background: var(--ink-tertiary) !important;
+  color: var(--ink-on-tertiary) !important;
 }
 
-.body--dark .q-btn:focus-visible,
-.body--dark .q-input :focus-visible {
-  outline-color: #64b5f6;
+.q-btn.bg-primary:hover {
+  background: var(--ink-tertiary-hover) !important;
 }
 
-/* Selection styling */
-::selection {
-  background-color: rgba(25, 118, 210, 0.2);
-  color: inherit;
+/* Ghost / flat ink buttons */
+.q-btn--flat.text-primary,
+.q-btn.flat.text-primary {
+  color: var(--ink-primary) !important;
+}
+
+.q-btn--flat.text-white {
+  color: var(--ink-on-primary) !important;
+}
+
+.bg-primary {
+  background: var(--ink-primary) !important;
+  color: var(--ink-on-primary) !important;
+}
+
+.text-primary {
+  color: var(--ink-tertiary) !important;
+}
+
+/* Header chrome uses ink, not clay */
+.ink-header.bg-primary,
+.ink-header.bg-primary .text-primary {
+  background: var(--ink-primary) !important;
+}
+
+.ink-header .text-primary {
+  color: var(--ink-on-primary) !important;
+}
+
+.q-field--outlined .q-field__control {
+  border-radius: var(--ink-radius-sm);
+}
+
+.q-field--outlined.q-field--focused .q-field__control:before {
+  border-color: var(--ink-tertiary);
+}
+
+.q-card {
+  background: var(--ink-surface);
+  color: var(--ink-on-surface);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-md);
+  box-shadow: none;
+}
+
+.q-dialog__inner > .q-card {
+  box-shadow: var(--ink-shadow);
+  border-radius: var(--ink-radius-lg);
+}
+
+.q-separator {
+  background: var(--ink-border);
+}
+
+.q-drawer {
+  background: var(--ink-neutral) !important;
+  border-right: 1px solid var(--ink-border);
+}
+
+.q-item {
+  border-radius: var(--ink-radius-sm);
+  min-height: 40px;
+}
+
+.q-item.q-router-link--active,
+.q-item--active {
+  background: var(--ink-surface-raised);
+  color: var(--ink-primary);
+}
+
+.q-badge {
+  border-radius: var(--ink-radius-full);
+  font-family: var(--ink-font-sans);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.q-badge.bg-primary,
+.q-badge.bg-red,
+.q-badge.bg-red-4 {
+  background: var(--ink-tertiary) !important;
+  color: var(--ink-on-tertiary) !important;
+}
+
+.q-tooltip {
+  font-size: 12px;
+  background: var(--ink-primary);
+  color: var(--ink-on-primary);
+  border-radius: var(--ink-radius-sm);
+}
+
+.q-notification {
+  border-radius: var(--ink-radius-md);
+  font-family: var(--ink-font-sans);
+}
+
+.q-tabs {
+  .q-tab {
+    text-transform: none;
+    font-weight: 500;
+    color: var(--ink-secondary);
+  }
+  .q-tab--active {
+    color: var(--ink-primary);
+  }
+  .q-tab__indicator {
+    background: var(--ink-tertiary);
+    height: 2px;
+  }
+}
+
+.q-toggle__inner--truthy .q-toggle__track {
+  background: var(--ink-tertiary) !important;
+}
+
+.q-slider__track-container .q-slider__selection {
+  background: var(--ink-tertiary);
+}
+
+.q-slider__thumb {
+  color: var(--ink-tertiary);
+}
+
+/* ---------- Utility classes ---------- */
+.ink-serif { font-family: var(--ink-font-serif); }
+.ink-sans { font-family: var(--ink-font-sans); }
+
+.ink-eyebrow {
+  font-family: var(--ink-font-sans);
+  font-size: var(--ink-meta);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.ink-title {
+  font-family: var(--ink-font-serif);
+  font-weight: 600;
+  color: var(--ink-primary);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.ink-meta {
+  font-family: var(--ink-font-sans);
+  font-size: var(--ink-meta);
+  color: var(--ink-secondary);
+}
+
+.ink-surface {
+  background: var(--ink-surface);
+  color: var(--ink-on-surface);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--ink-radius-md);
+}
+
+.ink-btn-primary {
+  background: var(--ink-tertiary) !important;
+  color: var(--ink-on-tertiary) !important;
+  border-radius: var(--ink-radius-sm) !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+}
+
+.ink-btn-ghost {
+  color: var(--ink-secondary) !important;
+  background: transparent !important;
+}
+
+.ink-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--ink-radius-full);
+  background: var(--ink-tertiary);
+  flex-shrink: 0;
+}
+
+/* ---------- Stage / reader measure ---------- */
+.ink-stage {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--ink-space-lg) var(--ink-space-xl);
+}
+
+.ink-reader-measure {
+  width: 100%;
+  max-width: var(--ink-reader-max);
+  margin: 0 auto;
+}
+
+/* Empty / error states */
+.ink-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--ink-space-2xl) var(--ink-space-lg);
+  color: var(--ink-secondary);
+
+  .ink-empty__icon {
+    opacity: 0.45;
+    margin-bottom: var(--ink-space-md);
+  }
+
+  .ink-empty__title {
+    font-family: var(--ink-font-serif);
+    font-size: var(--ink-h2-size);
+    font-weight: 600;
+    color: var(--ink-primary);
+    margin: 0 0 var(--ink-space-sm);
+  }
+
+  .ink-empty__desc {
+    font-size: var(--ink-body-sm);
+    max-width: 36ch;
+    line-height: 1.5;
+    margin: 0 0 var(--ink-space-lg);
+  }
 }

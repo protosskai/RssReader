@@ -20,10 +20,13 @@
 <script setup lang="ts">
 import {useRssInfoStore} from "stores/rssInfoStore";
 import {useSystemDialogStore} from "stores/systemDialogStore";
+import { electronClient } from "src/services/electronClient";
+import { useQuasar } from "quasar";
 
 const props = defineProps<{
   folderName: string
 }>()
+const $q = useQuasar()
 const systemDialogStore = useSystemDialogStore()
 const {toggleEditFolderDialog, setEditFolderDialogOldFolderName} = systemDialogStore
 const rssInfoStore = useRssInfoStore()
@@ -36,8 +39,18 @@ interface ContextMenuItem {
   separator?: boolean
 }
 
-const onMarkedRead = () => {
-
+const onMarkedRead = async () => {
+  try {
+    await electronClient.markAllAsRead({ folderName: props.folderName })
+    await rssInfoStore.refresh()
+    $q.notify({ message: `「${props.folderName}」已全部标为已读`, color: 'positive', position: 'top' })
+  } catch (e) {
+    $q.notify({
+      message: e instanceof Error ? e.message : '标记已读失败',
+      color: 'negative',
+      position: 'top',
+    })
+  }
 }
 
 const onRename = () => {
@@ -45,9 +58,15 @@ const onRename = () => {
   toggleEditFolderDialog()
 }
 const onDeleted = async () => {
-  const result = await removeFolder(props.folderName)
-  if (!result?.success) {
-    // Error handled by store
+  try {
+    await removeFolder(props.folderName)
+    $q.notify({ message: '文件夹已删除', color: 'positive', position: 'top' })
+  } catch (e) {
+    $q.notify({
+      message: e instanceof Error ? e.message : '删除失败',
+      color: 'negative',
+      position: 'top',
+    })
   }
 }
 const contextMenuInfo: ContextMenuItem[] = [

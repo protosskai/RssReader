@@ -1,0 +1,142 @@
+{
+  "passed": 27,
+  "failed": 0,
+  "results": [
+    {
+      "id": "A1-startup-render",
+      "ok": true,
+      "detail": "864 chars"
+    },
+    {
+      "id": "A2-keywords",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "A3-electronAPI",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "B1-folder-list",
+      "ok": true,
+      "detail": "folders=2"
+    },
+    {
+      "id": "B2-stats",
+      "ok": true,
+      "detail": "{\"totalArticles\":407,\"unreadCount\":344,\"favoriteCount\":0,\"feedCount\":6,\"folderCount\":2}"
+    },
+    {
+      "id": "B3-sync-config",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "B4-sync-status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "B5-favorites-list",
+      "ok": true,
+      "detail": "count=0"
+    },
+    {
+      "id": "B6-search",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "C1-settings-page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "C2-theme-control-clickable",
+      "ok": true,
+      "detail": "skipped (no toggle text — may use btn-toggle)"
+    },
+    {
+      "id": "C3-settings-sync-tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "C4-favorite-page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "C5-home-page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "D0-seed",
+      "ok": true,
+      "detail": "Hacker News posts=97"
+    },
+    {
+      "id": "D1-feed-list",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "D2-article-open",
+      "ok": true,
+      "detail": "Show HN: We beat Cloudflare's bot detect"
+    },
+    {
+      "id": "D3-article-content",
+      "ok": true,
+      "detail": "Show HN: We beat Cloudflare's bot de (298c)"
+    },
+    {
+      "id": "D5-scroll-surface",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "D6-favorite-toggle",
+      "ok": true,
+      "detail": "before=false"
+    },
+    {
+      "id": "D7-read-toggle",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "D4-article-back",
+      "ok": true,
+      "detail": "#/postList/0f6508e4-f6b2-4136-9bc2-b833f7f2e9af"
+    },
+    {
+      "id": "E1-folder-crud",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "F1-settings-localStorage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "F2-sync-config-update",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "G1-opml-api-present",
+      "ok": true,
+      "detail": "native dialog needs manual pick"
+    },
+    {
+      "id": "H1-no-fatal-console",
+      "ok": true,
+      "detail": "errors=0"
+    }
+  ],
+  "at": "2026-07-11T04:07:41.065Z"
+}

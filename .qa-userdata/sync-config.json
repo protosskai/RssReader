@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "interval": 30,
+  "backgroundSync": true,
+  "systemTray": true,
+  "syncOnStartup": true,
+  "notification": true
+}

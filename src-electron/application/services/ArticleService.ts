@@ -95,13 +95,27 @@ export class ArticleService {
 		if (!article) {
 			throw new Error("Article not found");
 		}
+		await this.setReadStatus(id, !article.read);
+	}
 
-		const newReadStatus = !article.read;
-		await this.articleRepo.markAsRead(id, newReadStatus);
+	/**
+	 * Idempotent set of read/unread. Safe to call from multiple UI surfaces
+	 * (e.g. list optimistic paint + reader open) without flip-flop races.
+	 */
+	async setReadStatus(id: string, read: boolean): Promise<boolean> {
+		const article = await this.articleRepo.getArticleById(id);
+		if (!article) {
+			throw new Error("Article not found");
+		}
 
-		// Update feed unread count
+		if (article.read === read) {
+			return read;
+		}
+
+		await this.articleRepo.markAsRead(id, read);
+
 		if (article.feedId) {
-			if (newReadStatus) {
+			if (read) {
 				await this.feedRepo.decrementUnreadCount(article.feedId);
 			} else {
 				await this.feedRepo.incrementUnreadCount(article.feedId);
@@ -110,18 +124,42 @@ export class ArticleService {
 
 		this.emitEvent(ArticleEventType.ARTICLE_READ, {
 			articleId: id,
-			read: newReadStatus,
+			read,
 		});
 		this.emitEvent(ArticleEventType.STATS_UPDATED, await this.getStats());
+		return read;
 	}
 
-	async toggleFavorite(id: string) {
+	async toggleFavorite(id: string): Promise<boolean> {
 		const isFavorite = await this.articleRepo.toggleFavorite(id);
 		this.emitEvent(ArticleEventType.ARTICLE_FAVORITE, {
 			articleId: id,
 			favorite: isFavorite,
 		});
 		this.emitEvent(ArticleEventType.STATS_UPDATED, await this.getStats());
+		return isFavorite;
+	}
+
+	/** Idempotent set favorite on / off */
+	async setFavorite(id: string, favorite: boolean): Promise<boolean> {
+		const repo = this.articleRepo as {
+			setFavorite?: (id: string, favorite: boolean) => Promise<boolean>;
+			toggleFavorite: (id: string) => Promise<boolean>;
+		};
+		const result = repo.setFavorite
+			? await repo.setFavorite(id, favorite)
+			: await (async () => {
+					const article = await this.articleRepo.getArticleById(id);
+					if (!article) throw new Error("Article not found");
+					if (article.favorite === favorite) return favorite;
+					return this.articleRepo.toggleFavorite(id);
+				})();
+		this.emitEvent(ArticleEventType.ARTICLE_FAVORITE, {
+			articleId: id,
+			favorite: result,
+		});
+		this.emitEvent(ArticleEventType.STATS_UPDATED, await this.getStats());
+		return result;
 	}
 
 	async markAllAsRead(filter?: { feedId?: string; folderName?: string }) {
@@ -250,7 +288,7 @@ export class ArticleService {
 	}
 
 	// Sync operations
-	async syncFeed(feedId: string) {
+	async syncFeed(feedId: string): Promise<number> {
 		const feed = await this.feedRepo.getFeedById(feedId);
 		if (!feed) {
 			throw new Error("Feed not found");
@@ -268,7 +306,7 @@ export class ArticleService {
 				console.log(
 					`[ArticleService] Feed ${feed.title} returned empty content`,
 				);
-				return;
+				return 0;
 			}
 			parsed = await parser.parseString(content);
 		}
@@ -277,7 +315,7 @@ export class ArticleService {
 			console.log(`[ArticleService] Feed ${feed.title} returned no posts`);
 			this.emitEvent(ArticleEventType.FEED_UPDATED, feed);
 			this.emitEvent(ArticleEventType.STATS_UPDATED, await this.getStats());
-			return;
+			return 0;
 		}
 
 		const posts = parsed.items.map((item: any) => ({
@@ -290,12 +328,14 @@ export class ArticleService {
 			guid: item.guid,
 		}));
 
-		await this.articleRepo.syncArticles(feedId, posts);
+		const insertedCount = await this.articleRepo.syncArticles(feedId, posts);
 
 		// Update feed's lastUpdateTime
 		await this.feedRepo.updateFeedLastUpdateTime(feedId, new Date());
 
 		this.emitEvent(ArticleEventType.FEED_UPDATED, feed);
 		this.emitEvent(ArticleEventType.STATS_UPDATED, await this.getStats());
+
+		return insertedCount;
 	}
 }

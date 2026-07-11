@@ -1,227 +1,232 @@
 <template>
-  <q-drawer :model-value="leftDrawerOpen" side="left" elevated overlay @update:model-value="updateDrawer">
-    <q-toolbar class="bg-grey-2">
+  <q-drawer
+    :model-value="leftDrawerOpen"
+    side="left"
+    elevated
+    :width="280"
+    :breakpoint="1023"
+    class="ink-drawer"
+    @update:model-value="updateDrawer"
+  >
+    <div class="ink-drawer__search">
       <q-input
         ref="searchInputRef"
-        rounded
-        outlined
-        dense
-        class="full-width"
-        bg-color="white"
         v-model="searchQuery"
-        placeholder="搜索订阅源或文章"
-        @update:model-value="handleSearch"
-        autofocus
+        dense
+        outlined
         clearable
+        placeholder="Search articles…"
+        class="ink-search-field"
+        @update:model-value="handleSearch"
       >
-        <template v-slot:prepend>
-          <q-icon name="search"/>
+        <template #prepend>
+          <q-icon name="search" size="18px" color="grey-7" />
         </template>
       </q-input>
-    </q-toolbar>
-
-    <!-- 搜索结果区域 -->
-    <div v-if="searchQuery && isSearching" class="search-loading q-pa-md text-center">
-      <q-spinner color="primary" size="2em"/>
-      <div class="text-grey-6 q-mt-sm">搜索中...</div>
     </div>
 
-    <div v-else-if="searchQuery && searchResults.length > 0" class="search-results">
-      <div class="q-pa-sm text-grey-6 text-caption">搜索结果 ({{ searchResults.length }})</div>
-      <q-list separator>
+    <div v-if="searchQuery && isSearching" class="ink-drawer__status">
+      <q-spinner size="20px" color="primary" />
+      <span>Searching…</span>
+    </div>
+
+    <div v-else-if="searchQuery && searchResults.length > 0" class="ink-drawer__results">
+      <div class="ink-eyebrow ink-drawer__section">Results · {{ searchResults.length }}</div>
+      <q-list dense class="ink-result-list">
         <q-item
           v-for="article in searchResults"
           :key="article.guid"
           clickable
+          class="ink-result-item"
           @click="openArticle(article)"
-          class="search-result-item"
         >
           <q-item-section>
-            <q-item-label class="text-weight-medium ellipsis-2-lines">
-              {{ article.title }}
+            <q-item-label class="ink-result-title">{{ article.title }}</q-item-label>
+            <q-item-label caption class="ink-meta">
+              {{ article.author || 'Unknown' }} · {{ formatDate(article.updateTime) }}
             </q-item-label>
-            <q-item-label caption class="text-grey-6 ellipsis">
-              {{ article.author }} · {{ formatDate(article.updateTime) }}
-            </q-item-label>
-            <q-item-label caption class="text-grey-8 ellipsis-3-lines q-mt-xs">
-              {{ article.desc }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side v-if="article.read">
-            <q-icon name="visibility" color="grey-5" size="sm"/>
           </q-item-section>
         </q-item>
       </q-list>
-      <div class="q-pa-sm text-center">
-        <q-btn
-          flat
-          dense
-          color="primary"
-          label="查看更多搜索结果"
-          @click="viewAllResults"
-          size="sm"
-        />
-      </div>
     </div>
 
-    <!-- 当有搜索查询但无结果时显示 -->
-    <div v-else-if="searchQuery && !isSearching" class="search-no-results q-pa-md text-center">
-      <q-icon name="search_off" size="3em" color="grey-5"/>
-      <div class="text-grey-6 q-mt-sm">没有找到相关文章</div>
+    <div v-else-if="searchQuery && !isSearching" class="ink-drawer__status ink-drawer__status--empty">
+      <q-icon name="search_off" size="28px" />
+      <span>No matching articles</span>
     </div>
 
-    <!-- 订阅源列表（当没有搜索时显示） -->
-    <subscription-list v-if="!searchQuery"/>
+    <div v-else class="ink-drawer__feeds">
+      <div class="ink-eyebrow ink-drawer__section">Subscriptions</div>
+      <subscription-list />
+    </div>
 
-    <edit-folder-dialog/>
+    <edit-folder-dialog />
   </q-drawer>
 </template>
 
 <script setup lang="ts">
-import {computed, inject, onMounted, provide, Ref, ref} from "vue";
-import {RSS_FOLDER_LIST_REF, TOGGLE_LAYOUT_LEFT_DRAWER_FUNC, TOGGLE_LAYOUT_LEFT_DRAWER_REF} from "src/const/InjectionKey";
-import SubscriptionList from "components/SubscriptionList.vue";
-import {useRssInfoStore} from "stores/rssInfoStore";
-import EditFolderDialog from "components/EditFolderDialog.vue";
+import { computed, inject, provide, ref } from 'vue';
+import {
+  RSS_FOLDER_LIST_REF,
+  TOGGLE_LAYOUT_LEFT_DRAWER_FUNC,
+  TOGGLE_LAYOUT_LEFT_DRAWER_REF,
+} from 'src/const/InjectionKey';
+import SubscriptionList from 'components/SubscriptionList.vue';
+import { useRssInfoStore } from 'stores/rssInfoStore';
+import EditFolderDialog from 'components/EditFolderDialog.vue';
 import { useSearchStore } from 'src/stores/searchStore';
 import type { PostIndexItem } from 'src/common/models';
-import { switchPage } from 'src/common/util';
+import { useRouter } from 'vue-router';
 
 interface Props {
-  leftDrawerOpen?: boolean
+  leftDrawerOpen?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  leftDrawerOpen: true
-})
+  leftDrawerOpen: true,
+});
 
-const store = useRssInfoStore()
-const searchStore = useSearchStore()
-const searchQuery = ref('')
-const searchResults = ref<PostIndexItem[]>([])
-const isSearching = ref(false)
-const searchInputRef = ref(null)
+const store = useRssInfoStore();
+const searchStore = useSearchStore();
+const router = useRouter();
+const searchQuery = ref('');
+const searchResults = ref<PostIndexItem[]>([]);
+const isSearching = ref(false);
+const searchInputRef = ref(null);
 
-const leftDrawerOpenRef = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF)
-const toggleLeftDrawerFunc = inject(TOGGLE_LAYOUT_LEFT_DRAWER_FUNC)
+const leftDrawerOpenRef = inject(TOGGLE_LAYOUT_LEFT_DRAWER_REF);
+const toggleLeftDrawerFunc = inject(TOGGLE_LAYOUT_LEFT_DRAWER_FUNC);
 
-// 确保始终使用最新的抽屉状态
-const leftDrawerOpen = computed(() => {
-  return leftDrawerOpenRef?.value ?? props.leftDrawerOpen
-})
+const leftDrawerOpen = computed(() => leftDrawerOpenRef?.value ?? props.leftDrawerOpen);
 
-provide(RSS_FOLDER_LIST_REF, computed(() => store.rssFolderList))
+provide(
+  RSS_FOLDER_LIST_REF,
+  computed(() => store.rssFolderList),
+);
 
-// 更新抽屉状态
+/** Sync drawer model to layout state — do NOT toggle (toggle fights Quasar close). */
 const updateDrawer = (val: boolean) => {
-  // 当用户点击遮罩层或关闭按钮时，调用父组件的方法
-  if (toggleLeftDrawerFunc) {
-    toggleLeftDrawerFunc()
+  if (leftDrawerOpenRef && typeof leftDrawerOpenRef === 'object' && 'value' in leftDrawerOpenRef) {
+    (leftDrawerOpenRef as { value: boolean }).value = val;
+    return;
   }
-}
+  // Fallback: only toggle when value actually diverges
+  if (typeof toggleLeftDrawerFunc === 'function' && val !== leftDrawerOpen.value) {
+    toggleLeftDrawerFunc();
+  }
+};
 
-// 处理搜索
-const handleSearch = async () => {
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+const handleSearch = () => {
+  if (searchTimer) clearTimeout(searchTimer);
   if (!searchQuery.value.trim()) {
-    searchResults.value = []
-    return
+    searchResults.value = [];
+    return;
   }
+  searchTimer = setTimeout(async () => {
+    isSearching.value = true;
+    try {
+      await searchStore.search(searchQuery.value);
+      searchResults.value = searchStore.searchResults.slice(0, 12);
+    } catch (error) {
+      console.error('[AppDrawer] Search failed:', error);
+    } finally {
+      isSearching.value = false;
+    }
+  }, 220);
+};
 
-  isSearching.value = true
-  try {
-    // 执行全局搜索
-    await searchStore.search(searchQuery.value)
-    searchResults.value = searchStore.searchResults.slice(0, 10) // 只显示前10个结果
-  } catch (error) {
-    console.error('[AppDrawer] Search failed:', error)
-  } finally {
-    isSearching.value = false
-  }
-}
-
-// 清空搜索
-const clearSearch = () => {
-  searchQuery.value = ''
-  searchResults.value = []
-}
-
-// 格式化日期
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  const diff = Date.now() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (minutes < 60) return `${Math.max(0, minutes)}m`;
+  if (hours < 24) return `${hours}h`;
+  if (days < 7) return `${days}d`;
+  return date.toLocaleDateString();
+};
 
-  if (minutes < 60) {
-    return `${minutes}分钟前`
-  } else if (hours < 24) {
-    return `${hours}小时前`
-  } else if (days < 7) {
-    return `${days}天前`
-  } else {
-    return date.toLocaleDateString('zh-CN')
-  }
-}
-
-// 打开文章
 const openArticle = (article: PostIndexItem) => {
-  switchPage('Content', {
-    RssId: article.rssId || 'search',
-    PostId: article.guid,
-  })
-  // 清空搜索以显示订阅源列表
-  searchQuery.value = ''
-}
-
-// 查看所有搜索结果
-const viewAllResults = () => {
-  // TODO: 导航到专门的搜索结果页面
-  console.log('[AppDrawer] View all search results')
-}
+  void router.push({
+    name: 'Content',
+    query: {
+      rssId: article.rssId || 'search',
+      postId: article.guid,
+    },
+  });
+  searchQuery.value = '';
+};
 </script>
 
 <style lang="scss" scoped>
-.q-toolbar {
-  pointer-events: auto !important;
+.ink-drawer {
+  background: var(--ink-neutral) !important;
+  border-right: 1px solid var(--ink-border);
 }
 
-.search-results {
-  max-height: 400px;
-  overflow-y: auto;
+.ink-drawer__search {
+  padding: 12px;
+  background: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  -webkit-app-region: drag; /* Makes the top draggable like a real native app */
 }
 
-.search-result-item {
-  &:hover {
-    background: rgba(0, 0, 0, 0.03);
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.05);
-    }
+.ink-search-field {
+  -webkit-app-region: no-drag;
+  :deep(.q-field__control) {
+    background: var(--ink-border); /* Subtle darker background for search */
+    border-radius: var(--ink-radius-md);
+    height: 32px;
+    min-height: 32px;
+  }
+  :deep(.q-field__marginal) {
+    height: 32px;
   }
 }
 
-.ellipsis-2-lines {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.ink-drawer__section {
+  padding: 8px 12px 4px;
 }
 
-.ellipsis-3-lines {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.search-loading,
-.search-no-results {
-  min-height: 200px;
+.ink-drawer__status {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--ink-secondary);
+  font-size: var(--ink-body-sm);
+}
+
+.ink-drawer__feeds {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.ink-result-list {
+  padding: 0 8px 16px;
+}
+
+.ink-result-item {
+  border-radius: var(--ink-radius-sm);
+  margin-bottom: 2px;
+
+  &:hover {
+    background: var(--ink-surface-raised);
+  }
+}
+
+.ink-result-title {
+  font-family: var(--ink-font-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-primary);
 }
 </style>

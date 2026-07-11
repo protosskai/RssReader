@@ -1,516 +1,265 @@
 <template>
-  <q-item
-    class="post-item"
+  <article
+    class="ink-post"
     :class="postClasses"
     :tabindex="0"
     role="article"
-    :aria-label="`${postInfo.read ? '已读' : '未读'}：${postInfo.title}`"
+    :aria-label="`${postInfo.read ? 'Read' : 'Unread'}: ${postInfo.title}`"
     @click="handleCardClick"
     @contextmenu.prevent="openContextMenu"
     @keydown.enter="handleCardClick"
     @keydown.space.prevent="handleCardClick"
   >
-    <q-card
-      class="post-card"
-      :class="{ 'is-read': postInfo.read }"
-    >
-      <!-- ── Header: title, unread dot, author, timestamp ── -->
-      <q-card-section class="q-pb-none">
-        <div class="row no-wrap items-start justify-between">
-          <div class="col-grow q-pr-md" style="min-width: 0">
-            <!-- Title row with unread indicator dot -->
-            <div class="title-row">
-              <q-icon
-                v-if="!postInfo.read"
-                name="fiber_manual_record"
-                class="unread-dot"
-                size="10px"
-              />
-              <div class="post-title text-h6 ellipsis" :class="{ 'is-unread': !postInfo.read }">
-                {{ postInfo.title }}
-              </div>
-            </div>
-            <!-- Author -->
-            <div v-if="postInfo.author" class="post-author text-subtitle2 q-mt-xs">
-              {{ postInfo.author }}
-            </div>
-          </div>
-          <!-- Timestamp -->
-          <div class="col-auto">
-            <span class="post-time text-caption text-grey">{{ postInfo.updateTime }}</span>
-          </div>
+    <div class="ink-post__layout">
+      <div class="ink-post__indicator">
+        <div v-if="!postInfo.read" class="ink-post__dot"></div>
+      </div>
+      <div class="ink-post__content">
+        <div class="ink-post__header">
+          <h3 class="ink-post__title">{{ postInfo.title }}</h3>
+          <span class="ink-post__time">{{ postInfo.updateTime }}</span>
         </div>
-      </q-card-section>
-
-      <q-separator class="q-mt-sm"/>
-
-      <!-- ── Description snippet ── -->
-      <q-card-section class="q-py-sm">
-        <div class="post-desc text-body1" :class="{ 'is-read': postInfo.read }">
+        <p class="ink-post__author" v-if="postInfo.author">{{ postInfo.author }}</p>
+        <p v-if="postInfo.desc" class="ink-post__excerpt">
           {{ extractTextFromHtml(postInfo.desc) }}
-        </div>
-      </q-card-section>
+        </p>
+      </div>
+    </div>
 
-      <q-separator/>
-
-      <!-- ── Action buttons ── -->
-      <q-card-section class="q-pt-sm q-pb-sm">
-        <div class="action-buttons">
-          <q-btn
-            label="阅读"
-            color="primary"
-            unelevated
-            size="md"
-            @click.stop="openContentPage"
-          />
-          <q-btn
-            :label="postInfo.read ? '标为未读' : '标为已读'"
-            :color="postInfo.read ? 'grey-7' : 'primary'"
-            flat
-            size="md"
-            @click.stop="toggleReadStatus"
-          />
-          <q-btn
-            icon="open_in_new"
-            color="primary"
-            flat
-            size="md"
-            @click.stop="openInBrowser"
-          >
-            <q-tooltip>在浏览器中打开原文</q-tooltip>
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
-
-    <!-- ── Context menu (right-click) ── -->
-    <q-menu
-      ref="contextMenuRef"
-      touch-position
-      transition-show="scale"
-      transition-hide="scale"
-    >
-      <q-list style="min-width: 140px">
-        <q-item
-          clickable
-          v-close-popup
-          @click="openContentPage"
-        >
-          <q-item-section avatar>
-            <q-icon name="article"/>
-          </q-item-section>
-          <q-item-section>打开文章</q-item-section>
+    <q-menu ref="contextMenuRef" touch-position transition-show="scale" transition-hide="scale">
+      <q-list dense style="min-width: 160px">
+        <q-item clickable v-close-popup @click="openContentPage">
+          <q-item-section avatar><q-icon name="article" size="18px" /></q-item-section>
+          <q-item-section>Open article</q-item-section>
         </q-item>
-        <q-item
-          clickable
-          v-close-popup
-          @click="toggleReadStatus"
-        >
+        <q-item clickable v-close-popup @click="toggleReadStatus">
           <q-item-section avatar>
-            <q-icon :name="postInfo.read ? 'mark_email_unread' : 'drafts'"/>
+            <q-icon :name="postInfo.read ? 'mark_email_unread' : 'drafts'" size="18px" />
           </q-item-section>
-          <q-item-section>
-            {{ postInfo.read ? '标为未读' : '标为已读' }}
-          </q-item-section>
+          <q-item-section>{{ postInfo.read ? 'Mark unread' : 'Mark read' }}</q-item-section>
         </q-item>
-        <q-separator/>
-        <q-item
-          clickable
-          v-close-popup
-          @click="openInBrowser"
-        >
-          <q-item-section avatar>
-            <q-icon name="open_in_new"/>
-          </q-item-section>
-          <q-item-section>在浏览器中打开</q-item-section>
+        <q-separator />
+        <q-item clickable v-close-popup @click="openInBrowser">
+          <q-item-section avatar><q-icon name="open_in_new" size="18px" /></q-item-section>
+          <q-item-section>Open original</q-item-section>
         </q-item>
-        <q-separator/>
-        <q-item
-          clickable
-          v-close-popup
-          @click="toggleFavorite"
-        >
+        <q-item clickable v-close-popup @click="toggleFavorite">
           <q-item-section avatar>
-            <q-icon :name="isFavorite ? 'favorite' : 'favorite_border'" :color="isFavorite ? 'red' : ''"/>
+            <q-icon :name="isFavorite ? 'star' : 'star_border'" :color="isFavorite ? 'amber' : undefined" size="18px" />
           </q-item-section>
-          <q-item-section>{{ isFavorite ? '取消收藏' : '收藏文章' }}</q-item-section>
+          <q-item-section>{{ isFavorite ? 'Unfavorite' : 'Favorite' }}</q-item-section>
         </q-item>
       </q-list>
     </q-menu>
-
-    <!-- ── Transition overlay for read-toggling animation ── -->
-    <transition name="read-toggle">
-      <div v-if="animating" class="read-toggle-overlay"/>
-    </transition>
-  </q-item>
+  </article>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { electronClient } from 'src/services/electronClient'
-import { switchPage, extractTextFromHtml } from 'src/common/util'
-import { PostIndexItem } from 'src/common/models'
-import { useQuasar } from 'quasar'
+import { computed, ref } from 'vue';
+import { electronClient } from 'src/services/electronClient';
+import { useRouter } from 'vue-router';
+import { extractTextFromHtml } from 'src/common/util';
+import { PostIndexItem } from 'src/common/models';
+import { useQuasar } from 'quasar';
 
 const props = defineProps<{
-  rssId: string
-  postInfo: PostIndexItem
-}>()
+  rssId: string;
+  postInfo: PostIndexItem;
+}>();
 
 const emit = defineEmits<{
-  (e: 'read-toggled', guid: string): void
-}>()
+  (e: 'read-toggled', guid: string): void;
+}>();
 
-const $q = useQuasar()
-const contextMenuRef = ref<{ show: (evt: MouseEvent) => void } | null>(null)
-const animating = ref(false)
-const isFavorite = ref(false)
-
-// ── Computed classes ──
+const $q = useQuasar();
+const router = useRouter();
+const contextMenuRef = ref<{ show: (evt: MouseEvent) => void } | null>(null);
+const isFavorite = ref(false);
 
 const postClasses = computed(() => ({
-  'post-item--unread': !props.postInfo.read,
-  'post-item--read': props.postInfo.read,
-  'post-item--dark': $q.dark.isActive,
-}))
+  'ink-post--unread': !props.postInfo.read,
+  'ink-post--read': props.postInfo.read,
+}));
 
-// ── Event handlers ──
-
-/**
- * Open the content page and mark the article as read.
- */
 const handleCardClick = () => {
-  // If unread, mark as read first
   if (!props.postInfo.read) {
-    markAsRead()
+    props.postInfo.read = true;
+    emit('read-toggled', props.postInfo.guid);
   }
-  openContentPage()
-}
+  openContentPage();
+};
 
-/**
- * Open the context menu on right-click.
- */
 const openContextMenu = (evt: MouseEvent) => {
-  contextMenuRef.value?.show(evt)
-}
+  contextMenuRef.value?.show(evt);
+};
 
-/**
- * Mark the article as read via the backend API, then update local state.
- */
-const markAsRead = async () => {
-  try {
-    await electronClient.toggleReadStatus(props.postInfo.guid)
-    props.postInfo.read = true
-    animateToggle()
-    emit('read-toggled', props.postInfo.guid)
-    $q.notify({
-      message: '已标记为已读',
-      color: 'positive',
-      position: 'top',
-      timeout: 1000,
-    })
-  } catch (err) {
-    console.error('[PostListItem] markAsRead error:', err)
-  }
-}
-
-/**
- * Toggle the read/unread status for this article.
- * Uses the domain-layer API (article:toggleReadStatus IPC channel),
- * which toggles the status server-side and updates unread counts.
- */
 const toggleReadStatus = async () => {
-  const currentState = props.postInfo.read
+  const next = !props.postInfo.read;
   try {
-    await electronClient.toggleReadStatus(props.postInfo.guid)
-    // The backend toggles server-side; mirror locally
-    props.postInfo.read = !currentState
-    animateToggle()
-    emit('read-toggled', props.postInfo.guid)
+    await electronClient.setReadStatus(props.postInfo.guid, next);
+    props.postInfo.read = next;
+    emit('read-toggled', props.postInfo.guid);
     $q.notify({
-      message: props.postInfo.read
-        ? '已标记为已读'
-        : '已标记为未读',
+      message: props.postInfo.read ? 'Marked read' : 'Marked unread',
       color: 'positive',
       position: 'top',
       timeout: 1000,
-    })
+    });
   } catch (err) {
-    console.error('[PostListItem] toggleReadStatus error:', err)
-    $q.notify({
-      message: '操作失败，请重试',
-      color: 'negative',
-      position: 'top',
-    })
+    console.error('[PostListItem] setReadStatus error:', err);
+    $q.notify({ message: 'Action failed', color: 'negative', position: 'top' });
   }
-}
+};
 
-/**
- * Toggle the favorite status for this article.
- */
 const toggleFavorite = async () => {
   try {
-    const result = await electronClient.toggleFavorite(props.postInfo.guid)
-    isFavorite.value = result
+    const result = await electronClient.toggleFavorite(props.postInfo.guid);
+    isFavorite.value = result;
     $q.notify({
-      message: result ? '已收藏' : '已取消收藏',
+      message: result ? 'Favorited' : 'Removed from favorites',
       color: 'positive',
       position: 'top',
       timeout: 1000,
-    })
+    });
   } catch (err) {
-    console.error('[PostListItem] toggleFavorite error:', err)
-    $q.notify({
-      message: '收藏操作失败',
-      color: 'negative',
-      position: 'top',
-    })
+    console.error('[PostListItem] toggleFavorite error:', err);
+    $q.notify({ message: 'Favorite failed', color: 'negative', position: 'top' });
   }
-}
+};
 
-/**
- * Open the article URL in the default system browser.
- */
-const openInBrowser = () => {
+const openInBrowser = async () => {
   if (props.postInfo.link) {
-    electronClient.openLink(props.postInfo.link)
+    electronClient.openLink(props.postInfo.link);
+    if (!props.postInfo.read) {
+      try {
+        await electronClient.setReadStatus(props.postInfo.guid, true);
+        props.postInfo.read = true;
+        emit('read-toggled', props.postInfo.guid);
+      } catch (err) {
+        console.error('[PostListItem] setReadStatus error:', err);
+      }
+    }
   }
-}
+};
 
-/**
- * Navigate to the Content page with the current article ID.
- */
 const openContentPage = () => {
-  const postId = props.postInfo.guid || props.postInfo.link
+  const postId = props.postInfo.guid || props.postInfo.link;
   if (!postId) {
-    $q.notify({
-      type: 'negative',
-      message: '无法获取文章标识',
-      position: 'top',
-    })
-    return
+    $q.notify({ type: 'negative', message: 'Missing article id', position: 'top' });
+    return;
   }
-  switchPage('Content', {
-    RssId: props.rssId,
-    PostId: postId,
-  })
-}
-
-/**
- * Brief CSS-driven animation on read status toggle.
- */
-const animateToggle = () => {
-  animating.value = true
-  setTimeout(() => {
-    animating.value = false
-  }, 400)
-}
+  void router.push({
+    name: 'Content',
+    query: { rssId: props.rssId, postId },
+  });
+};
 </script>
 
 <style scoped lang="scss">
-// ── Layout ──
-
-.post-item {
+.ink-post {
+  display: block;
   width: 100%;
-  padding: 6px 0;
-  outline: none;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ink-border);
   cursor: pointer;
-  transition: opacity 0.2s ease;
-
-  &:focus-visible {
-    .post-card {
-      outline: 2px solid var(--q-primary, #1976d2);
-      outline-offset: 2px;
+  outline: none;
+  background: transparent;
+  
+  /* Selection handles */
+  .ink-postlist__item--selected & {
+    background: var(--ink-tertiary);
+    border-bottom-color: var(--ink-tertiary);
+    
+    .ink-post__title, .ink-post__time, .ink-post__author, .ink-post__excerpt {
+      color: var(--ink-on-tertiary);
+    }
+    
+    .ink-post__dot {
+      background: var(--ink-on-tertiary);
     }
   }
 }
 
-.post-card {
-  width: 100%;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.25s ease,
-    opacity 0.3s ease,
-    border-color 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  // ── Read vs unread styling ──
-  &.is-read {
-    opacity: 0.65;
-
-    .post-title {
-      font-weight: 400;
-    }
-
-    .post-desc {
-      opacity: 0.7;
-    }
-
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-
-  &:not(.is-read) {
-    .post-title {
-      font-weight: 700;
-    }
-
-    .post-desc {
-      font-weight: 500;
-    }
-  }
-}
-
-// ── Title row with unread dot ──
-
-.title-row {
+.ink-post__layout {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ink-post__indicator {
+  width: 12px;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+  flex-shrink: 0;
+}
+
+.ink-post__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-tertiary);
+}
+
+.ink-post__content {
+  flex: 1;
   min-width: 0;
 }
 
-.unread-dot {
-  color: var(--q-primary, #1976d2);
+.ink-post__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+.ink-post__title {
+  font-family: var(--ink-font-sans);
+  font-size: 13px;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--ink-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding-right: 8px;
+}
+
+.ink-post--read .ink-post__title {
+  font-weight: 400;
+  color: var(--ink-secondary);
+}
+
+.ink-post--unread .ink-post__title {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.ink-post__time {
+  font-size: 11px;
+  color: var(--ink-muted);
   flex-shrink: 0;
-  animation: pulse-dot 2s ease-in-out 3;
+  white-space: nowrap;
 }
 
-@keyframes pulse-dot {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-
-.post-title {
-  line-height: 1.4;
-  word-break: break-word;
+.ink-post__author {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin: 0 0 2px 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
-  transition:
-    font-weight 0.2s ease,
-    opacity 0.3s ease;
-
-  &.is-unread {
-    font-weight: 700;
-  }
 }
 
-.post-author {
-  color: var(--q-secondary);
-  font-size: 0.85rem;
-}
-
-.post-time {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.post-desc {
-  line-height: 1.6;
-  transition:
-    font-weight 0.2s ease,
-    opacity 0.3s ease;
-
-  &.is-read {
-    font-weight: 400;
-    color: var(--q-grey-6);
-  }
-}
-
-// ── Action buttons ──
-
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-
-  .q-btn {
-    flex-shrink: 0;
-  }
-}
-
-// ── Read-toggle animation overlay ──
-
-.read-toggle-overlay {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: transparent;
-}
-
-.read-toggle-enter-active {
-  animation: read-flash 0.4s ease;
-}
-
-@keyframes read-flash {
-  0% {
-    background: rgba(var(--q-primary-rgb, 25, 118, 210), 0.12);
-    transform: scale(1);
-  }
-  100% {
-    background: transparent;
-    transform: scale(1);
-  }
-}
-
-// ── Dark mode overrides ──
-
-.post-item--dark {
-  .post-card {
-    &.is-read {
-      opacity: 0.5;
-
-      &:hover {
-        opacity: 0.7;
-      }
-    }
-
-    &:not(.is-read) {
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-  }
-
-  .unread-dot {
-    color: #6ba3ff;
-  }
-
-  .post-desc {
-    &.is-read {
-      color: var(--q-grey-5);
-    }
-  }
-}
-
-// ── Responsive ──
-
-@media (max-width: 600px) {
-  .post-item {
-    padding: 4px 0;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    align-items: stretch;
-
-    .q-btn {
-      width: 100%;
-    }
-  }
-
-  .post-title {
-    font-size: 1rem;
-  }
+.ink-post__excerpt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>
